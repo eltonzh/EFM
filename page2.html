@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Operations</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f13;
+      color: #e0e0e0;
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 48px;
+      color: #fff;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #6c63ff;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .section {
+      max-width: 960px;
+      margin: 0 auto 48px;
+    }
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: #1a1a24;
+      border-radius: 14px;
+      padding: 28px 24px;
+      border: 1px solid #2a2a38;
+    }
+    .symbol {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    .definition {
+      font-size: 0.95rem;
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .example {
+      background: #0f0f13;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-bottom: 14px;
+      white-space: pre-line;
+    }
+    .terms {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .term {
+      font-size: 0.88rem;
+      color: #888;
+      line-height: 1.5;
+    }
+    .term strong { color: #c0c0d0; }
+
+    .addition .symbol       { color: #60a5fa; }
+    .subtraction .symbol    { color: #60a5fa; }
+    .multiplication .symbol { color: #60a5fa; }
+    .division .symbol       { color: #60a5fa; }
+    .fractions .symbol      { color: #c084fc; }
+    .decimals .symbol       { color: #fb923c; }
+    .negatives .symbol      { color: #94a3b8; }
+    .variables .symbol      { color: #34d399; }
+    .formulas .symbol       { color: #e879f9; font-size: 1.4rem; }
+    .speech-bubble-wrap {
+      max-width: 960px;
+      margin: 40px auto 0;
+      padding: 0 24px 48px;
+    }
+    .speech-bubble {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 32px;
+      font-size: 1.05rem;
+      color: #1a1a24;
+      line-height: 1.6;
+      font-weight: 500;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      display: inline-block;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="display:block; max-width:960px; margin: 0 auto 24px; color:#555; font-size:0.85rem; text-decoration:none; padding: 24px 24px 0;">← Back</a>
+<h1>Elton's Fun Math</h1>
+  <p style="text-align:center; color:#888; font-size:1rem; margin-top:-32px; margin-bottom:48px;">Before we move on...</p>
+
+  <div class="section">
+    <div class="section-title">Basic Operations</div>
+    <div class="grid">
+
+      <div class="card addition">
+        <div class="symbol">+</div>
+        <div class="name">Addition</div>
+        <div class="definition">Combining two or more numbers to find their total sum.</div>
+        <div class="example">3 + 4 = 7</div>
+        <div class="terms">
+          <div class="term"><strong>Addends</strong> — the numbers being added (3 and 4)</div>
+          <div class="term"><strong>Sum</strong> — the result of adding (7)</div>
+        </div>
+      </div>
+
+      <div class="card subtraction">
+        <div class="symbol">−</div>
+        <div class="name">Subtraction</div>
+        <div class="definition">Finding the difference between two numbers by taking one away from the other.</div>
+        <div class="example">9 − 5 = 4</div>
+        <div class="terms">
+          <div class="term"><strong>Minuend</strong> — the number being subtracted from (9)</div>
+          <div class="term"><strong>Subtrahend</strong> — the number being subtracted (5)</div>
+          <div class="term"><strong>Difference</strong> — the result (4)</div>
+        </div>
+      </div>
+
+      <div class="card multiplication">
+        <div class="symbol">×</div>
+        <div class="name">Multiplication</div>
+        <div class="definition">Adding a number to itself a repeated number of times.</div>
+        <div class="example">6 × 3 = 18</div>
+        <div class="terms">
+          <div class="term"><strong>Factors</strong> — the numbers being multiplied (6 and 3)</div>
+          <div class="term"><strong>Product</strong> — the result of multiplying (18)</div>
+        </div>
+      </div>
+
+      <div class="card division">
+        <div class="symbol">÷</div>
+        <div class="name">Division</div>
+        <div class="definition">Splitting a number into equal parts or groups.</div>
+        <div class="example">12 ÷ 4 = 3</div>
+        <div class="terms">
+          <div class="term"><strong>Dividend</strong> — the number being divided (12)</div>
+          <div class="term"><strong>Divisor</strong> — the number dividing it (4)</div>
+          <div class="term"><strong>Quotient</strong> — the result (3)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Fundamental Formulas</div>
+    <div class="grid">
+
+      <div class="card formulas">
+        <div class="symbol">A = L × W</div>
+        <div class="name">Area</div>
+        <div class="definition">The amount of space inside a flat shape. Measured in square units.</div>
+        <div class="example">L = 5, W = 3  →  A = 15</div>
+      </div>
+
+      <div class="card formulas">
+        <div class="symbol">P = 2L + 2W</div>
+        <div class="name">Perimeter</div>
+        <div class="definition">The total distance around the outside of a shape.</div>
+        <div class="example">L = 5, W = 3  →  P = 16</div>
+      </div>
+
+      <div class="card formulas">
+        <div class="symbol">D = R × T</div>
+        <div class="name">Distance</div>
+        <div class="definition">How far something travels, based on its speed (rate) and the time it moves.</div>
+        <div class="example">R = 60 mph, T = 2 hrs  →  D = 120 mi</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Other Concepts</div>
+    <div class="grid">
+
+      <div class="card fractions">
+        <div class="symbol">¾</div>
+        <div class="name">Fractions</div>
+        <div class="definition">A way to represent a part of a whole, written as one number over another.</div>
+        <div class="example">1/2 + 1/4 = 3/4</div>
+      </div>
+
+      <div class="card decimals">
+        <div class="symbol">0.5</div>
+        <div class="name">Decimals</div>
+        <div class="definition">Numbers written with a dot to show values smaller than one, based on powers of ten.</div>
+        <div class="example">0.75 = 75/100</div>
+      </div>
+
+      <div class="card negatives">
+        <div class="symbol">−n</div>
+        <div class="name">Negative Numbers</div>
+        <div class="definition">Numbers less than zero, shown with a minus sign, used to represent values like debt or temperature below zero.</div>
+        <div class="example">−3 + 5 = 2</div>
+      </div>
+
+      <div class="card variables">
+        <div class="symbol">x, y</div>
+        <div class="name">Variables</div>
+        <div class="definition">Letters used to represent unknown or changing numbers in math expressions and equations.</div>
+        <div class="example">x + 3 = 7  →  x = 4</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="speech-bubble-wrap">
+<div class="speech-bubble">
+      "And before we dive in to any more harder concepts, operations, or formulas..."
+    </div>
+  </div>
+
+
+  <div style="max-width:960px; margin: 48px auto 48px; padding: 0 24px; display:flex; justify-content:space-between;">
+    <a href="index.html">
+      <button style="background:#2a2a38; color:#e0e0e0; border:none; padding:14px 32px; font-size:1rem; font-weight:700; border-radius:10px; cursor:pointer; letter-spacing:0.05em;">← Back</button>
+    </a>
+    <a href="page3.html">
+      <button style="background:#60a5fa; color:#0f0f13; border:none; padding:14px 32px; font-size:1rem; font-weight:700; border-radius:10px; cursor:pointer; letter-spacing:0.05em;">Next →</button>
+    </a>
+  </div>
+
+</body>
+</html>
