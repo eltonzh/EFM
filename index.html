@@ -7,125 +7,184 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #bcd8f1;
+      background: linear-gradient(
+        135deg,
+        #4a9e4a 0% 33%,
+        #5a9fd4 33% 66%,
+        #ffb347 66% 100%
+      );
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
-    .bubble {
+
+    .zone {
+      position: fixed;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .zone-left  { top: 0; left: 0;   width: 50%; height: 100vh; }
+    .zone-right { top: 0; left: 50%; width: 50%; height: 100vh; }
+
+    .sym {
+      position: absolute;
+      font-family: system-ui, sans-serif;
+      color: rgba(0,0,0,0.12);
+      font-size: 2rem;
+      white-space: nowrap;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    .sym:nth-child(2n)   { animation-delay: -0.3s; }
+    .sym:nth-child(3n)   { animation-delay: -0.7s; }
+    .sym:nth-child(4n)   { animation-delay: -1.1s; }
+    .sym:nth-child(5n)   { animation-delay: -1.5s; }
+    .sym:nth-child(6n)   { animation-delay: -0.9s; }
+    .sym:nth-child(7n)   { animation-delay: -1.8s; }
+
+
+    .bubbl {
       position: absolute;
       border-radius: 50%;
       opacity: 0.75;
-      animation: float 4s ease-in-out infinite;
+      animation: bob 4s ease-in-out infinite;
     }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-18px); }
+    @keyframes bob {
+      0%,100% { transform: translate(-50%,-50%); }
+      50%      { transform: translate(-50%, calc(-50% - 18px)); }
     }
   </style>
 </head>
 <body>
-  <a href="about.html" style="position:absolute; top:20px; right:24px;">
-    <button style="padding:8px 20px; font-size:0.9rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; letter-spacing:0.05em;">About</button>
-  </a>
-  <p style="position:absolute; top:calc(50% - 46vh); left:calc(50% - 38vw); font-family:system-ui,sans-serif; font-size:1.2rem; color:#2a2a38; font-weight:500;">Welcome to</p>
 
-  <!-- Row 1 -->
-  <span style="position:absolute;top:4%;left:3%;font-size:2.4rem;color:rgba(0,0,0,0.11);font-family:system-ui,sans-serif;">∫</span>
-  <span style="position:absolute;top:3%;left:18%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">+</span>
-  <span style="position:absolute;top:5%;left:36%;font-size:2.8rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">△</span>
-  <span style="position:absolute;top:4%;left:55%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">π</span>
-  <span style="position:absolute;top:3%;left:72%;font-size:2.6rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∞</span>
-  <span style="position:absolute;top:5%;right:4%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">θ</span>
-  <!-- Row 1.5 -->
-  <span style="position:absolute;top:11%;left:10%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">α</span>
-  <span style="position:absolute;top:12%;left:28%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">≤</span>
-  <span style="position:absolute;top:11%;left:47%;font-size:2.2rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">β</span>
-  <span style="position:absolute;top:12%;left:66%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∃</span>
-  <span style="position:absolute;top:11%;right:12%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">2</span>
-  <!-- Row 2 -->
-  <span style="position:absolute;top:18%;left:2%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">◇</span>
-  <span style="position:absolute;top:17%;left:20%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">√</span>
-  <span style="position:absolute;top:19%;left:40%;font-size:2.8rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∑</span>
-  <span style="position:absolute;top:18%;left:62%;font-size:2.5rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">λ</span>
-  <span style="position:absolute;top:17%;right:5%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">≠</span>
-  <!-- Row 2.5 -->
-  <span style="position:absolute;top:25%;left:10%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">μ</span>
-  <span style="position:absolute;top:26%;left:30%;font-size:2.2rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">⊕</span>
-  <span style="position:absolute;top:25%;left:52%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">γ</span>
-  <span style="position:absolute;top:26%;left:73%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">≥</span>
-  <span style="position:absolute;top:25%;right:10%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">7</span>
-  <!-- Row 3 -->
-  <span style="position:absolute;top:33%;left:4%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∀</span>
-  <span style="position:absolute;top:32%;left:22%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">□</span>
-  <span style="position:absolute;top:34%;left:44%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">φ</span>
-  <span style="position:absolute;top:33%;left:65%;font-size:2.8rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">÷</span>
-  <span style="position:absolute;top:32%;right:3%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">ω</span>
-  <!-- Row 3.5 -->
-  <span style="position:absolute;top:40%;left:12%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">3</span>
-  <span style="position:absolute;top:41%;left:33%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∧</span>
-  <span style="position:absolute;top:40%;left:54%;font-size:2.2rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">ℕ</span>
-  <span style="position:absolute;top:41%;left:74%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">&gt;</span>
-  <span style="position:absolute;top:40%;right:8%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∝</span>
-  <!-- Row 4 -->
-  <span style="position:absolute;top:48%;left:2%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">⬡</span>
-  <span style="position:absolute;top:47%;left:20%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;font-style:italic;">x</span>
-  <span style="position:absolute;top:49%;left:42%;font-size:2.8rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∂</span>
-  <span style="position:absolute;top:48%;left:63%;font-size:2.5rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">ℝ</span>
-  <span style="position:absolute;top:47%;right:4%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">⊥</span>
-  <!-- Row 4.5 -->
-  <span style="position:absolute;top:55%;left:11%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∨</span>
-  <span style="position:absolute;top:56%;left:31%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">ℚ</span>
-  <span style="position:absolute;top:55%;left:52%;font-size:2.2rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">5</span>
-  <span style="position:absolute;top:56%;left:73%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">≡</span>
-  <span style="position:absolute;top:55%;right:9%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∉</span>
-  <!-- Row 5 -->
-  <span style="position:absolute;top:63%;left:3%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">≈</span>
-  <span style="position:absolute;top:62%;left:22%;font-size:2.6rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">○</span>
-  <span style="position:absolute;top:64%;left:43%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∇</span>
-  <span style="position:absolute;top:63%;left:64%;font-size:2.8rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;font-style:italic;">y</span>
-  <span style="position:absolute;top:62%;right:3%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∮</span>
-  <!-- Row 5.5 -->
-  <span style="position:absolute;top:70%;left:11%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">8</span>
-  <span style="position:absolute;top:71%;left:31%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">√</span>
-  <span style="position:absolute;top:70%;left:52%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">⌊x⌋</span>
-  <span style="position:absolute;top:71%;left:72%;font-size:2.2rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∑</span>
-  <span style="position:absolute;top:70%;right:8%;font-size:2.4rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">z</span>
-  <!-- Row 6 -->
-  <span style="position:absolute;top:78%;left:2%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">−</span>
-  <span style="position:absolute;top:77%;left:20%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">⬟</span>
-  <span style="position:absolute;top:79%;left:42%;font-size:2.8rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">∈</span>
-  <span style="position:absolute;top:78%;left:63%;font-size:2.5rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">σ</span>
-  <span style="position:absolute;top:77%;right:4%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">!</span>
-  <!-- Row 6.5 -->
-  <span style="position:absolute;top:85%;left:12%;font-size:2.3rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∫</span>
-  <span style="position:absolute;top:86%;left:32%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">π</span>
-  <span style="position:absolute;top:85%;left:53%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">∞</span>
-  <span style="position:absolute;top:86%;left:73%;font-size:2.3rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">θ</span>
-  <span style="position:absolute;top:85%;right:9%;font-size:2.5rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">λ</span>
-  <!-- Row 7 -->
-  <span style="position:absolute;top:91%;left:4%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">×</span>
-  <span style="position:absolute;top:92%;left:23%;font-size:2.4rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">ℤ</span>
-  <span style="position:absolute;top:91%;left:44%;font-size:2.6rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">⊗</span>
-  <span style="position:absolute;top:92%;left:64%;font-size:2.8rem;color:rgba(0,0,0,0.09);font-family:system-ui,sans-serif;">Δ</span>
-  <span style="position:absolute;top:91%;right:3%;font-size:2.5rem;color:rgba(0,0,0,0.1);font-family:system-ui,sans-serif;">&lt;</span>
+  <!-- LEFT HALF -->
+  <div class="zone zone-left">
+    <span class="sym" style="top:2%;left:8%;">+</span>
+    <span class="sym" style="top:5%;left:45%;">π</span>
+    <span class="sym" style="top:8%;left:72%;">∫</span>
+    <span class="sym" style="top:11%;left:22%;">∑</span>
+    <span class="sym" style="top:14%;left:60%;">◇</span>
+    <span class="sym" style="top:17%;left:35%;">∀</span>
+    <span class="sym" style="top:20%;left:82%;">φ</span>
+    <span class="sym" style="top:23%;left:15%;">x</span>
+    <span class="sym" style="top:26%;left:55%;">ℝ</span>
+    <span class="sym" style="top:29%;left:78%;">Δ</span>
+    <span class="sym" style="top:32%;left:30%;">√</span>
+    <span class="sym" style="top:35%;left:65%;">∞</span>
+    <span class="sym" style="top:38%;left:10%;">θ</span>
+    <span class="sym" style="top:41%;left:48%;">λ</span>
+    <span class="sym" style="top:44%;left:88%;">≠</span>
+    <span class="sym" style="top:47%;left:25%;">α</span>
+    <span class="sym" style="top:50%;left:70%;">β</span>
+    <span class="sym" style="top:53%;left:40%;">γ</span>
+    <span class="sym" style="top:56%;left:85%;">∂</span>
+    <span class="sym" style="top:59%;left:18%;">∇</span>
+    <span class="sym" style="top:62%;left:58%;">μ</span>
+    <span class="sym" style="top:65%;left:32%;">≈</span>
+    <span class="sym" style="top:68%;left:75%;">∈</span>
+    <span class="sym" style="top:71%;left:5%;">⊕</span>
+    <span class="sym" style="top:74%;left:50%;">ω</span>
+    <span class="sym" style="top:77%;left:90%;">σ</span>
+    <span class="sym" style="top:80%;left:28%;">ℕ</span>
+    <span class="sym" style="top:83%;left:62%;">÷</span>
+    <span class="sym" style="top:86%;left:42%;">⬡</span>
+    <span class="sym" style="top:89%;left:80%;">!</span>
+    <span class="sym" style="top:92%;left:12%;">≡</span>
+    <span class="sym" style="top:95%;left:55%;">∮</span>
+    <span class="sym" style="top:98%;left:35%;">ℤ</span>
+  </div>
+
+  <!-- RIGHT HALF -->
+  <div class="zone zone-right">
+    <span class="sym" style="top:2%;left:18%;">×</span>
+    <span class="sym" style="top:5%;left:62%;">ω</span>
+    <span class="sym" style="top:8%;left:38%;">−</span>
+    <span class="sym" style="top:11%;left:80%;">∂</span>
+    <span class="sym" style="top:14%;left:12%;">y</span>
+    <span class="sym" style="top:17%;left:55%;">∇</span>
+    <span class="sym" style="top:20%;left:28%;">ℤ</span>
+    <span class="sym" style="top:23%;left:72%;">σ</span>
+    <span class="sym" style="top:26%;left:45%;">∈</span>
+    <span class="sym" style="top:29%;left:88%;">θ</span>
+    <span class="sym" style="top:32%;left:22%;">≤</span>
+    <span class="sym" style="top:35%;left:65%;">≥</span>
+    <span class="sym" style="top:38%;left:8%;">∃</span>
+    <span class="sym" style="top:41%;left:50%;">φ</span>
+    <span class="sym" style="top:44%;left:82%;">∝</span>
+    <span class="sym" style="top:47%;left:35%;">ℚ</span>
+    <span class="sym" style="top:50%;left:75%;">⊗</span>
+    <span class="sym" style="top:53%;left:18%;">∧</span>
+    <span class="sym" style="top:56%;left:58%;">∨</span>
+    <span class="sym" style="top:59%;left:92%;">π</span>
+    <span class="sym" style="top:62%;left:32%;">∞</span>
+    <span class="sym" style="top:65%;left:70%;">Δ</span>
+    <span class="sym" style="top:68%;left:15%;">λ</span>
+    <span class="sym" style="top:71%;left:48%;">α</span>
+    <span class="sym" style="top:74%;left:85%;">β</span>
+    <span class="sym" style="top:77%;left:25%;">√</span>
+    <span class="sym" style="top:80%;left:60%;">∑</span>
+    <span class="sym" style="top:83%;left:40%;">◇</span>
+    <span class="sym" style="top:86%;left:78%;">≠</span>
+    <span class="sym" style="top:89%;left:5%;">!</span>
+    <span class="sym" style="top:92%;left:52%;">⬟</span>
+    <span class="sym" style="top:95%;left:30%;">∮</span>
+    <span class="sym" style="top:98%;left:70%;">ℝ</span>
+  </div>
 
   <!-- Bubbles behind EFM -->
-  <div class="bubble" style="width:260px;height:260px;background:#f87171;top:50%;left:50%;margin-top:-38vh;margin-left:-38vw;z-index:0;animation-delay:0s;"></div>
-  <div class="bubble" style="width:220px;height:220px;background:#facc15;top:50%;left:50%;margin-top:-30vh;margin-left:-10vw;z-index:0;animation-delay:0.4s;"></div>
-  <div class="bubble" style="width:280px;height:280px;background:#4ade80;top:50%;left:50%;margin-top:-42vh;margin-left:10vw;z-index:0;animation-delay:0.8s;"></div>
-  <div class="bubble" style="width:240px;height:240px;background:#c084fc;top:50%;left:50%;margin-top:-25vh;margin-left:22vw;z-index:0;animation-delay:0.2s;"></div>
-  <div class="bubble" style="width:200px;height:200px;background:#fb923c;top:50%;left:50%;margin-top:-18vh;margin-left:-28vw;z-index:0;animation-delay:1s;"></div>
-  <div class="bubble" style="width:250px;height:250px;background:#60a5fa;top:50%;left:50%;margin-top:-12vh;margin-left:8vw;z-index:0;animation-delay:0.6s;"></div>
-  <div class="bubble" style="width:210px;height:210px;background:#f472b6;top:50%;left:50%;margin-top:-20vh;margin-left:-18vw;z-index:0;animation-delay:1.2s;"></div>
+  <div class="bubbl" style="width:260px;height:260px;background:#f87171;top:50%;left:50%;margin-top:-18vh;margin-left:-18vw;"></div>
+  <div class="bubbl" style="width:220px;height:220px;background:#facc15;top:50%;left:50%;margin-top:-10vh;margin-left:8vw;"></div>
+  <div class="bubbl" style="width:280px;height:280px;background:#4ade80;top:50%;left:50%;margin-top:-20vh;margin-left:5vw;"></div>
+  <div class="bubbl" style="width:240px;height:240px;background:#c084fc;top:50%;left:50%;margin-top:5vh;margin-left:15vw;"></div>
+  <div class="bubbl" style="width:200px;height:200px;background:#fb923c;top:50%;left:50%;margin-top:8vh;margin-left:-20vw;"></div>
+  <div class="bubbl" style="width:250px;height:250px;background:#60a5fa;top:50%;left:50%;margin-top:12vh;margin-left:0vw;"></div>
+  <div class="bubbl" style="width:210px;height:210px;background:#f472b6;top:50%;left:50%;margin-top:0vh;margin-left:-8vw;"></div>
 
-  <div style="text-align:center; margin-top:-20vh; position:relative; z-index:1;">
-    <h1 style="font-family:system-ui,sans-serif; font-size:18rem; font-weight:800; color:#0f0f13; letter-spacing:0.1em;">EFM</h1>
-    <p style="font-family:system-ui,sans-serif; font-size:3rem; color:#2a2a38; margin-top:8px; letter-spacing:0.05em;">Elton's Fun Math</p>
-    <a href="page2.html" style="display:block; margin-top:32px;">
-      <button style="width:80vw; padding:20px 0; font-size:1.4rem; font-weight:700; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:14px; cursor:pointer; letter-spacing:0.05em;">Let's Get Started!</button>
-    </a>
+  <!-- Characters sideways buttons -->
+  <a href="characters.html" style="position:fixed; left:-38px; top:50%; transform:translateY(-50%) rotate(90deg); z-index:10;">
+    <button style="padding:8px 20px; font-size:0.9rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:10px 10px 0 0; cursor:pointer; letter-spacing:0.05em;">Characters</button>
+  </a>
+  <a href="characters.html" style="position:fixed; right:-38px; top:50%; transform:translateY(-50%) rotate(-90deg); z-index:10;">
+    <button style="padding:8px 20px; font-size:0.9rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:10px 10px 0 0; cursor:pointer; letter-spacing:0.05em;">Characters</button>
+  </a>
+
+  <!-- UI -->
+  <a href="notebook.html" style="position:fixed;top:20px;left:24px;z-index:10;">
+    <button style="padding:8px 20px;font-size:0.9rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.05em;">Notebook</button>
+  </a>
+  <a href="about.html" style="position:fixed;top:20px;right:24px;z-index:10;">
+    <button style="padding:8px 20px;font-size:0.9rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.05em;">About</button>
+  </a>
+  <p style="position:fixed;margin-top: -600px; text-align: center; font-family:system-ui,sans-serif;font-size:2.5rem;color:#2a2a38;font-weight:500;z-index:10;">Welcome to</p>
+
+  <div style="text-align:center;margin-top:calc(5vh - 4cm);position:fixed;z-index:2;width:100%;">
+    <h1 style="font-family:system-ui,sans-serif;font-size: 30vw;font-weight:800;color:#0f0f13;letter-spacing:0.1 em;">EFM</h1>
   </div>
+  <p id="efm-subtitle" style="position:fixed;top:calc(5vh + 30vw - 20px + 1.5cm);width:100%;text-align:center;font-family:system-ui,sans-serif;font-size: 3rem;color:#2a2a38;letter-spacing:0.05em;z-index:2;">Elton's Fun Math</p>
+  <style>
+    @media (max-width: 900px) {
+      #efm-subtitle { top: calc(12vh + 1cm) !important; }
+    }
+  </style>
+
+  <div style="position:fixed; bottom:8vh; left:50%; transform:translateX(-50%); width:80vw;">
+    <div style="position:relative; display:inline-block; width:100%;">
+      <div style="position:absolute; top:-36px; left:0; z-index:10;">
+        <a href="indexpage.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer;">Index</button></a>
+      </div>
+      <div style="position:absolute; top:-36px; right:0;">
+        <a href="toc.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer;">Table of Contents</button></a>
+      </div>
+      <a href="page2.html">
+        <button style="width:100%; margin-bottom: 10px; padding:15px 0;font-size:1.4rem;font-weight:700;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.05em;">Let's Get Started!</button>
+      </a>
+    </div>
+  </div>
+
 </body>
 </html>

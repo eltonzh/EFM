@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Note – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #e8e8e8;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+    }
+    .topbar {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .layout {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .main { flex: 1; display: flex; flex-direction: column; }
+    textarea {
+      width: 100%;
+      min-height: 70vh;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      padding: 32px;
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #1a1a1a;
+      outline: none;
+      resize: vertical;
+      font-family: system-ui, sans-serif;
+    }
+    textarea:focus { border-color: #888; }
+    .sidebar {
+      width: 180px;
+      min-height: 70vh;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      padding: 20px 14px;
+      flex-shrink: 0;
+    }
+    .sidebar h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+      margin-bottom: 14px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+      text-decoration: none;
+      background: #f5f5f5;
+      transition: background 0.15s;
+    }
+    .sidebar a:hover { background: #e0e0e0; }
+    .sidebar a.active { background: #0f0f13; color: #fff; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="notebook.html" style="color:#555; font-size:0.85rem; text-decoration:none;">← Back</a>
+  </div>
+  <div class="layout">
+    <div class="main">
+      <h2 id="notetitle" style="font-size:1.6rem; font-weight:700; color:#1a1a1a; margin-bottom:12px; outline:none; cursor:text;" contenteditable="true">Click to add Title</h2>
+      <textarea id="doc" placeholder="Start typing..."></textarea>
+    </div>
+    <div class="sidebar">
+      <h3>My Notes</h3>
+      <div id="notes-list"></div>
+    </div>
+  </div>
+
+  <a href="#" onclick="addNote()" style="position:fixed; bottom:32px; left:32px; background:#0f0f13; color:#fff; text-decoration:none; padding:14px 28px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.2);">+ Add Note</a>
+  <div style="position:fixed; bottom:32px; left:50%; transform:translateX(-50%); display:flex; gap:12px;">
+    <button id="savebtn" onclick="save()" style="background:#2a7a2a; color:#fff; border:none; padding:14px 36px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">💾 Save</button>
+    <button onclick="deleteNote()" style="background:#b91c1c; color:#fff; border:none; padding:14px 20px; font-size:1.2rem; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">🗑️</button>
+  </div>
+  <button onclick="addPage()" style="position:fixed; bottom:32px; right:32px; background:#0f0f13; color:#fff; border:none; padding:14px 28px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">+ Add Page</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id'));
+
+    function getNotes() { return JSON.parse(localStorage.getItem('efm-notes') || '[]'); }
+    function saveNotes(notes) { localStorage.setItem('efm-notes', JSON.stringify(notes)); }
+
+    const notes = getNotes();
+    const note = notes.find(n => n.id === id);
+
+    const doc = document.getElementById('doc');
+    const titleEl = document.getElementById('notetitle');
+
+    if (note) {
+      doc.value = note.content || '';
+      titleEl.textContent = note.title || 'Click to add Title';
+    }
+
+    function buildNotesList() {
+      const list = document.getElementById('notes-list');
+      const all = getNotes();
+      list.innerHTML = '';
+      all.forEach(n => {
+        const a = document.createElement('a');
+        a.href = 'note.html?id=' + n.id;
+        a.textContent = n.title || 'Click to add Title';
+        if (n.id === id) a.classList.add('active');
+        list.appendChild(a);
+      });
+    }
+    buildNotesList();
+
+    titleEl.addEventListener('input', () => {
+      const all = getNotes();
+      const n = all.find(n => n.id === id);
+      if (n) { n.title = titleEl.textContent; saveNotes(all); buildNotesList(); }
+    });
+
+    doc.addEventListener('input', () => {
+      const all = getNotes();
+      const n = all.find(n => n.id === id);
+      if (n) { n.content = doc.value; saveNotes(all); }
+    });
+
+    function save() {
+      const all = getNotes();
+      const n = all.find(n => n.id === id);
+      if (n) { n.title = titleEl.textContent; n.content = doc.value; saveNotes(all); }
+      const btn = document.getElementById('savebtn');
+      btn.textContent = '✓ Saved!';
+      btn.style.background = '#1a5a1a';
+      setTimeout(() => { btn.textContent = '💾 Save'; btn.style.background = '#2a7a2a'; }, 1500);
+    }
+
+    function deleteNote() {
+      const all = getNotes().filter(n => n.id !== id);
+      saveNotes(all);
+      window.location.href = 'notebook.html';
+    }
+
+    function addNote() {
+      const all = getNotes();
+      const newId = Date.now();
+      all.push({ id: newId, title: 'Click to add Title', content: '' });
+      saveNotes(all);
+      window.location.href = 'note.html?id=' + newId;
+    }
+
+    function addPage() {
+      doc.style.minHeight = (doc.offsetHeight + 400) + 'px';
+    }
+  </script>
+</body>
+</html>
