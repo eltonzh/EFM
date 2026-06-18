@@ -1,0 +1,16 @@
+{
+  "name": "Elton's Fun Math",
+  "short_name": "EFM",
+  "icons": [
+    {
+      "src": "efm-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e6fe8",
+  "theme_color": "#1e6fe8"
+}

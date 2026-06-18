@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notebook – EFM</title>
   <style>
@@ -79,16 +82,25 @@
   </style>
 </head>
 <body>
+  <a href="index.html" style="position:fixed;top:12px;right:72px;z-index:100;"><img src="logo-transparent.png" style="height:40px;opacity:0.8;"></a>
   <div class="topbar">
     <a href="index.html" style="color:#555; font-size:0.85rem; text-decoration:none;">← Back</a>
     <span style="font-size:0.85rem; color:#888;">Notebook</span>
-    <a href="page2.html">
-      <button style="background:#60a5fa; color:#0f0f13; border:none; padding:8px 18px; font-size:0.85rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:8px; cursor:pointer;">Back to Reference</button>
-    </a>
+    <div style="display:flex; gap:8px;">
+      <a href="page2.html">
+        <button style="background:#60a5fa; color:#0f0f13; border:none; padding:8px 18px; font-size:0.85rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:8px; cursor:pointer;">Back to Reference</button>
+      </a>
+      <a href="toc.html">
+        <button style="background:#60a5fa; color:#0f0f13; border:none; padding:8px 18px; font-size:0.85rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:8px; cursor:pointer;">Table of Contents</button>
+      </a>
+    </div>
   </div>
   <div class="layout">
     <div class="main">
       <h2 id="title" contenteditable="true" style="font-size:1.6rem; font-weight:700; color:#1a1a1a; margin-bottom:12px; outline:none; cursor:text;">Click to add Title</h2>
+      <div style="margin-bottom:8px;">
+        <button onclick="addPage()" style="background:#0f0f13; color:#fff; border:none; padding:8px 20px; font-size:0.9rem; font-weight:600; font-family:system-ui,sans-serif; border-radius:8px; cursor:pointer;">+ Add Page</button>
+      </div>
       <textarea id="doc" placeholder="Start typing..."></textarea>
     </div>
     <div class="sidebar">
@@ -97,12 +109,59 @@
     </div>
   </div>
 
+  <div style="position:fixed; left:0; top:50%; transform:translateY(-50%); z-index:50;">
+    <button onclick="toggleSymbolMenu()" style="background:#0f0f13; color:#fff; border:none; border-radius:0 10px 10px 0; padding:12px 10px; font-size:1.2rem; cursor:pointer; box-shadow:4px 0 12px rgba(0,0,0,0.2);">π</button>
+    <div id="symbol-menu" style="display:none; position:absolute; left:100%; top:50%; transform:translateY(-50%); background:#fff; border:2px solid #ccc; border-radius:12px; padding:12px; box-shadow:4px 4px 20px rgba(0,0,0,0.15); min-width:200px;">
+      <div style="font-size:0.75rem; font-weight:700; color:#888; margin-bottom:8px; text-transform:uppercase;">Exponents</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+        <button onclick="insertSymbol('²')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">²</button>
+        <button onclick="insertSymbol('³')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">³</button>
+        <button onclick="insertSymbol('⁴')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">⁴</button>
+        <button onclick="insertSymbol('⁵')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">⁵</button>
+        <button onclick="insertSymbol('ⁿ')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">ⁿ</button>
+      </div>
+      <div style="display:flex; gap:6px; margin-bottom:12px; align-items:center;">
+        <input id="custom-exp" type="text" maxlength="5" placeholder="custom" style="width:70px; border:1px solid #ddd; border-radius:6px; padding:4px 8px; font-size:0.9rem; outline:none;">
+        <button onclick="insertCustomExponent()" style="background:#0f0f13;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85rem;">Insert xⁿ</button>
+      </div>
+      <div style="font-size:0.75rem; font-weight:700; color:#888; margin-bottom:8px; text-transform:uppercase;">Vinculum (Fractions)</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+        <button onclick="insertSymbol('½')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">½</button>
+        <button onclick="insertSymbol('⅓')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">⅓</button>
+        <button onclick="insertSymbol('¼')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">¼</button>
+        <button onclick="insertSymbol('¾')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">¾</button>
+        <button onclick="insertSymbol('⅔')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">⅔</button>
+      </div>
+      <div style="display:flex; gap:4px; margin-bottom:12px; align-items:center;">
+        <input id="frac-num" type="text" maxlength="5" placeholder="num" style="width:50px; border:1px solid #ddd; border-radius:6px; padding:4px 6px; font-size:0.9rem; outline:none;">
+        <span style="font-size:1rem;">⁄</span>
+        <input id="frac-den" type="text" maxlength="5" placeholder="den" style="width:50px; border:1px solid #ddd; border-radius:6px; padding:4px 6px; font-size:0.9rem; outline:none;">
+        <button onclick="insertCustomFraction()" style="background:#0f0f13;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.85rem;">Insert</button>
+      </div>
+      <div style="font-size:0.75rem; font-weight:700; color:#888; margin-bottom:8px; text-transform:uppercase;">Symbols</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        <button onclick="insertSymbol('π')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">π</button>
+        <button onclick="insertSymbol('∞')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">∞</button>
+        <button onclick="insertSymbol('√')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">√</button>
+        <button onclick="insertSymbol('∑')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">∑</button>
+        <button onclick="insertSymbol('≠')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">≠</button>
+        <button onclick="insertSymbol('≤')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">≤</button>
+        <button onclick="insertSymbol('≥')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">≥</button>
+        <button onclick="insertSymbol('÷')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">÷</button>
+        <button onclick="insertSymbol('×')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">×</button>
+        <button onclick="insertSymbol('∫')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:1rem;">∫</button>
+      </div>
+    </div>
+  </div>
+
   <a href="#" onclick="addNote()" style="position:fixed; bottom:32px; left:32px; background:#0f0f13; color:#fff; text-decoration:none; padding:14px 28px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.2);">+ Add Note</a>
   <div style="position:fixed; bottom:32px; left:50%; transform:translateX(-50%); display:flex; gap:12px;">
     <button id="savebtn" onclick="save()" style="background:#2a7a2a; color:#fff; border:none; padding:14px 36px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">💾 Save</button>
     <button onclick="clearNotebook()" style="background:#b91c1c; color:#fff; border:none; padding:14px 20px; font-size:1.2rem; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">🗑️</button>
   </div>
-  <button onclick="addPage()" style="position:fixed; bottom:32px; right:32px; background:#0f0f13; color:#fff; border:none; padding:14px 28px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">+ Add Page</button>
+  <div style="position:fixed; bottom:32px; right:32px;">
+    <button onclick="deletePage()" style="background:#0f0f13; color:#fff; border:none; padding:14px 22px; font-size:1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">🗑 Delete Page</button>
+  </div>
 
   <script>
     const doc = document.getElementById('doc');
@@ -144,6 +203,35 @@
       setTimeout(() => { btn.textContent = '💾 Save'; btn.style.background = '#2a7a2a'; }, 1500);
     }
 
+    const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','n':'ⁿ','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
+    const subMap = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','a':'ₐ','e':'ₑ','o':'ₒ','x':'ₓ','n':'ₙ','s':'ₛ','t':'ₜ'};
+    function insertCustomFraction() {
+      const num = document.getElementById('frac-num').value;
+      const den = document.getElementById('frac-den').value;
+      const supNum = num.split('').map(c => supMap[c.toLowerCase()] || c).join('');
+      const subDen = den.split('').map(c => subMap[c.toLowerCase()] || c).join('');
+      insertSymbol(supNum + '⁄' + subDen);
+      document.getElementById('frac-num').value = '';
+      document.getElementById('frac-den').value = '';
+    }
+    function insertCustomExponent() {
+      const val = document.getElementById('custom-exp').value;
+      const sup = val.split('').map(c => supMap[c.toLowerCase()] || c).join('');
+      insertSymbol(sup);
+      document.getElementById('custom-exp').value = '';
+    }
+    function toggleSymbolMenu() {
+      const menu = document.getElementById('symbol-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    function insertSymbol(symbol) {
+      const start = doc.selectionStart;
+      const end = doc.selectionEnd;
+      doc.value = doc.value.slice(0, start) + symbol + doc.value.slice(end);
+      doc.selectionStart = doc.selectionEnd = start + symbol.length;
+      doc.focus();
+      localStorage.setItem('efm-notebook', doc.value);
+    }
     function clearNotebook() {
       localStorage.removeItem('efm-notebook');
       localStorage.removeItem('efm-notebook-title');
@@ -153,6 +241,15 @@
 
     function addPage() {
       doc.style.minHeight = (doc.offsetHeight + 400) + 'px';
+    }
+    function deletePage() {
+      const current = doc.offsetHeight;
+      const min = window.innerHeight * 0.7;
+      if (current - 400 >= min) {
+        doc.style.minHeight = (current - 400) + 'px';
+      } else {
+        doc.style.minHeight = min + 'px';
+      }
     }
 
     function addNote() {

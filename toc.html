@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Table of Contents – EFM</title>
   <style>
@@ -12,17 +15,51 @@
       font-family: system-ui, sans-serif;
       color: #e0e0e0;
     }
+    .toc-row {
+      position: absolute;
+      left: 5%;
+      width: 90%;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+    .toc-row .pipe {
+      color: #fff;
+      font-size: 1.2rem;
+      padding: 0 16px;
+    }
+    .toc-row .right {
+      text-align: right;
+    }
   </style>
 </head>
 <body>
+  <a href="index.html" style="position:fixed;top:12px;right:72px;z-index:100;"><img src="logo-white.png" style="height:40px;opacity:0.9;"></a>
   <div style="max-width:700px; margin: 0 auto; padding: 24px 40px 0; display:flex; justify-content:space-between;">
     <a href="index.html" style="color:#555; font-size:0.85rem; text-decoration:none;">← Back</a>
   </div>
 
-  <div style="max-width:700px; margin: 60px auto 0; padding: 0 40px;">
-    <a href="page2.html#basic-operations" style="display:inline-block; font-size:1.4rem; font-weight:600; color:#e0e0e0; text-decoration:none; padding-bottom:6px; border-bottom:2px solid #60a5fa;">Basic Operations</a>
-    <br><br>
-    <a href="page4.html" style="font-size:1.1rem; color:#f87171; text-decoration:underline; margin-left:20px;">Addition</a>
+  <p style="position:absolute; top:3cm; width:100%; text-align:center; font-size:75px; font-weight:700; font-family:system-ui,sans-serif; color:#e0e0e0; margin:0;">Table of Contents</p>
+  <hr style="position:absolute; top:calc(3cm + 90px); left:5%; width:90%; border:none; border-top:3px dotted #fff; margin:0;">
+  <p style="position:absolute; top:calc(3cm + 108px); width:100%; text-align:center; font-size:0.85rem; color:#888; font-family:system-ui,sans-serif; margin:0;">Click on words to visit!</p>
+
+  <div class="toc-row" style="top:calc(3cm + 150px);">
+    <span style="font-size:1.2rem; color:#e0e0e0;">Reference</span>
+    <span class="pipe">|</span>
+    <a href="page2.html" class="right" style="font-size:1.2rem; color:#e0e0e0; text-decoration:none;">page2.html</a>
   </div>
+
+  <div class="toc-row" style="top:calc(3cm + 195px);">
+    <span style="font-size:1.5rem; font-weight:700; color:#e0e0e0;">Chapter 1: The Basics</span>
+    <span class="pipe">|</span>
+    <a href="page3b.html" class="right" style="font-size:1.2rem; color:#e0e0e0; text-decoration:none;">page3b.html</a>
+  </div>
+
+  <div class="toc-row" style="top:calc(3cm + 245px);">
+    <a href="page4.html" style="font-size:1.2rem; color:#e0e0e0; text-decoration:none;">Addition</a>
+    <span class="pipe">|</span>
+    <a href="page4.html" class="right" style="font-size:1.2rem; color:#e0e0e0; text-decoration:none;">page4.html</a>
+  </div>
+
 </body>
 </html>

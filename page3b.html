@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #5a9fd4;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    .sym {
+      position: fixed;
+      font-family: system-ui, sans-serif;
+      color: rgba(0,0,0,0.08);
+      font-size: 2.4rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    /* Shrink the chapter title when the window isn't fullscreen-wide */
+    @media (max-width: 1200px) {
+      #chapter-title { font-size: 100px !important; }
+    }
+    /* In fullscreen (wide) view, move Start diagonally to the upper left */
+    @media (min-width: 1201px) {
+      #start-link { bottom: 120px; right: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Scattered symbols -->
+  <span class="sym" style="top:5%;left:2%;">×</span>
+  <span class="sym" style="top:5%;left:12%;">+</span>
+  <span class="sym" style="top:5%;left:25%;">−</span>
+  <span class="sym" style="top:5%;left:38%;">÷</span>
+  <span class="sym" style="top:5%;left:52%;">=</span>
+  <span class="sym" style="top:5%;left:65%;">×</span>
+  <span class="sym" style="top:5%;left:78%;">+</span>
+  <span class="sym" style="top:5%;left:90%;">−</span>
+  <span class="sym" style="top:15%;left:6%;">÷</span>
+  <span class="sym" style="top:15%;left:20%;">=</span>
+  <span class="sym" style="top:15%;left:88%;">×</span>
+  <span class="sym" style="top:15%;right:4%;">+</span>
+  <span class="sym" style="top:30%;left:2%;">+</span>
+  <span class="sym" style="top:30%;left:92%;">÷</span>
+  <span class="sym" style="top:45%;left:3%;">−</span>
+  <span class="sym" style="top:45%;right:3%;">×</span>
+  <span class="sym" style="top:55%;left:8%;">=</span>
+  <span class="sym" style="top:55%;right:8%;">+</span>
+  <span class="sym" style="top:65%;left:3%;">×</span>
+  <span class="sym" style="top:65%;left:15%;">÷</span>
+  <span class="sym" style="top:65%;right:3%;">−</span>
+  <span class="sym" style="top:65%;right:15%;">=</span>
+  <span class="sym" style="top:75%;left:5%;">+</span>
+  <span class="sym" style="top:75%;left:18%;">−</span>
+  <span class="sym" style="top:75%;left:40%;">×</span>
+  <span class="sym" style="top:75%;left:60%;">÷</span>
+  <span class="sym" style="top:75%;left:80%;">=</span>
+  <span class="sym" style="top:75%;right:2%;">+</span>
+  <span class="sym" style="top:85%;left:3%;">÷</span>
+  <span class="sym" style="top:85%;left:22%;">=</span>
+  <span class="sym" style="top:85%;left:45%;">−</span>
+  <span class="sym" style="top:85%;left:68%;">×</span>
+  <span class="sym" style="top:85%;right:3%;">+</span>
+  <span class="sym" style="top:93%;left:5%;">×</span>
+  <span class="sym" style="top:93%;left:25%;">+</span>
+  <span class="sym" style="top:93%;left:48%;">÷</span>
+  <span class="sym" style="top:93%;left:70%;">−</span>
+  <span class="sym" style="top:93%;right:4%;">=</span>
+
+  <div style="max-width:960px; margin: 0; padding: 24px 24px 0; display:flex; justify-content:space-between; align-items:center;">
+    <a href="page3.html" style="color:#000; font-size:0.85rem; text-decoration:none;">← Back</a>
+    <a href="index.html" style="display:inline-block; border-radius:8px; overflow:hidden; background-color:#5a9fd4; background-image:linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(rgba(255,255,255,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.06) 1px,transparent 1px); background-size:80px 80px,80px 80px,20px 20px,20px 20px; padding:4px;"><img src="logo-transparent.png" style="height:60px; display:block;"></a>
+  </div>
+  <div style="max-width:960px; margin: 24px 0 0; padding: 0 24px;">
+    <p id="chapter-title" style="font-family:system-ui,sans-serif; font-size:175px; font-weight:800; color:#0f0f13; line-height:1.1;">Chapter 1:<br>The Basics</p>
+  </div>
+  <a id="start-link" href="page3c.html" style="position:fixed; bottom:40px; right:40px;">
+    <button style="background:#4a9e4a; color:#fff; border:none; padding:16px 40px; font-size:1.1rem; font-weight:700; font-family:system-ui,sans-serif; border-radius:12px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.2);">Start</button>
+  </a>
+</body>
+</html>
