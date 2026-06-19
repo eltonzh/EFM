@@ -234,6 +234,11 @@
 
 
 <script>
+// If progress was reset (efm_started cleared), wipe all page4 state so we start fresh
+if (!localStorage.getItem('efm_started')) {
+  ['p4progress','p4sc','p4f1','p4f2'].forEach(function(k){ localStorage.removeItem(k); });
+}
+
 var spinCount=0;
 var spinAttempts=0;
 var MAX_SPINS=3;
