@@ -65,8 +65,9 @@
     #reset-btn {
       display: none;
       position: fixed;
-      left: 24px;
-      top: calc(12vh + 1cm);
+      left: calc(50% - 40vw + 4px);
+      bottom: calc(8vh + 4px);
+      top: auto;
       z-index: 10;
       padding: 0;
       font-size: 0.9rem;
@@ -79,7 +80,7 @@
       letter-spacing: 0.03em;
     }
     @media (min-width: 901px) {
-      #reset-btn { top: calc(5vh + 3cm); }
+      #reset-btn { left: 24px; bottom: auto; top: calc(5vh + 3cm); }
     }
   </style>
 </head>
