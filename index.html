@@ -61,6 +61,26 @@
       0%,100% { transform: translate(-50%,-50%); }
       50%      { transform: translate(-50%, calc(-50% - 18px)); }
     }
+
+    #reset-btn {
+      display: none;
+      position: fixed;
+      left: 24px;
+      top: calc(12vh + 1cm);
+      z-index: 10;
+      padding: 0;
+      font-size: 0.9rem;
+      font-family: system-ui, sans-serif;
+      background: none;
+      color: rgba(0,0,0,0.45);
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      letter-spacing: 0.03em;
+    }
+    @media (min-width: 901px) {
+      #reset-btn { top: calc(5vh + 3cm); }
+    }
   </style>
 </head>
 <body>
@@ -205,5 +225,16 @@
   </div>
 
 
+  <button id="reset-btn" onclick="resetProgress()">Reset Progress</button>
+
+  <script>
+    if (localStorage.getItem('efm_started')) {
+      document.getElementById('reset-btn').style.display = 'block';
+    }
+    function resetProgress() {
+      ['efm_started','p4sc','p4f1','p4f2','mathCoins'].forEach(function(k){ localStorage.removeItem(k); });
+      document.getElementById('reset-btn').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
