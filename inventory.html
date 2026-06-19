@@ -40,11 +40,37 @@
       user-select: none;
       overflow: visible;
     }
+
+
+    body.is-fullscreen #card4 {
+      top: 20px !important;
+      left: calc(69px + 112vh + 48px) !important;
+    }
+    body.is-fullscreen #card5 {
+      top: 20px !important;
+      left: calc(69px + 140vh + 64px) !important;
+    }
+    body.is-fullscreen #card6 {
+      top: 20px !important;
+      left: calc(69px + 168vh + 80px) !important;
+    }
   </style>
 </head>
 <body>
 
   <a href="index.html" style="position:fixed;top:14px;left:18px;z-index:100;color:#000;font-size:0.82rem;text-decoration:none;font-family:system-ui,sans-serif;">← Back</a>
+
+  <div id="dbg" style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:11px;padding:6px 10px;border-radius:6px;z-index:9999;font-family:monospace;"></div>
+  <script>
+    setInterval(function(){
+      var el = document.getElementById('dbg');
+      el.textContent =
+        'outerH=' + window.outerHeight +
+        '  screenH=' + screen.height +
+        '  ratio=' + (window.outerHeight/screen.height).toFixed(3) +
+        '  class=' + document.body.classList.contains('is-fullscreen');
+    }, 300);
+  </script>
 
   <div style="position:absolute;top:20px;left:calc(69px + 28vh);">
     <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
@@ -133,11 +159,8 @@
       <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:8px 12px;font-family:system-ui,sans-serif;color:#0f0f13;">
         <div style="font-size:1.15rem;font-weight:700;">Coins</div>
         <div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Use coins to continue your math course!</div>
-        <div style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: None</div>
-      </div>
-      <div style="position:absolute;left:91%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <a href="#" style="font-size:0.9rem;font-weight:700;color:#fff;text-decoration:none;background:#9ca3af;border:1.5px solid #9ca3af;border-radius:6px;padding:3px 14px;white-space:nowrap;cursor:default;">🔒 Shop</a>
-        <div style="font-size:0.5rem;color:#ef4444;text-align:center;max-width:10vw;">Shop locked. Earn some more coins to continue on the website!</div>
+        <div id="coinAmount" style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: None</div>
+        <script>var c=localStorage.getItem('mathCoins');if(c)document.getElementById('coinAmount').textContent='Amount: '+c;</script>
       </div>
     </div>
   </div>
@@ -152,9 +175,11 @@
           <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
         </svg>
       </div>
-      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;">
+      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;">
+        <div style="flex:1"></div>
         <div style="font-size:1rem;font-weight:600;">Cash | Locked</div>
-        <div style="font-size:0.75rem;text-align:center;">Get 150 coins to unlock this item and read Fun Math Break Comics!</div>
+        <div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 25 coins to unlock this item and read Fun Math Break Comics!</div>
+        <div style="flex:1"></div>
       </div>
     </div>
   </div>
@@ -169,10 +194,16 @@
           <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
         </svg>
       </div>
+      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;">
+        <div style="flex:1"></div>
+        <div style="font-size:1rem;font-weight:600;">Gold Pebbles | Locked</div>
+        <div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 25 cash to unlock this item and play some games!</div>
+        <div style="flex:1"></div>
+      </div>
     </div>
   </div>
 
-  <div style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 28vh);">
+  <div id="card4" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 28vh);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -185,7 +216,7 @@
     </div>
   </div>
 
-  <div style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 56vh + 16px);">
+  <div id="card5" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 56vh + 16px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -198,7 +229,7 @@
     </div>
   </div>
 
-  <div style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 84vh + 32px);">
+  <div id="card6" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 84vh + 32px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -328,6 +359,25 @@
       fitTimer = setTimeout(fitTitle, 600);
     });
   </script>
+
+  <script>
+    var fsTimer;
+    function checkFullscreen() {
+      var isFull = window.outerHeight >= screen.height * 0.97 ||
+                   !!document.fullscreenElement ||
+                   !!document.webkitFullscreenElement;
+      document.body.classList.toggle('is-fullscreen', isFull);
+    }
+    checkFullscreen();
+    window.addEventListener('resize', function() {
+      checkFullscreen();
+      clearTimeout(fsTimer);
+      fsTimer = setTimeout(checkFullscreen, 650);
+    });
+    document.addEventListener('fullscreenchange', checkFullscreen);
+    document.addEventListener('webkitfullscreenchange', checkFullscreen);
+  </script>
+
 
 </body>
 </html>

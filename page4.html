@@ -14,61 +14,153 @@
       min-height: 600vh;
       font-family: system-ui, sans-serif;
     }
+    .para-section { font-family:system-ui,sans-serif; font-size:1.05rem; color:#ccc; line-height:1.8; margin-top:16px; }
+    .cont-wrap { margin-top:20px; }
+    .cont-btn {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+    }
+    .cont-btn:hover { background: #16a34a; }
+    @keyframes bookPageFlip {
+      0%   { transform: perspective(400px) rotateY(0deg); }
+      35%  { transform: perspective(400px) rotateY(-90deg); }
+      65%  { transform: perspective(400px) rotateY(-90deg); }
+      100% { transform: perspective(400px) rotateY(-180deg); }
+    }
+    .flip-book-btn { position:relative; width:110px; height:44px; cursor:pointer; }
+    .fp-back, .fp-front {
+      position:absolute; inset:0;
+      background:#fff; color:#000;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:1rem; font-family:system-ui,sans-serif;
+      border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.3);
+    }
+    .fp-back { z-index:1; }
+    .fp-front {
+      z-index:2;
+      backface-visibility:hidden;
+      transform-origin:left center;
+      animation:bookPageFlip 2s ease-in-out infinite;
+    }
+    @keyframes pageFlip {
+      0%   { transform: perspective(1200px) rotateY(-90deg); opacity: 0; transform-origin: left center; }
+      55%  { transform: perspective(1200px) rotateY(6deg);   opacity: 1; transform-origin: left center; }
+      75%  { transform: perspective(1200px) rotateY(-3deg);  opacity: 1; transform-origin: left center; }
+      100% { transform: perspective(1200px) rotateY(0deg);   opacity: 1; transform-origin: left center; }
+    }
+    .flip-in { animation: pageFlip 0.55s ease-out forwards; }
+    @keyframes bubblePop {
+      0%,100%{transform:translateX(-50%) scale(1);}
+      45%{transform:translateX(-50%) scale(1.18) translateY(-5px);}
+      65%{transform:translateX(-50%) scale(0.93);}
+    }
   </style>
 </head>
 <body>
   <a href="index.html" style="position:fixed;top:12px;right:72px;z-index:100;"><img src="logo-white.png" style="height:40px;opacity:0.9;"></a>
   <a href="page3c.html" style="display:block; color:#555; font-size:0.85rem; text-decoration:none; padding: 24px 24px 0;">← Back</a>
   <h1 style="font-family:system-ui,sans-serif; font-size:5rem; font-weight:800; color:#fff; text-align:left; padding-left:24px; margin-top:16px;">Addition</h1>
-  <div style="padding: 20px 24px;">
-    <p style="font-family:system-ui,sans-serif; font-size:1.05rem; color:#ccc; line-height:1.8;">
+  <div style="padding: 20px 24px; padding-bottom: calc(120px + 2cm);">
+
+    <!-- Section 1 -->
+    <div id="sec-1" class="para-section">
       Addition is a fundamental mathematical operation where two or more numbers are combined to find their total or sum. We have already seen an example on page 2. Another example of 1-digit addition (which we'll get to in a few minutes) is: 1+3 = <b>4</b> or 9 + 3 = 12. Soon you'll realize you can add 1+3 (1,2,3,<b><u>4</u></b>) and 3+1 (3,<b><u>4</u></b>) to get the same answer. This is because addition is <i>commutative</i>.
-    </p>
-    <div style="display:flex; gap:16px; margin-top:16px; align-items:flex-end;">
-      <img src="hellocat.png" style="height:220px; width:auto; border-radius:8px;">
     </div>
-    <p style="font-family:system-ui,sans-serif; font-size:1.05rem; color:#ccc; line-height:1.8; margin-top:16px;">
-      Hello, Martha.<br>Don't mind her, but you <b>cannot</b> ignore Presia — her sister. Watch out for who you pay attention to — don't get them mixed up! (You'll see the differences later). Anyway. Back to the definition of <i>commutative</i>.
-      <br><br>
+    <div class="cont-wrap" id="cont-1">
+      <button class="cont-btn" onclick="showSection(2)">Continue →</button>
+    </div>
+
+    <!-- Section 2 -->
+    <div id="sec-2" class="para-section" style="display:none">
+      <div style="display:flex; gap:16px; margin-top:16px; align-items:flex-end;">
+        <img src="hellocat.png" style="height:220px; width:auto; border-radius:8px;">
+      </div>
+      <div style="margin-top:16px;">
+        Hello, Martha.<br>Don't mind her, but you <b>cannot</b> ignore Presia &#8212; her sister. Watch out for who you pay attention to &#8212; don't get them mixed up! (You'll see the differences later). Anyway. Back to the definition of <i>commutative</i>.
+      </div>
+    </div>
+    <div class="cont-wrap" id="cont-2" style="display:none">
+      <button class="cont-btn" onclick="showSection(3)">Continue →</button>
+    </div>
+
+    <!-- Section 3 -->
+    <div id="sec-3" class="para-section" style="display:none">
       The operations addition and multiplication are <i>commutative</i>. Division and subtraction are not <i>commutative</i>, because you cannot switch the minuend and the subtrahend, or the divisor and the dividend.
       <br><br>
       <img src="whycat.png" style="height:180px; width:auto; border-radius:8px;">
       <br><br>
-      Because we can take any 2 numbers — say, like 2 and 3 — and do this...
+      Because we can take any 2 numbers &#8212; say, like 2 and 3 &#8212; and do this...
       <br><br>
       3 - 2 = 1 &nbsp;&nbsp;&nbsp;&nbsp; 2 - 3 = (-1)
       <br><br>
-      You see? The differences are different. 1 ≠ -1. Also note that I put parentheses around the -1 so you wouldn't get confused with the = and the -. Sometimes you kittens just get them mixed up and think it's part of the equation.
-      <br><br>
+      You see? The differences are different. 1 &#8800; -1. Also note that I put parentheses around the -1 so you wouldn't get confused with the = and the -. Sometimes you kittens just get them mixed up and think it's part of the equation.
+    </div>
+    <div class="cont-wrap" id="cont-3" style="display:none">
+      <button class="cont-btn" onclick="showSection(4)">Continue →</button>
+    </div>
+
+    <!-- Section 4 -->
+    <div id="sec-4" class="para-section" style="display:none">
       Now you probably understand already. You can switch the addends and get the same answer, or switch the products and get the same answer. <img src="proveit.png" style="height:130px; width:auto; vertical-align:middle; border-radius:6px;">
       <br><br>
       You bet! Here goes...
       <br><br>
-      2+3=5 &nbsp;&nbsp; 3+2=5 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3×4=12 &nbsp;&nbsp; 4×3=12
-      <br><br>
+      2+3=5 &nbsp;&nbsp; 3+2=5 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&#215;4=12 &nbsp;&nbsp; 4&#215;3=12
+    </div>
+    <div class="cont-wrap" id="cont-4" style="display:none">
+      <button class="cont-btn" onclick="showSection(5)">Continue →</button>
+    </div>
+
+    <!-- Section 5 -->
+    <div id="sec-5" class="para-section" style="display:none">
       That was rather exciting, because we got to prove that it worked for addition and multiplication, and also got to show everybody that subtraction did not work. <img src="divisioncat.jpg" style="height:80px; width:auto; vertical-align:middle; border-radius:6px;">
       <br><br>
       Right. Division. Let's show everybody another example of <i>division</i>...
       <br><br>
-      72 ÷ 8 = 9 &nbsp;&nbsp;&nbsp; 72 ÷ 9 = 8
+      72 &#247; 8 = 9 &nbsp;&nbsp;&nbsp; 72 &#247; 9 = 8
       <br><br>
       See? The quotients are different. <img src="bigcat.jpg" style="height:100px; width:auto; vertical-align:middle; border-radius:6px;">
       <br><br>
       Yes, they are. But not to <i>everybody</i>. <img src="whocat.webp" style="height:80px; width:auto; vertical-align:middle; border-radius:6px;"> You actually might want to move over because...
-      <br><br>
-      <img src="surprise.jpg" style="width:100vw; height:calc(100vh - 2cm - 0.5in); object-fit:fill; display:block; margin-left:-24px; clip-path:inset(0.75cm 0 calc(0.75in + 1cm) 0); margin-top:-0.75cm; margin-bottom:calc(-0.75in - 1cm);">
+    </div>
+    <div class="cont-wrap" id="cont-5" style="display:none">
+      <button class="cont-btn" onclick="showSection(6)">Continue →</button>
+    </div>
+
+    <!-- Section 6 -->
+    <div id="sec-6" class="para-section" style="display:none">
+      <img src="surprise.jpg" style="width:100vw; height:100vh; object-fit:fill; display:block; margin-left:-24px;">
       <br>
       Yep. All of your friends are here to meet you. All of our EFM Characters!
       <br><br>
       That's the commutative property. It means the order in which you add or multiply numbers does not change the final result. Let's look at something else...
-      <br><br>
+    </div>
+    <div class="cont-wrap" id="cont-6" style="display:none">
+      <button class="cont-btn" onclick="showSection(7)">Continue →</button>
+    </div>
+
+    <!-- Section 7 -->
+    <div id="sec-7" class="para-section" style="display:none">
       First let's try adding more than two numbers. 2+2+1. 2,3,4. Add 1. <i><b><u>5</u></b></i>. Easy enough.
       <br>
       Now let's try it another way. 2+1+2. Add 1 to 2, 3. Add two more ones- 3, 4, <i><b><u>5</u></b></i>- you get the answer. It's also 5.
       <br>Now let's do it <i>one more</i> way.
       <br>The final way to add it up with the numbers 2, 1, and 2 is: 1+2+2. We can switch around the 2 and the 1 since addition is commutative. The equation becomes 3+ 2. 3, 4, <i><b><u>5</u></b></i> is the answer.
       <br><br>It's cool, isn't it? However you add, as long as the addends match, their sums are equal. This is the associative property. When you are adding or multiplying numbers, the way you group them with parentheses does not change the final result! ISN'T IT?!
-      <br><br>
+    </div>
+    <div class="cont-wrap" id="cont-7" style="display:none">
+      <button class="cont-btn" onclick="showSection(8)">Continue →</button>
+    </div>
+
+    <!-- Section 8 -->
+    <div id="sec-8" class="para-section" style="display:none">
       <img src="Screenshot 2026-06-05 at 22.29.18.png" style="max-width:100%; height:auto; border-radius:8px;">
       <br><br>Um...were you even listening? I said, <i>when you are adding or multiplying numbers, the way you group them with parentheses does not change the final result</i>.
       <br><br>
@@ -81,12 +173,19 @@
         </div>
       </div>
       <div style="color:#ccc; margin-top:20px; font-size:1.05rem; line-height:1.5;">Right! But to make this more fun, we'll spin a wheel to choose what numbers we use...</div>
+    </div>
+    <div class="cont-wrap" id="cont-8" style="display:none">
+      <button class="cont-btn" onclick="showSection(9)">Continue →</button>
+    </div>
+
+    <!-- Section 9: Spinner -->
+    <div id="sec-9" style="display:none">
       <div style="display:flex; align-items:center; justify-content:center; gap:32px; margin-top:24px;">
 
         <!-- Left: First Factor label -->
         <div style="text-align:center; min-width:110px;">
           <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
-            <button id="retryBtn" onclick="retrySpin()" style="display:none; background:#555; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.8rem; cursor:pointer;">↺</button>
+            <button id="retryBtn" onclick="retrySpin()" style="display:none; background:#555; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.8rem; cursor:pointer;">&#8635;</button>
             <div style="color:#ccc; font-size:1.05rem;">First Factor<span id="spinResult" style="display:none;"> = <span id="spinNumber"></span></span></div>
           </div>
         </div>
@@ -108,7 +207,7 @@
         <!-- Right: Second Factor label -->
         <div style="text-align:center; min-width:110px;">
           <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
-            <button id="retryBtn2" onclick="retrySpin()" style="display:none; background:#555; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.8rem; cursor:pointer;">↺</button>
+            <button id="retryBtn2" onclick="retrySpin()" style="display:none; background:#555; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.8rem; cursor:pointer;">&#8635;</button>
             <div style="color:#ccc; font-size:1.05rem;">Second Factor<span id="spinResult2" style="display:none;"> = <span id="spinNumber2"></span></span></div>
           </div>
         </div>
@@ -116,20 +215,51 @@
       </div>
 
       <div id="factorResult" style="display:none; color:#ccc; margin-top:28px; font-size:1.05rem; line-height:1.8;"></div>
-      <br>
-    </p>
 
-<style>
-@keyframes bubblePop {
-  0%,100%{transform:translateX(-50%) scale(1);}
-  45%{transform:translateX(-50%) scale(1.18) translateY(-5px);}
-  65%{transform:translateX(-50%) scale(0.93);}
-}
-</style>
+      <div id="coinsOffer" style="display:none; margin-top:28px; color:#ccc; font-size:1.05rem; line-height:1.8; position:relative; padding-bottom:70px;">
+        Nice Job! Keep going! Here's 25 coins to <span id="cheerWord">cheer</span> you on.
+        <button id="claimBtn" onclick="claimCoins()" style="position:absolute; white-space:nowrap; background:linear-gradient(135deg,#f5c518,#e6a800); color:#1a1000; border:none; border-radius:10px; padding:12px 28px; font-size:1rem; font-weight:700; cursor:pointer; box-shadow:0 3px 12px rgba(230,168,0,0.5); letter-spacing:0.03em;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:7px;"><rect x="2" y="10" width="20" height="12" rx="2" fill="#b8860b"/><rect x="2" y="10" width="20" height="5" rx="1" fill="#f5c518"/><rect x="8" y="7" width="8" height="5" rx="1" fill="#e6a800"/><rect x="10" y="13" width="4" height="4" rx="1" fill="#f5c518"/><path d="M2 12h20" stroke="#b8860b" stroke-width="1"/></svg>Claim my 25 coins</button>
+      </div>
+
+      <div id="flipNextWrap" style="display:none; margin-top:32px; display:none; text-align:right;">
+        <div class="flip-book-btn" style="display:inline-flex;" onclick="window.location.href='page5.html'">
+          <div class="fp-back">Flip!</div>
+          <div class="fp-front">Flip!</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
 <script>
 var spinCount=0;
-var spinAttempts=0; // session-only, resets each page visit
+var spinAttempts=0;
 var MAX_SPINS=3;
+
+function revealUpTo(n) {
+  for (var i = 2; i <= n; i++) {
+    var pc = document.getElementById('cont-'+(i-1));
+    var s = document.getElementById('sec-'+i);
+    if (pc) pc.style.display = 'none';
+    if (s) s.style.display = '';
+  }
+  var ac = document.getElementById('cont-'+n);
+  if (ac) ac.style.display = '';
+}
+
+function showSection(n) {
+  revealUpTo(n);
+  localStorage.setItem('p4progress', n);
+  var sec = document.getElementById('sec-'+n);
+  if (sec) {
+    sec.classList.remove('flip-in');
+    void sec.offsetWidth;
+    sec.classList.add('flip-in');
+    sec.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
 
 function disableWheel(){
   var msg=document.getElementById('spinLimitMsg');
@@ -157,14 +287,14 @@ function showFactorResult(f1,f2){
     f2+'</strong> = <strong>'+product+'</strong>';
   document.getElementById('factorResult').style.display='block';
   document.getElementById('coinsOffer').style.display='block';
-  requestAnimationFrame(function(){
+  setTimeout(function(){
     positionClaimButton();
     if(localStorage.getItem('mathCoins')){
       var cb=document.getElementById('claimBtn');
       cb.style.background='#666';cb.style.boxShadow='none';cb.style.cursor='default';cb.onclick=null;
       cb.innerHTML=cb.innerHTML.replace('Claim my','Claimed my');
     }
-  });
+  }, 80);
   document.getElementById('factorResult').scrollIntoView({behavior:'smooth'});
 }
 
@@ -231,7 +361,8 @@ function showFactorResult(f1,f2){
         } else {
           document.getElementById('spinNumber2').textContent=result;
           document.getElementById('spinResult2').style.display='inline';
-          document.getElementById('retryBtn2').style.display='inline-block';
+          document.getElementById('retryBtn').style.display='none';
+          document.getElementById('retryBtn2').style.display='none';
           document.getElementById('spinBubble').style.display='none';
           localStorage.setItem('p4sc','2');
           localStorage.setItem('p4f2',result);
@@ -261,12 +392,29 @@ function showFactorResult(f1,f2){
     var f2=localStorage.getItem('p4f2');
     document.getElementById('spinNumber2').textContent=f2;
     document.getElementById('spinResult2').style.display='inline';
-    document.getElementById('retryBtn2').style.display='inline-block';
+    document.getElementById('retryBtn').style.display='none';
+    document.getElementById('retryBtn2').style.display='none';
     document.getElementById('spinBubble').style.display='none';
     showFactorResult(parseInt(localStorage.getItem('p4f1')),parseInt(f2));
   }
 
-  draw();
+  requestAnimationFrame(draw);
+})();
+
+if(localStorage.getItem('mathCoins')){
+  document.getElementById('flipNextWrap').style.display='';
+}
+
+// Restore section progress on page load
+(function(){
+  var sc=parseInt(localStorage.getItem('p4sc')||'0');
+  var prog=parseInt(localStorage.getItem('p4progress')||'1');
+  if(sc>=1) prog=Math.max(prog,9);
+  if(prog>1){
+    revealUpTo(prog);
+    var lastSec=document.getElementById('sec-'+prog);
+    if(lastSec) setTimeout(function(){ lastSec.scrollIntoView({block:'start'}); },50);
+  }
 })();
 
 function claimCoins(){
@@ -302,13 +450,13 @@ function retrySpin(){
   }
 }
 </script>
-  </div>
 
-  <a href="notebook.html" style="position:fixed; bottom:32px; left:32px;">
+  <a href="notebook.html" style="position:fixed; bottom:32px; left:32px; z-index:500;">
     <button style="background:#60a5fa; color:#0f0f13; border:none; padding:4px 16px; font-size:0.8rem; font-weight:600; font-family:system-ui,sans-serif; border-radius:10px; cursor:pointer;">Go to Notes</button>
   </a>
-  <a href="toc.html" style="position:fixed; bottom:32px; right:32px;">
+  <a href="toc.html" style="position:fixed; bottom:32px; right:32px; z-index:500;">
     <button style="background:#60a5fa; color:#0f0f13; border:none; padding:4px 16px; font-size:0.8rem; font-weight:600; font-family:system-ui,sans-serif; border-radius:10px; cursor:pointer;">Back to Table of Contents</button>
   </a>
+
 </body>
 </html>

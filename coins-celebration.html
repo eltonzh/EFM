@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You Earned Coins!</title>
+  <style>
+    @keyframes shimmer {
+      0%{background-position:0% 50%;}
+      50%{background-position:100% 50%;}
+      100%{background-position:0% 50%;}
+    }
+    body {
+      margin:0; padding:0;
+      min-height:100vh;
+      background: linear-gradient(135deg, #ffe066, #ffd700, #fffbe6, #f5c518, #ffe066);
+      background-size: 400% 400%;
+      animation: shimmer 3s ease infinite;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      font-family: system-ui, sans-serif;
+      overflow:hidden;
+      position:relative;
+    }
+    canvas {
+      position:fixed; top:0; left:0; pointer-events:none; z-index:0;
+    }
+    .content {
+      position:relative; z-index:1; text-align:center;
+    }
+    .hooray {
+      font-size:150px; font-weight:900; color:#1a1000;
+      line-height:1; margin:0;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    }
+    .subtitle {
+      font-size:2rem; font-weight:700; color:#1a1000; margin-top:8px;
+    }
+    .keep-going {
+      font-size:1.3rem; color:#5a3a00; margin-top:8px;
+    }
+    .continue-btn {
+      margin-top:40px; background:#888; color:#fff; border:none;
+      border-radius:10px; padding:14px 36px; font-size:1.1rem;
+      font-weight:700; cursor:pointer; letter-spacing:0.03em;
+    }
+    .continue-btn:hover { background:#666; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="content">
+    <div class="hooray">Hooray!</div>
+    <div class="subtitle">You earned 25 coins!</div>
+    <div class="keep-going">Keep going!</div>
+    <button class="continue-btn" onclick="window.location.href='page4.html'">Click to Continue</button>
+  </div>
+  <script>
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var pieces = [];
+    var sparks = [];
+
+    for (var i = 0; i < 120; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: 8 + Math.random() * 10,
+        h: 5 + Math.random() * 7,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.1,
+        vy: 1.5 + Math.random() * 2.5,
+        vx: (Math.random() - 0.5) * 1.2,
+        color: ['#ff6b35','#e040fb','#2196f3','#4caf50','#fff','#ff9500','#ff3d7f'][Math.floor(Math.random()*7)]
+      });
+    }
+
+    for (var j = 0; j < 60; j++) {
+      sparks.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: 2 + Math.random() * 4,
+        alpha: Math.random(),
+        speed: 0.02 + Math.random() * 0.04
+      });
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (var i = 0; i < pieces.length; i++) {
+        var p = pieces[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.rotSpeed;
+        if (p.y > canvas.height + 20) { p.y = -20; p.x = Math.random() * canvas.width; }
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      for (var j = 0; j < sparks.length; j++) {
+        var s = sparks[j];
+        s.alpha += s.speed;
+        var a = (Math.sin(s.alpha) + 1) / 2;
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.globalAlpha = a * 0.9;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-s.size / 2, -1, s.size, 2);
+        ctx.fillRect(-1, -s.size / 2, 2, s.size);
+        ctx.restore();
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+
+    window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+
+</body>
+</html>
