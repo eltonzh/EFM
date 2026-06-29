@@ -269,8 +269,13 @@ function efmGoBack() {
     var rafPending = false, px = 0, py = 0;
     document.addEventListener('mousemove', function (e) {
       var overButton = !!e.target.closest('button, a, input, [role="button"]');
-      ownCursor.style.display = overButton ? 'none' : '';
-      if (overButton) return;
+      if (overButton) {
+        ownCursor.style.display = 'none';
+        noNative.textContent = ''; // restore classic cursor for yourself
+        return;
+      }
+      noNative.textContent = '* { cursor: none !important; }';
+      ownCursor.style.display = '';
       ownCursor.style.left = e.clientX + 'px';
       ownCursor.style.top  = e.clientY + 'px';
       px = (e.clientX / window.innerWidth)  * 100;
