@@ -12,9 +12,9 @@ function efmGoBack() {
 
 (function () {
   // ← AFTER Railway deploy, replace RAILWAY_URL with your app's Railway domain
-  var RAILWAY_URL = 'efm-chat.up.railway.app'; // e.g. "efm-production.up.railway.app"
+  var RAILWAY_URL = 'acceptable-adaptation-production-565f.up.railway.app'; // e.g. "efm-production.up.railway.app"
   var WS_URL = window.location.hostname === 'localhost'
-    ? 'ws://localhost:8081'
+    ? 'ws://localhost:8080'
     : 'wss://' + RAILWAY_URL;
 
   function getIdentity() {
