@@ -1,4 +1,4 @@
-import asyncio, json, random
+import asyncio, json, random, os
 import websockets
 
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
@@ -81,8 +81,10 @@ async def handler(websocket):
             await broadcast_cursors({'type': 'leave', 'id': cid})
 
 async def main():
-    async with websockets.serve(handler, 'localhost', 8081):
-        print('Cursor + chat server running on ws://localhost:8081')
+    port = int(os.environ.get('PORT', 8081))
+    host = '0.0.0.0'
+    async with websockets.serve(handler, host, port):
+        print(f'Cursor + chat server running on {host}:{port}')
         await asyncio.Future()
 
 asyncio.run(main())

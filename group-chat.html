@@ -285,8 +285,13 @@
       row.scrollIntoView({ block: 'end' });
     }
 
+    var RAILWAY_URL = 'efm-chat.up.railway.app';
+    var CHAT_WS = window.location.hostname === 'localhost'
+      ? 'ws://localhost:8081'
+      : 'wss://' + RAILWAY_URL;
+
     function connectChat() {
-      try { chatWs = new WebSocket('ws://localhost:8081'); } catch(e) { return; }
+      try { chatWs = new WebSocket(CHAT_WS); } catch(e) { return; }
       chatWs.onopen = function() {
         myName = localStorage.getItem('efm_cursor_name') || 'Guest';
         chatWs.send(JSON.stringify({ type: 'chat_join', name: myName }));

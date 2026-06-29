@@ -11,7 +11,11 @@ function efmGoBack() {
 }
 
 (function () {
-  var WS_URL = 'ws://localhost:8081';
+  // ← AFTER Railway deploy, replace RAILWAY_URL with your app's Railway domain
+  var RAILWAY_URL = 'efm-chat.up.railway.app'; // e.g. "efm-production.up.railway.app"
+  var WS_URL = window.location.hostname === 'localhost'
+    ? 'ws://localhost:8081'
+    : 'wss://' + RAILWAY_URL;
 
   function getIdentity() {
     var id    = localStorage.getItem('efm_cursor_id');
@@ -212,6 +216,13 @@ function efmGoBack() {
     var remote = {};
     var ws;
 
+    // Show own cursor with favorite color and hide the native cursor
+    var ownCursor = makeCursorEl(identity.name, identity.color);
+    ownCursor.style.transition = 'none'; // no lag on own cursor
+    var noNative = document.createElement('style');
+    noNative.textContent = '* { cursor: none !important; }';
+    document.head.appendChild(noNative);
+
     function connect() {
       try { ws = new WebSocket(WS_URL); } catch (e) { return; }
 
@@ -257,6 +268,8 @@ function efmGoBack() {
 
     var rafPending = false, px = 0, py = 0;
     document.addEventListener('mousemove', function (e) {
+      ownCursor.style.left = e.clientX + 'px';
+      ownCursor.style.top  = e.clientY + 'px';
       px = (e.clientX / window.innerWidth)  * 100;
       py = (e.clientY / window.innerHeight) * 100;
       if (!rafPending && ws && ws.readyState === 1) {
