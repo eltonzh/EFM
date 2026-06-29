@@ -6,7 +6,8 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" href="favicon.png" id="favicon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cover</title>
+  <title>EFM – Elton's Fun Math</title>
+  <meta name="description" content="EFM (Elton's Fun Math) – a fun, interactive math website with lessons, characters, a notebook, and a group chat. Learn math the fun way!">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -197,14 +198,35 @@
       <a href="efm_version_k.html">
         <button style="width:100%; margin-bottom: 10px; padding:15px 0;font-size:1.4rem;font-weight:700;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.05em;">Let's Get Started!</button>
       </a>
+      <div style="text-align:center;">
+        <a href="inventory.html">
+          <button style="padding:6px 20px; font-size:0.95rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer; letter-spacing:0.05em;">Your Inventory 💰</button>
+        </a>
+      </div>
     </div>
   </div>
 
 
   <script>
     function resetProgress() {
-      ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color'].forEach(function(k){ localStorage.removeItem(k); });
-      window.location.reload();
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999999;font-family:system-ui,sans-serif;';
+      overlay.innerHTML = [
+        '<div style="background:#fff;border-radius:14px;padding:32px 28px;box-shadow:0 8px 40px rgba(0,0,0,0.25);width:320px;text-align:center;">',
+          '<div style="font-size:1.1rem;font-weight:700;color:#111;margin-bottom:10px;">Reset Progress</div>',
+          '<div style="font-size:0.9rem;color:#555;margin-bottom:24px;line-height:1.5;">Are you sure you want to reset all the progress you\'ve made in this website?</div>',
+          '<div style="display:flex;gap:10px;">',
+            '<button id="_rp_cancel" style="flex:1;padding:11px;background:#f0f0f0;color:#333;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">Cancel</button>',
+            '<button id="_rp_confirm" style="flex:1;padding:11px;background:#c0392b;color:#fff;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">Reset</button>',
+          '</div>',
+        '</div>'
+      ].join('');
+      document.body.appendChild(overlay);
+      document.getElementById('_rp_cancel').addEventListener('click', function() { overlay.remove(); });
+      document.getElementById('_rp_confirm').addEventListener('click', function() {
+        ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color'].forEach(function(k){ localStorage.removeItem(k); });
+        window.location.reload();
+      });
     }
   </script>
 <script src="cursors.js"></script>

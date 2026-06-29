@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://efm.ai-taichi.com/sitemap.xml

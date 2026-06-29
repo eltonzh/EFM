@@ -1,5 +1,6 @@
 import asyncio, json, random, os
 import websockets
+import anthropic
 
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
 COLORS = [f'hsl({h * 10}, 82%, 56%)' for h in range(36)]
@@ -71,6 +72,27 @@ async def handler(websocket):
                     chat_history.pop(0)
                 await broadcast_chat({'type': 'chat', **msg})
 
+            elif kind == 'ask_claude':
+                user_text = data.get('text', '')
+                api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+                if not api_key:
+                    reply = "I can't respond right now — no API key is configured."
+                else:
+                    try:
+                        client = anthropic.Anthropic(api_key=api_key)
+                        response = client.messages.create(
+                            model='claude-sonnet-4-6',
+                            max_tokens=512,
+                            system="You are Claude, an AI assistant embedded in EFM (Elton's Fun Math), a kids' math learning website. You helped build the site. Be friendly, brief, and encouraging. If kids ask math questions, answer them clearly.",
+                            messages=[{'role': 'user', 'content': user_text}]
+                        )
+                        reply = response.content[0].text
+                    except Exception as e:
+                        reply = f"Oops, something went wrong: {str(e)[:80]}"
+                import datetime
+                reply_msg = {'name': 'Claude', 'text': reply, 'time': datetime.datetime.utcnow().isoformat() + 'Z'}
+                await websocket.send(json.dumps({'type': 'claude_reply', **reply_msg}))
+
     except websockets.exceptions.ConnectionClosed:
         pass
     finally:
@@ -81,7 +103,7 @@ async def handler(websocket):
             await broadcast_cursors({'type': 'leave', 'id': cid})
 
 async def main():
-    port = int(os.environ.get('PORT', 8081))
+    port = int(os.environ.get('PORT', 8080))
     host = '0.0.0.0'
     async with websockets.serve(handler, host, port):
         print(f'Cursor + chat server running on {host}:{port}')

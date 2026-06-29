@@ -10,11 +10,9 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #d4ecd4;
+      background: #fff;
       min-height: 100dvh;
       font-family: system-ui, sans-serif;
-      display: flex;
-      flex-direction: column;
     }
     #header {
       background: #0f0f13;
@@ -22,94 +20,76 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-shrink: 0;
     }
-    #header a {
-      color: rgba(255,255,255,0.6);
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
+    #header a { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-decoration: none; }
     #header a:hover { color: #fff; }
-    #header .dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: #2a7a2a;
-      flex-shrink: 0;
+    #header .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a7a2a; flex-shrink: 0; }
+    #header .title { color: #fff; font-weight: 700; font-size: 1rem; letter-spacing: 0.02em; }
+
+    #calendar { max-width: 320px; margin: 28px auto 0; padding: 0 16px; }
+    #cal-month { text-align: center; font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; letter-spacing: 0.03em; }
+    #cal-dow { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 8px; }
+    .cal-dow-label { text-align: center; font-size: 0.68rem; font-weight: 600; color: #aaa; }
+    #cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 0.82rem; font-weight: 500; color: #333;
+      border: 1.5px solid #e0e0e0; cursor: pointer;
     }
-    #header .title {
-      color: #fff;
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.02em;
+    .cal-day:hover { background: #f0f0f0; }
+    .cal-day.today { background: #2a7a2a; color: #fff; border-color: #2a7a2a; font-weight: 700; }
+    .cal-day.today:hover { background: #1e5a1e; }
+    .cal-day.selected { background: #0f0f13; color: #fff; border-color: #0f0f13; }
+    .cal-day.empty { border-color: transparent; cursor: default; pointer-events: none; }
+
+    #mini-bar { max-width: 320px; margin: 20px auto 0; padding: 0 16px; display: flex; gap: 10px; }
+    .mini-cal {
+      flex: 1; cursor: pointer; border-radius: 10px; padding: 6px 4px 4px;
+      border: 1.5px solid #e8e8e8; transition: border-color 0.15s, background 0.15s;
     }
-    #content {
-      flex: 1;
-      padding: 20px 14px 40px;
-      max-width: 600px;
-      width: 100%;
-      margin: 0 auto;
+    .mini-cal:hover { border-color: #aaa; background: #f8f8f8; }
+    .mini-cal:active { background: #efefef; }
+    .mini-cal-month {
+      text-align: center; font-size: 0.7rem; font-weight: 700; color: #555;
+      letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px;
     }
-    .day-section { margin-bottom: 28px; }
-    .day-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #2a5a2a;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      padding: 0 2px;
+    .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .mini-day {
+      aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 0.52rem; color: #555;
+      border: 1px solid #e8e8e8; pointer-events: none;
     }
-    .day-msgs {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .mini-day.empty { border-color: transparent; }
+
+    #divider { border: none; border-top: 1.5px solid #e0e0e0; margin: 20px 16px 0; }
+
+    #messages { max-width: 320px; margin: 0 auto; padding: 16px 16px 48px; display: flex; flex-direction: column; }
+    #msg-date-label {
+      font-size: 0.72rem; font-weight: 700; color: #aaa;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 14px; text-align: center;
     }
-    .msg-row { display: flex; flex-direction: column; max-width: 80%; }
+    .msg-row { display: flex; flex-direction: column; max-width: 85%; margin-bottom: 8px; }
     .msg-row.own { align-self: flex-end; align-items: flex-end; }
     .msg-row.other { align-self: flex-start; align-items: flex-start; }
-    .msg-name {
-      font-size: 0.72rem;
-      color: #2a5a2a;
-      margin-bottom: 3px;
-      padding: 0 4px;
+    .msg-name { font-size: 0.7rem; color: #aaa; margin-bottom: 2px; padding: 0 4px; }
+    .msg-bubble { padding: 8px 12px; border-radius: 16px; font-size: 0.88rem; line-height: 1.45; word-break: break-word; }
+    .msg-row.own .msg-bubble { background: #2a7a2a; color: #fff; border-bottom-right-radius: 4px; }
+    .msg-row.other .msg-bubble { background: #f0f0f0; color: #1a1a1a; border-bottom-left-radius: 4px; }
+    .msg-time { font-size: 0.65rem; color: rgba(0,0,0,0.3); margin-top: 2px; padding: 0 4px; }
+    .msg-actions {
+      display: flex; gap: 4px; margin-bottom: 3px; align-self: flex-end;
+      opacity: 0; pointer-events: none; transition: opacity 0.12s;
     }
-    .msg-bubble {
-      padding: 9px 13px;
-      border-radius: 16px;
-      font-size: 0.92rem;
-      line-height: 1.45;
-      word-break: break-word;
+    .msg-row.own:hover .msg-actions { opacity: 1; pointer-events: auto; }
+    .msg-action-btn {
+      font-size: 0.68rem; font-weight: 600; padding: 2px 9px;
+      border: none; border-radius: 6px; cursor: pointer;
+      font-family: system-ui, sans-serif; background: rgba(0,0,0,0.08); color: #444;
     }
-    .msg-row.own .msg-bubble {
-      background: #2a7a2a;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .msg-row.other .msg-bubble {
-      background: rgba(255,255,255,0.75);
-      color: #0f0f13;
-      border-bottom-left-radius: 4px;
-    }
-    .msg-time {
-      font-size: 0.68rem;
-      color: rgba(0,0,0,0.35);
-      margin-top: 3px;
-      padding: 0 4px;
-    }
-    #empty {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #2a5a2a;
-      opacity: 0.6;
-      text-align: center;
-      gap: 8px;
-      padding: 60px 32px;
-      font-size: 0.9rem;
-    }
-    #empty .big { font-size: 2rem; }
+    .msg-action-btn.del { color: #c0392b; }
+    .msg-action-btn:hover { background: rgba(0,0,0,0.15); }
+    #no-msgs { text-align: center; color: #aaa; font-size: 0.88rem; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -120,90 +100,244 @@
     <span class="title">Chat History</span>
   </div>
 
-  <div id="content"></div>
+  <div id="calendar">
+    <div id="cal-month"></div>
+    <div id="cal-dow">
+      <div class="cal-dow-label">S</div>
+      <div class="cal-dow-label">M</div>
+      <div class="cal-dow-label">T</div>
+      <div class="cal-dow-label">W</div>
+      <div class="cal-dow-label">T</div>
+      <div class="cal-dow-label">F</div>
+      <div class="cal-dow-label">S</div>
+    </div>
+    <div id="cal-grid"></div>
+  </div>
+
+  <div id="mini-bar"></div>
+
+  <hr id="divider">
+  <div id="messages"></div>
 
   <script>
-    var myName = localStorage.getItem('efm_cursor_name') || 'You';
+    var now        = new Date();
+    var todayYear  = now.getFullYear();
+    var todayMonth = now.getMonth();
+    var todayDate  = now.getDate();
+    var myName     = localStorage.getItem('efm_cursor_name') || 'You';
+    var userColor  = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
+    var selectedKey = null;
+
+    // main calendar and 3 mini slots, each {year, month}
+    function monthObj(y, m) { var d = new Date(y, m, 1); return { year: d.getFullYear(), month: d.getMonth() }; }
+    var main  = monthObj(todayYear, todayMonth);
+    var minis = [
+      monthObj(todayYear, todayMonth - 1),
+      monthObj(todayYear, todayMonth - 2),
+      monthObj(todayYear, todayMonth - 3)
+    ];
 
     (function () {
-      var c = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
-      var el = document.createElement('style');
-      el.textContent = '#content .msg-row.own .msg-bubble{background:' + c + '}';
-      document.head.appendChild(el);
+      var s = document.createElement('style');
+      s.id = '_uc';
+      s.textContent = '.msg-row.own .msg-bubble{background:' + userColor + '}';
+      document.head.appendChild(s);
     })();
+    window.addEventListener('efm_color_ready', function () {
+      userColor = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
+      document.getElementById('_uc').textContent = '.msg-row.own .msg-bubble{background:' + userColor + '}';
+    });
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function dateKey(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
 
     function fmtTime(iso) {
       var d = new Date(iso);
-      var h = d.getHours(), m = d.getMinutes();
-      return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + (h < 12 ? 'am' : 'pm');
+      var h = d.getHours(), mn = d.getMinutes();
+      return (h % 12 || 12) + ':' + (mn < 10 ? '0' : '') + mn + ' ' + (h < 12 ? 'am' : 'pm');
     }
 
-    function fmtDay(dateStr) {
-      var d = new Date(dateStr + 'T12:00:00');
-      var today = new Date().toISOString().slice(0, 10);
-      var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-      if (dateStr === today) return 'Today';
-      if (dateStr === yesterday) return 'Yesterday';
-      return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
-    }
+    function renderMainCal() {
+      document.getElementById('cal-month').textContent =
+        new Date(main.year, main.month, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
-    var days = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      if (k && k.startsWith('efm_chat_20')) {
-        var dateStr = k.replace('efm_chat_', '');
-        var msgs = JSON.parse(localStorage.getItem(k) || '[]');
-        if (msgs.length > 0) days.push({ date: dateStr, msgs: msgs });
+      var grid = document.getElementById('cal-grid');
+      grid.innerHTML = '';
+      var firstDay = new Date(main.year, main.month, 1).getDay();
+      var daysInMonth = new Date(main.year, main.month + 1, 0).getDate();
+
+      for (var i = 0; i < firstDay; i++) {
+        var b = document.createElement('div');
+        b.className = 'cal-day empty';
+        grid.appendChild(b);
+      }
+      for (var d = 1; d <= daysInMonth; d++) {
+        var key = dateKey(main.year, main.month, d);
+        var isToday = d === todayDate && main.month === todayMonth && main.year === todayYear;
+        var cell = document.createElement('div');
+        cell.className = 'cal-day' + (isToday ? ' today' : '') + (key === selectedKey ? ' selected' : '');
+        cell.textContent = d;
+        (function (y, m, dd) {
+          cell.addEventListener('click', function () { showDay(y, m, dd); });
+        })(main.year, main.month, d);
+        grid.appendChild(cell);
       }
     }
-    days.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
-    var content = document.getElementById('content');
+    function renderMiniBar() {
+      var bar = document.getElementById('mini-bar');
+      bar.innerHTML = '';
+      minis.forEach(function (mo, idx) {
+        var mFirst = new Date(mo.year, mo.month, 1).getDay();
+        var mDays  = new Date(mo.year, mo.month + 1, 0).getDate();
 
-    if (days.length === 0) {
-      content.innerHTML = '<div id="empty"><div class="big">📭</div><div>No history yet.</div><div>Messages are saved here for 30 days.</div></div>';
-    } else {
-      days.forEach(function(day) {
-        var section = document.createElement('div');
-        section.className = 'day-section';
+        var wrap = document.createElement('div');
+        wrap.className = 'mini-cal';
+
+        (function (i) {
+          wrap.addEventListener('click', function () { swapWithMain(i); });
+        })(idx);
 
         var label = document.createElement('div');
-        label.className = 'day-label';
-        label.textContent = fmtDay(day.date);
-        section.appendChild(label);
+        label.className = 'mini-cal-month';
+        label.textContent = new Date(mo.year, mo.month, 1).toLocaleDateString(undefined, { month: 'short' });
+        wrap.appendChild(label);
 
-        var msgsEl = document.createElement('div');
-        msgsEl.className = 'day-msgs';
+        var miniGrid = document.createElement('div');
+        miniGrid.className = 'mini-cal-grid';
 
-        day.msgs.forEach(function(msg) {
+        for (var bi = 0; bi < mFirst; bi++) {
+          var bl = document.createElement('div');
+          bl.className = 'mini-day empty';
+          miniGrid.appendChild(bl);
+        }
+        for (var md = 1; md <= mDays; md++) {
+          var mc = document.createElement('div');
+          mc.className = 'mini-day';
+          mc.textContent = md;
+          miniGrid.appendChild(mc);
+        }
+
+        wrap.appendChild(miniGrid);
+        bar.appendChild(wrap);
+      });
+    }
+
+    function swapWithMain(i) {
+      var temp = { year: main.year, month: main.month };
+      main = { year: minis[i].year, month: minis[i].month };
+      minis[i] = temp;
+      selectedKey = null;
+      document.getElementById('messages').innerHTML = '';
+      renderMainCal();
+      renderMiniBar();
+    }
+
+    function historyEdit(row, bubble, msg, storeKey) {
+      if (row.querySelector('.msg-edit-input')) return;
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'msg-edit-input';
+      input.value = msg.text;
+      var ownColor = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
+      input.style.cssText = 'width:100%;padding:9px 13px;border-radius:16px;border-bottom-right-radius:4px;border:none;outline:2px solid rgba(255,255,255,0.6);font-size:0.92rem;font-family:system-ui,sans-serif;box-sizing:border-box;background:' + ownColor + ';color:#fff;';
+      bubble.style.display = 'none';
+      bubble.parentNode.insertBefore(input, bubble);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+      function save() {
+        var newText = input.value.trim();
+        if (newText) {
+          msg.text = newText;
+          bubble.textContent = newText;
+          var stored = JSON.parse(localStorage.getItem(storeKey) || '[]');
+          for (var i = 0; i < stored.length; i++) {
+            if (stored[i].time === msg.time) { stored[i].text = newText; break; }
+          }
+          localStorage.setItem(storeKey, JSON.stringify(stored));
+        }
+        bubble.style.display = '';
+        input.remove();
+      }
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); save(); }
+        if (e.key === 'Escape') { bubble.style.display = ''; input.remove(); }
+      });
+      input.addEventListener('blur', save);
+    }
+
+    function historyDelete(row, msg, storeKey) {
+      var stored = JSON.parse(localStorage.getItem(storeKey) || '[]');
+      stored = stored.filter(function(m) { return m.time !== msg.time; });
+      localStorage.setItem(storeKey, JSON.stringify(stored));
+      row.remove();
+    }
+
+    function showDay(y, m, d) {
+      selectedKey = dateKey(y, m, d);
+      renderMainCal();
+      renderMiniBar();
+
+      var msgs = JSON.parse(localStorage.getItem('efm_chat_' + selectedKey) || '[]');
+      var container = document.getElementById('messages');
+      container.innerHTML = '';
+
+      var dateLabel = document.createElement('div');
+      dateLabel.id = 'msg-date-label';
+      dateLabel.textContent = new Date(y, m, d).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      container.appendChild(dateLabel);
+
+      if (msgs.length === 0) {
+        var empty = document.createElement('div');
+        empty.id = 'no-msgs';
+        empty.textContent = 'No messages on this day. Look somewhere else!';
+        container.appendChild(empty);
+      } else {
+        var storeKey = 'efm_chat_' + selectedKey;
+        msgs.forEach(function (msg) {
           var isOwn = msg.name === myName;
           var row = document.createElement('div');
           row.className = 'msg-row ' + (isOwn ? 'own' : 'other');
-
           if (!isOwn) {
             var nameEl = document.createElement('div');
             nameEl.className = 'msg-name';
             nameEl.textContent = msg.name;
             row.appendChild(nameEl);
           }
-
           var bubble = document.createElement('div');
           bubble.className = 'msg-bubble';
           bubble.textContent = msg.text;
+          if (isOwn) {
+            var actions = document.createElement('div');
+            actions.className = 'msg-actions';
+            var editBtn = document.createElement('button');
+            editBtn.className = 'msg-action-btn';
+            editBtn.textContent = 'Edit';
+            var delBtn = document.createElement('button');
+            delBtn.className = 'msg-action-btn del';
+            delBtn.textContent = 'Delete';
+            (function(r, b, m, sk) {
+              editBtn.addEventListener('click', function(e) { e.stopPropagation(); historyEdit(r, b, m, sk); });
+              delBtn.addEventListener('click', function(e) { e.stopPropagation(); historyDelete(r, m, sk); });
+            })(row, bubble, msg, storeKey);
+            actions.appendChild(editBtn);
+            actions.appendChild(delBtn);
+            row.appendChild(actions);
+          }
           row.appendChild(bubble);
-
           var time = document.createElement('div');
           time.className = 'msg-time';
           time.textContent = fmtTime(msg.time);
           row.appendChild(time);
-
-          msgsEl.appendChild(row);
+          container.appendChild(row);
         });
+      }
 
-        section.appendChild(msgsEl);
-        content.appendChild(section);
-      });
+      document.getElementById('divider').scrollIntoView({ behavior: 'smooth' });
     }
+
+    renderMainCal();
+    renderMiniBar();
   </script>
 
 <script src="cursors.js"></script>
