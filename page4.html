@@ -65,7 +65,7 @@
 </head>
 <body>
   <a href="index.html" style="position:fixed;top:12px;right:72px;z-index:100;"><img src="logo-white.png" style="height:40px;opacity:0.9;"></a>
-  <a href="page3c.html" style="display:block; color:#555; font-size:0.85rem; text-decoration:none; padding: 24px 24px 0;">← Back</a>
+  <a href="#" onclick="efmGoBack();return false;" style="display:block; color:#555; font-size:0.85rem; text-decoration:none; padding: 24px 24px 0;">← Back</a>
   <h1 style="font-family:system-ui,sans-serif; font-size:5rem; font-weight:800; color:#fff; text-align:left; padding-left:24px; margin-top:16px;">Addition</h1>
   <div style="padding: 20px 24px; padding-bottom: calc(120px + 2cm);">
 
@@ -100,7 +100,7 @@
       <br><br>
       3 - 2 = 1 &nbsp;&nbsp;&nbsp;&nbsp; 2 - 3 = (-1)
       <br><br>
-      You see? The differences are different. 1 &#8800; -1. Also note that I put parentheses around the -1 so you wouldn't get confused with the = and the -. Sometimes you kittens just get them mixed up and think it's part of the equation.
+      You see? The differences are different. 1 &#8800; -1. Also note that I put parentheses around the -1 so you wouldn't get confused with the = and the -. Sometimes you kittens just get them mixed up and think it's part of the equation. And you may not know about subtraction, multiplication, or division yet, but that's ok! You can always ignore these complicated things we're going to do yet, but all you've got to do is learn, understand, and remember the commutative and associative property, which is what we're doing now.
     </div>
     <div class="cont-wrap" id="cont-3" style="display:none">
       <button class="cont-btn" onclick="showSection(4)">Continue →</button>
@@ -214,11 +214,19 @@
 
       </div>
 
+      <!-- Third Factor: centered below wheel -->
+      <div style="text-align:center; margin-top:16px;">
+        <div style="display:inline-flex; align-items:center; gap:6px;">
+          <button id="retryBtn3" onclick="retrySpin()" style="display:none; background:#555; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.8rem; cursor:pointer;">&#8635;</button>
+          <div style="color:#ccc; font-size:1.05rem;">Third Factor<span id="spinResult3" style="display:none;"> = <span id="spinNumber3"></span></span></div>
+        </div>
+      </div>
+
       <div id="factorResult" style="display:none; color:#ccc; margin-top:28px; font-size:1.05rem; line-height:1.8;"></div>
 
-      <div id="coinsOffer" style="display:none; margin-top:28px; color:#ccc; font-size:1.05rem; line-height:1.8; position:relative; padding-bottom:70px;">
-        Nice Job! Keep going! Here's 25 coins to <span id="cheerWord">cheer</span> you on.
-        <button id="claimBtn" onclick="claimCoins()" style="position:absolute; white-space:nowrap; background:linear-gradient(135deg,#f5c518,#e6a800); color:#1a1000; border:none; border-radius:10px; padding:12px 28px; font-size:1rem; font-weight:700; cursor:pointer; box-shadow:0 3px 12px rgba(230,168,0,0.5); letter-spacing:0.03em;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:7px;"><rect x="2" y="10" width="20" height="12" rx="2" fill="#b8860b"/><rect x="2" y="10" width="20" height="5" rx="1" fill="#f5c518"/><rect x="8" y="7" width="8" height="5" rx="1" fill="#e6a800"/><rect x="10" y="13" width="4" height="4" rx="1" fill="#f5c518"/><path d="M2 12h20" stroke="#b8860b" stroke-width="1"/></svg>Claim my 25 coins</button>
+      <div id="coinsOffer" style="display:none; margin-top:28px; color:#ccc; font-size:1.05rem; line-height:1.8;">
+        Nice Job! Keep going! Here's 25 coins to cheer you on.
+        <button id="claimBtn" onclick="claimCoins()" style="display:block; margin-top:12px; white-space:nowrap; background:linear-gradient(135deg,#f5c518,#e6a800); color:#1a1000; border:none; border-radius:10px; padding:12px 28px; font-size:1rem; font-weight:700; cursor:pointer; box-shadow:0 3px 12px rgba(230,168,0,0.5); letter-spacing:0.03em;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:7px;"><rect x="2" y="10" width="20" height="12" rx="2" fill="#b8860b"/><rect x="2" y="10" width="20" height="5" rx="1" fill="#f5c518"/><rect x="8" y="7" width="8" height="5" rx="1" fill="#e6a800"/><rect x="10" y="13" width="4" height="4" rx="1" fill="#f5c518"/><path d="M2 12h20" stroke="#b8860b" stroke-width="1"/></svg>Claim my 25 coins</button>
       </div>
 
       <div id="flipNextWrap" style="display:none; margin-top:32px; display:none; text-align:right;">
@@ -241,7 +249,8 @@ if (!localStorage.getItem('efm_started')) {
 
 var spinCount=0;
 var spinAttempts=0;
-var MAX_SPINS=3;
+var MAX_SPINS=6;
+var allDone=false;
 
 function revealUpTo(n) {
   for (var i = 2; i <= n; i++) {
@@ -273,33 +282,19 @@ function disableWheel(){
   document.getElementById('spinWheel').style.cursor='default';
 }
 
-function positionClaimButton(){
-  var cw=document.getElementById('cheerWord');
-  var od=document.getElementById('coinsOffer');
-  var btn=document.getElementById('claimBtn');
-  if(!cw||!od||!btn)return;
-  var cr=cw.getBoundingClientRect();
-  var or=od.getBoundingClientRect();
-  btn.style.left=(cr.left-or.left+cr.width/2-btn.offsetWidth/2)+'px';
-  btn.style.top=(cr.bottom-or.top+10)+'px';
-}
-
-function showFactorResult(f1,f2){
-  var product=f1*f2;
+function showFactorResult(f1,f2,f3){
+  var product=f1*f2*f3;
   document.getElementById('factorResult').innerHTML=
-    'Okay! So, our factors are <strong>'+f1+'</strong> and <strong>'+f2+
-    '</strong>, so we just need to multiply them:<br><strong>'+f1+'</strong> x <strong>'+
-    f2+'</strong> = <strong>'+product+'</strong>';
+    'Okay! So, our factors are <strong>'+f1+'</strong>, <strong>'+f2+
+    '</strong>, and <strong>'+f3+'</strong>, so we just need to multiply them:<br><strong>'+f1+'</strong> x <strong>'+
+    f2+'</strong> x <strong>'+f3+'</strong> = <strong>'+product+'</strong>';
   document.getElementById('factorResult').style.display='block';
   document.getElementById('coinsOffer').style.display='block';
-  setTimeout(function(){
-    positionClaimButton();
-    if(localStorage.getItem('mathCoins')){
-      var cb=document.getElementById('claimBtn');
-      cb.style.background='#666';cb.style.boxShadow='none';cb.style.cursor='default';cb.onclick=null;
-      cb.innerHTML=cb.innerHTML.replace('Claim my','Claimed my');
-    }
-  }, 80);
+  if(localStorage.getItem('mathCoins')){
+    var cb=document.getElementById('claimBtn');
+    cb.style.background='#666';cb.style.boxShadow='none';cb.style.cursor='default';cb.onclick=null;
+    cb.innerHTML=cb.innerHTML.replace('Claim my','Claimed my');
+  }
   document.getElementById('factorResult').scrollIntoView({behavior:'smooth'});
 }
 
@@ -332,13 +327,14 @@ function showFactorResult(f1,f2){
   }
 
   canvas.addEventListener('click',function(){
-    if(spinning||spinAttempts>=MAX_SPINS)return;
+    if(spinning||allDone)return;
+    if(spinAttempts>=MAX_SPINS){disableWheel();return;}
     spinAttempts++;
     spinning=true;
     var bubble=document.getElementById('spinBubble');
     bubble.style.animation='none';bubble.style.display='none';
     var extra=TWO_PI*(15+Math.random()*10)+Math.random()*TWO_PI;
-    var dur=4000+Math.random()*1000;
+    var dur=(4000+Math.random()*1000)/3;
     var start=angle,t0=performance.now();
     function frame(t){
       var p=Math.min((t-t0)/dur,1);
@@ -363,16 +359,32 @@ function showFactorResult(f1,f2){
             document.getElementById('bubbleText').textContent='Spin Again!';
             b.style.display='';b.style.animation='bubblePop 0.85s ease-in-out infinite';
           }
-        } else {
+        } else if(spinCount===2){
           document.getElementById('spinNumber2').textContent=result;
           document.getElementById('spinResult2').style.display='inline';
+          document.getElementById('retryBtn2').style.display='inline-block';
+          localStorage.setItem('p4sc','2');
+          localStorage.setItem('p4f2',result);
+          if(spinAttempts>=MAX_SPINS){ disableWheel(); }
+          else{
+            var b=document.getElementById('spinBubble');
+            document.getElementById('bubbleText').innerHTML='Spin <i>Again!</i>';
+            b.style.display='';b.style.animation='bubblePop 0.85s ease-in-out infinite';
+          }
+        } else {
+          document.getElementById('spinNumber3').textContent=result;
+          document.getElementById('spinResult3').style.display='inline';
           document.getElementById('retryBtn').style.display='none';
           document.getElementById('retryBtn2').style.display='none';
           document.getElementById('spinBubble').style.display='none';
-          localStorage.setItem('p4sc','2');
-          localStorage.setItem('p4f2',result);
-          showFactorResult(parseInt(document.getElementById('spinNumber').textContent),result);
-          if(spinAttempts>=MAX_SPINS) disableWheel();
+          localStorage.setItem('p4sc','3');
+          localStorage.setItem('p4f3',result);
+          allDone=true;
+          showFactorResult(
+            parseInt(document.getElementById('spinNumber').textContent),
+            parseInt(document.getElementById('spinNumber2').textContent),
+            result
+          );
         }
       }
     }
@@ -397,10 +409,23 @@ function showFactorResult(f1,f2){
     var f2=localStorage.getItem('p4f2');
     document.getElementById('spinNumber2').textContent=f2;
     document.getElementById('spinResult2').style.display='inline';
+    document.getElementById('retryBtn2').style.display='inline-block';
+    if(sc===2){
+      var b=document.getElementById('spinBubble');
+      document.getElementById('bubbleText').innerHTML='Spin <i>Again!</i>';
+      b.style.display='';b.style.animation='bubblePop 0.85s ease-in-out infinite';
+    }
+  }
+  if(sc>=3){
+    var f3=localStorage.getItem('p4f3');
+    document.getElementById('spinNumber3').textContent=f3;
+    document.getElementById('spinResult3').style.display='inline';
     document.getElementById('retryBtn').style.display='none';
     document.getElementById('retryBtn2').style.display='none';
     document.getElementById('spinBubble').style.display='none';
-    showFactorResult(parseInt(localStorage.getItem('p4f1')),parseInt(f2));
+    allDone=true;
+    document.getElementById('spinWheel').style.cursor='default';
+    showFactorResult(parseInt(localStorage.getItem('p4f1')),parseInt(f2),parseInt(f3));
   }
 
   requestAnimationFrame(draw);
@@ -429,13 +454,17 @@ function claimCoins(){
 
 function retrySpin(){
   spinCount=0;
+  allDone=false;
   localStorage.removeItem('p4sc');
   localStorage.removeItem('p4f1');
   localStorage.removeItem('p4f2');
+  localStorage.removeItem('p4f3');
   document.getElementById('spinResult').style.display='none';
   document.getElementById('retryBtn').style.display='none';
   document.getElementById('spinResult2').style.display='none';
   document.getElementById('retryBtn2').style.display='none';
+  document.getElementById('spinResult3').style.display='none';
+  document.getElementById('retryBtn3').style.display='none';
   document.getElementById('factorResult').style.display='none';
   document.getElementById('coinsOffer').style.display='none';
   var cb=document.getElementById('claimBtn');
@@ -456,12 +485,11 @@ function retrySpin(){
 }
 </script>
 
-  <a href="notebook.html" style="position:fixed; bottom:32px; left:32px; z-index:500;">
+  <a href="notebook.html" style="position:fixed; bottom:32px; right:32px; z-index:500;">
     <button style="background:#60a5fa; color:#0f0f13; border:none; padding:4px 16px; font-size:0.8rem; font-weight:600; font-family:system-ui,sans-serif; border-radius:10px; cursor:pointer;">Go to Notes</button>
   </a>
-  <a href="toc.html" style="position:fixed; bottom:32px; right:32px; z-index:500;">
-    <button style="background:#60a5fa; color:#0f0f13; border:none; padding:4px 16px; font-size:0.8rem; font-weight:600; font-family:system-ui,sans-serif; border-radius:10px; cursor:pointer;">Back to Table of Contents</button>
-  </a>
 
+
+<script src="cursors.js"></script>
 </body>
 </html>

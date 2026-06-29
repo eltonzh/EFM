@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFM Group Chat</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f13;
+      height: 100dvh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    #chat-header {
+      background: #0f0f13;
+      border-top: 12px solid #0f0f13;
+      padding: 14px 18px 14px calc(18px + 0.5cm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    @media (min-width: 600px) {
+      #chat-header {
+        padding-top: 0;
+        padding-left: 0.5cm;
+        align-items: flex-start;
+      }
+      #chat-header .back,
+      #chat-header .dot,
+      #chat-header .title {
+        margin-top: 0;
+        padding-top: 0;
+      }
+    }
+    #chat-header .back {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      text-decoration: none;
+      margin-right: 4px;
+    }
+    #chat-header .back:hover { color: #fff; }
+    #chat-header .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #2a7a2a;
+      flex-shrink: 0;
+    }
+    #chat-header .title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+    #info-bar {
+      background: #c8e6c8;
+      border-bottom: 1px solid #a8cca8;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    #info-bar span {
+      font-size: 0.78rem;
+      color: #1e4a1e;
+      flex: 1;
+    }
+    #history-btn {
+      white-space: nowrap;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      background: #2a7a2a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    #history-btn:active { background: #1e5a1e; }
+    #msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+    }
+    #empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #2a5a2a;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      text-align: center;
+      gap: 8px;
+      padding: 32px;
+    }
+    #empty-state .big { font-size: 2rem; }
+    .msg-row { display: flex; flex-direction: column; max-width: 80%; }
+    .msg-row.own { align-self: flex-end; align-items: flex-end; }
+    .msg-row.other { align-self: flex-start; align-items: flex-start; }
+    .msg-name {
+      font-size: 0.72rem;
+      color: #2a5a2a;
+      margin-bottom: 3px;
+      padding: 0 4px;
+    }
+    .msg-bubble {
+      padding: 9px 13px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .msg-row.own .msg-bubble {
+      background: #2a7a2a;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-row.other .msg-bubble {
+      background: rgba(255,255,255,0.75);
+      color: #0f0f13;
+      border-bottom-left-radius: 4px;
+    }
+    .msg-time {
+      font-size: 0.68rem;
+      color: rgba(0,0,0,0.35);
+      margin-top: 3px;
+      padding: 0 4px;
+    }
+    #input-bar {
+      background: #fff;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding: 10px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    #msg-input {
+      flex: 1;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: 99px;
+      padding: 9px 15px;
+      font-size: 0.9rem;
+      font-family: system-ui, sans-serif;
+      outline: none;
+      background: #f7f7f7;
+    }
+    #msg-input:focus { border-color: #2a7a2a; background: #fff; }
+    #send-btn {
+      background: #2a7a2a;
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+    #send-btn:active { background: #1e5a1e; }
+  </style>
+</head>
+<body>
+
+  <div id="chat-header">
+    <a href="index.html" class="back">← Back</a>
+    <span class="title">EFM Group Chat</span>
+    <img src="logo-white.png" style="height:24px;opacity:0.85;margin-left:auto;">
+  </div>
+
+  <div id="info-bar">
+    <span>Resets Daily. Go to History if you want to see what's been up in the past month!</span>
+    <button id="history-btn" onclick="window.location.href='chat-history.html'">Go to Chat History</button>
+  </div>
+
+  <div id="msgs">
+    <div id="empty-state">
+      <div class="big">💬</div>
+      <div>No messages yet today.</div>
+      <div>Say something!</div>
+    </div>
+  </div>
+
+  <div id="input-bar">
+    <input id="msg-input" type="text" placeholder="Type a message..." maxlength="500" autocomplete="off" />
+    <button id="send-btn" onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    var myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+    var chatWs;
+
+    // All the named colors the user wants for other people's bubbles
+    var CHAT_COLORS = [
+      '#DC143C','#FF2400','#9B111E','#800020','#800000',
+      '#FF007F','#FF6B6B','#FA8072','#FF00FF','#DD77FF',
+      '#FFBF00','#F4C430','#F28500','#FFCBA4','#FBCEB1',
+      '#FFD700','#FFDB58','#FFFF99','#FFF44F','#FFFDD0',
+      '#50C878','#808000','#BCB88A','#98FF98','#00A86B',
+      '#32CD32','#228B22','#008080','#7FFF00','#AACC00',
+      '#0F52BA','#4B0082','#0047AB','#001F5B','#007BA7',
+      '#40E0D0','#967BB6','#C8A2C8','#9966CC','#DDA0DD',
+      '#483C32','#704214','#A0522D','#CC7722','#36454F',
+      '#708090','#FFFFF0','#F5F5DC','#555D50','#F2F0E6'
+    ];
+    var nameColorMap = {};
+    var chatColorIdx = 0;
+
+    function getNameColor(name) {
+      if (!nameColorMap[name]) {
+        nameColorMap[name] = CHAT_COLORS[chatColorIdx % CHAT_COLORS.length];
+        chatColorIdx++;
+      }
+      return nameColorMap[name];
+    }
+
+    function luminance(hex) {
+      if (!hex || hex[0] !== '#' || hex.length < 7) return 0.5;
+      var r = parseInt(hex.slice(1,3),16)/255;
+      var g = parseInt(hex.slice(3,5),16)/255;
+      var b = parseInt(hex.slice(5,7),16)/255;
+      return 0.299*r + 0.587*g + 0.114*b;
+    }
+
+    function applyUserColor() {
+      var c = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
+      myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+      var el = document.getElementById('_efm_color');
+      if (!el) { el = document.createElement('style'); el.id = '_efm_color'; document.head.appendChild(el); }
+      el.textContent = '#info-bar{background:' + c + ';border-bottom-color:' + c + '} #info-bar span{color:#fff} #input-bar{background:' + c + '} #msg-input{background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.4);color:#fff} #msg-input::placeholder{color:rgba(255,255,255,0.7)} #msg-input:focus{background:rgba(255,255,255,0.35);border-color:#fff} #send-btn{background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5)} #send-btn:active{filter:brightness(0.85)}';
+    }
+    applyUserColor();
+    window.addEventListener('efm_color_ready', applyUserColor);
+
+    function fmtTime(iso) {
+      var d = new Date(iso);
+      var h = d.getHours(), m = d.getMinutes();
+      return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + (h < 12 ? 'am' : 'pm');
+    }
+
+    function renderMessage(msg) {
+      var empty = document.getElementById('empty-state');
+      if (empty) empty.remove();
+      var isOwn = msg.name === myName;
+      var bgColor = isOwn
+        ? (localStorage.getItem('efm_cursor_color') || '#2a7a2a')
+        : getNameColor(msg.name);
+      var row = document.createElement('div');
+      row.className = 'msg-row ' + (isOwn ? 'own' : 'other');
+      if (!isOwn) {
+        var nameEl = document.createElement('div');
+        nameEl.className = 'msg-name';
+        nameEl.textContent = msg.name;
+        nameEl.style.color = bgColor;
+        row.appendChild(nameEl);
+      }
+      var bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.textContent = msg.text;
+      bubble.style.background = bgColor;
+      bubble.style.color = luminance(bgColor) > 0.55 ? '#111' : '#fff';
+
+      row.appendChild(bubble);
+      var time = document.createElement('div');
+      time.className = 'msg-time';
+      time.textContent = fmtTime(msg.time);
+      row.appendChild(time);
+      document.getElementById('msgs').appendChild(row);
+      row.scrollIntoView({ block: 'end' });
+    }
+
+    function connectChat() {
+      try { chatWs = new WebSocket('ws://localhost:8081'); } catch(e) { return; }
+      chatWs.onopen = function() {
+        myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+        chatWs.send(JSON.stringify({ type: 'chat_join', name: myName }));
+      };
+      chatWs.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        if (data.type === 'chat_history') {
+          var msgsEl = document.getElementById('msgs');
+          msgsEl.innerHTML = '<div id="empty-state"><div class="big">💬</div><div>No messages yet today.</div><div>Say something!</div></div>';
+          data.messages.forEach(renderMessage);
+        } else if (data.type === 'chat') {
+          renderMessage(data);
+        }
+      };
+      chatWs.onclose = function() { setTimeout(connectChat, 3000); };
+    }
+
+    function sendMessage() {
+      var input = document.getElementById('msg-input');
+      var text = input.value.trim();
+      if (!text) return;
+      if (!chatWs || chatWs.readyState !== 1) return;
+      myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+      chatWs.send(JSON.stringify({ type: 'chat', name: myName, text: text, time: new Date().toISOString() }));
+      input.value = '';
+      input.focus();
+    }
+
+    document.getElementById('msg-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    connectChat();
+  </script>
+
+<script src="cursors.js"></script>
+</body>
+</html>

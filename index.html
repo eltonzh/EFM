@@ -62,26 +62,6 @@
       50%      { transform: translate(-50%, calc(-50% - 18px)); }
     }
 
-    #reset-btn {
-      display: none;
-      position: fixed;
-      left: calc(50% - 40vw + 4px);
-      bottom: calc(8vh + 4px);
-      top: auto;
-      z-index: 10;
-      padding: 0;
-      font-size: 0.9rem;
-      font-family: system-ui, sans-serif;
-      background: none;
-      color: rgba(0,0,0,0.45);
-      border: none;
-      cursor: pointer;
-      text-decoration: underline;
-      letter-spacing: 0.03em;
-    }
-    @media (min-width: 901px) {
-      #reset-btn { left: 24px; bottom: auto; top: calc(5vh + 3cm); }
-    }
   </style>
 </head>
 <body>
@@ -206,36 +186,27 @@
   <div id="bottom-nav" style="position:fixed; bottom:8vh; left:50%; transform:translateX(-50%); width:80vw;">
     <div style="position:relative; display:inline-block; width:100%;">
       <div style="position:absolute; top:-36px; left:0; z-index:10;">
-        <a href="indexpage.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer;">Index</button></a>
+        <button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#c0392b; color:#fff; border:none; border-radius:8px; cursor:pointer;" onclick="resetProgress()">Reset Progress</button>
       </div>
       <div style="position:absolute; top:-40px; left:50%; transform:translateX(-50%); z-index:10;">
         <a href="index.html"><img src="logo-transparent.png" style="height:32px; opacity:0.85;"></a>
       </div>
       <div style="position:absolute; top:-36px; right:0;">
-        <a href="toc.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer;">Table of Contents</button></a>
+        <a href="group-chat.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#2a7a2a; color:#fff; border:none; border-radius:8px; cursor:pointer;">EFM Group Chat</button></a>
       </div>
-      <a href="page2.html">
+      <a href="efm_version_k.html">
         <button style="width:100%; margin-bottom: 10px; padding:15px 0;font-size:1.4rem;font-weight:700;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.05em;">Let's Get Started!</button>
       </a>
-      <div style="text-align:center;">
-        <a href="inventory.html">
-          <button style="display:inline-block; padding:3px 0; padding-left:1mm; font-size:0.95rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:6px; cursor:pointer; letter-spacing:0.05em; width:auto; min-width:0; white-space:nowrap;">Your Inventory💰</button>
-        </a>
-      </div>
     </div>
   </div>
 
 
-  <button id="reset-btn" onclick="resetProgress()">Reset Progress</button>
-
   <script>
-    if (localStorage.getItem('efm_started')) {
-      document.getElementById('reset-btn').style.display = 'block';
-    }
     function resetProgress() {
-      ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress'].forEach(function(k){ localStorage.removeItem(k); });
-      document.getElementById('reset-btn').style.display = 'none';
+      ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color'].forEach(function(k){ localStorage.removeItem(k); });
+      window.location.reload();
     }
   </script>
+<script src="cursors.js"></script>
 </body>
 </html>

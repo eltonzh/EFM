@@ -42,38 +42,15 @@
     }
 
 
-    body.is-fullscreen #card4 {
-      top: 20px !important;
-      left: calc(69px + 112vh + 48px) !important;
-    }
-    body.is-fullscreen #card5 {
-      top: 20px !important;
-      left: calc(69px + 140vh + 64px) !important;
-    }
-    body.is-fullscreen #card6 {
-      top: 20px !important;
-      left: calc(69px + 168vh + 80px) !important;
-    }
   </style>
 </head>
 <body>
 
-  <a href="index.html" style="position:fixed;top:14px;left:18px;z-index:100;color:#000;font-size:0.82rem;text-decoration:none;font-family:system-ui,sans-serif;">← Back</a>
+  <a href="#" onclick="efmGoBack();return false;" style="position:fixed;top:14px;left:18px;z-index:100;color:#000;font-size:0.82rem;text-decoration:none;font-family:system-ui,sans-serif;">← Back</a>
 
-  <div id="dbg" style="position:fixed;bottom:8px;right:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:11px;padding:6px 10px;border-radius:6px;z-index:9999;font-family:monospace;"></div>
-  <script>
-    setInterval(function(){
-      var el = document.getElementById('dbg');
-      el.textContent =
-        'outerH=' + window.outerHeight +
-        '  screenH=' + screen.height +
-        '  ratio=' + (window.outerHeight/screen.height).toFixed(3) +
-        '  class=' + document.body.classList.contains('is-fullscreen');
-    }, 300);
-  </script>
 
   <div style="position:absolute;top:20px;left:calc(69px + 28vh);">
-    <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
+    <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg id="coin-svg" viewBox="-35 -40 230 285" overflow="visible" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -166,26 +143,81 @@
   </div>
 
   <div style="position:absolute;top:20px;left:calc(69px + 56vh + 16px);">
-    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
-      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
-          <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>
-          <circle cx="50" cy="83" r="10" fill="#e5e7eb"/>
-          <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
+    <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
+      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg id="coin-svg-2" viewBox="-35 -40 230 285" overflow="visible" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="glow-grad-2" cx="80" cy="100" r="140" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stop-color="#fff7a0" stop-opacity="0.95"/>
+              <stop offset="18%"  stop-color="#FFE97A" stop-opacity="0.85"/>
+              <stop offset="50%"  stop-color="#FFD700" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="80" cy="100" r="140" fill="url(#glow-grad-2)"/>
+          <g id="shine-rays-2"></g>
+          <g id="corona-rings-2"></g>
+          <ellipse cx="80" cy="200" rx="75" ry="11" fill="rgba(0,0,0,0.18)"/>
+          <ellipse cx="14"  cy="191" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="14"  cy="186" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="14"  cy="186" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="48"  cy="194" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="48"  cy="189" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="48"  cy="189" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="28"  cy="183" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="28"  cy="178" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="28"  cy="178" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="62"  cy="188" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="62"  cy="183" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="62"  cy="183" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="97"  cy="192" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="97"  cy="187" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="97"  cy="187" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="75"  cy="186" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="75"  cy="181" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="75"  cy="181" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="115" cy="190" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="115" cy="185" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="115" cy="185" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="132" cy="183" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="132" cy="178" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="132" cy="178" rx="13" ry="5" fill="#FFE97A"/>
+          <ellipse cx="150" cy="188" rx="20" ry="8" fill="#a86400"/>
+          <ellipse cx="150" cy="183" rx="20" ry="8" fill="#FFD700"/>
+          <ellipse cx="150" cy="183" rx="13" ry="5" fill="#FFE97A"/>
+          <rect x="16" y="105" width="38" height="65" rx="3" fill="#a86400"/>
+          <ellipse cx="35" cy="105" rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="35" cy="96"  rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="35" cy="87"  rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="35" cy="78"  rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="35" cy="78"  rx="12" ry="5" fill="#FFE97A"/>
+          <rect x="106" y="112" width="38" height="58" rx="3" fill="#a86400"/>
+          <ellipse cx="125" cy="112" rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="125" cy="103" rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="125" cy="94"  rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="125" cy="85"  rx="19" ry="8" fill="#FFD700"/>
+          <ellipse cx="125" cy="85"  rx="12" ry="5" fill="#FFE97A"/>
+          <rect x="58" y="55" width="44" height="115" rx="3" fill="#a86400"/>
+          <ellipse cx="80" cy="55"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="46"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="37"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="28"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="19"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="10"  rx="22" ry="9" fill="#FFD700"/>
+          <ellipse cx="80" cy="10"  rx="14" ry="6" fill="#FFE97A"/>
         </svg>
       </div>
-      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;">
-        <div style="flex:1"></div>
-        <div style="font-size:1rem;font-weight:600;">Cash | Locked</div>
-        <div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 25 coins to unlock this item and read Fun Math Break Comics!</div>
-        <div style="flex:1"></div>
+      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:8px 12px;font-family:system-ui,sans-serif;color:#0f0f13;">
+        <div style="font-size:1.15rem;font-weight:700;">Coins</div>
+        <div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Use coins to continue your math course!</div>
+        <div id="coinAmount2" style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: None</div>
+        <script>var c2=localStorage.getItem('mathCoins');if(c2)document.getElementById('coinAmount2').textContent='Amount: '+c2;</script>
       </div>
     </div>
   </div>
 
   <div style="position:absolute;top:20px;left:calc(69px + 84vh + 32px);">
-    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
+    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
           <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
@@ -194,7 +226,7 @@
           <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
         </svg>
       </div>
-      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;">
+      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;overflow:hidden;">
         <div style="flex:1"></div>
         <div style="font-size:1rem;font-weight:600;">Gold Pebbles | Locked</div>
         <div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 25 cash to unlock this item and play some games!</div>
@@ -203,7 +235,7 @@
     </div>
   </div>
 
-  <div id="card4" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 28vh);">
+  <div id="card7" style="display:none;position:absolute;top:20px;left:calc(69px + 112vh + 48px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -216,7 +248,7 @@
     </div>
   </div>
 
-  <div id="card5" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 56vh + 16px);">
+  <div id="card8" style="display:none;position:absolute;top:20px;left:calc(69px + 140vh + 64px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -229,7 +261,46 @@
     </div>
   </div>
 
-  <div id="card6" style="position:absolute;top:calc(20px + 64vw + 16px);left:calc(69px + 84vh + 32px);">
+  <div id="card9" style="display:none;position:absolute;top:20px;left:calc(69px + 168vh + 80px);">
+    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
+      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
+          <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>
+          <circle cx="50" cy="83" r="10" fill="#e5e7eb"/>
+          <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="card10" style="display:none;position:absolute;top:20px;left:calc(69px + 196vh + 96px);">
+    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
+      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
+          <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>
+          <circle cx="50" cy="83" r="10" fill="#e5e7eb"/>
+          <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="card11" style="display:none;position:absolute;top:20px;left:calc(69px + 224vh + 112px);">
+    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
+      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
+          <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>
+          <circle cx="50" cy="83" r="10" fill="#e5e7eb"/>
+          <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="card12" style="display:none;position:absolute;top:20px;left:calc(69px + 252vh + 128px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
       <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
@@ -257,22 +328,23 @@
       var NS = 'http://www.w3.org/2000/svg';
 
       // 180 straight rays
-      var g = document.getElementById('shine-rays');
-      for (var angle = 0; angle < 360; angle += 2) {
-        var rad = angle * Math.PI / 180;
-        var dx = Math.sin(rad);
-        var dy = -Math.cos(rad);
-        var line = document.createElementNS(NS, 'line');
-        line.setAttribute('x1', cx);
-        line.setAttribute('y1', cy);
-        line.setAttribute('x2', (cx + 5000 * dx).toFixed(2));
-        line.setAttribute('y2', (cy + 5000 * dy).toFixed(2));
-        line.setAttribute('stroke', '#FFE97A');
-        line.setAttribute('stroke-width', '1.8');
-        line.setAttribute('stroke-linecap', 'round');
-        line.setAttribute('opacity', '0.85');
-        g.appendChild(line);
-      }
+      [document.getElementById('shine-rays'), document.getElementById('shine-rays-2')].forEach(function(g) {
+        for (var angle = 0; angle < 360; angle += 2) {
+          var rad = angle * Math.PI / 180;
+          var dx = Math.sin(rad);
+          var dy = -Math.cos(rad);
+          var line = document.createElementNS(NS, 'line');
+          line.setAttribute('x1', cx);
+          line.setAttribute('y1', cy);
+          line.setAttribute('x2', (cx + 5000 * dx).toFixed(2));
+          line.setAttribute('y2', (cy + 5000 * dy).toFixed(2));
+          line.setAttribute('stroke', '#FFE97A');
+          line.setAttribute('stroke-width', '1.8');
+          line.setAttribute('stroke-linecap', 'round');
+          line.setAttribute('opacity', '0.85');
+          g.appendChild(line);
+        }
+      });
 
       // Wavy corona rings
       function wavyRingPath(r, amp, waves) {
@@ -288,21 +360,22 @@
         return d + 'Z';
       }
 
-      var rings = document.getElementById('corona-rings');
-      [
-        {r: 38,  amp: 4, waves: 7,  op: 0.9, w: 3.5},
-        {r: 60,  amp: 5, waves: 9,  op: 0.75, w: 3.0},
-        {r: 85,  amp: 6, waves: 11, op: 0.6,  w: 2.5},
-        {r: 110, amp: 7, waves: 13, op: 0.45, w: 2.0},
-        {r: 135, amp: 8, waves: 15, op: 0.3,  w: 1.5},
-      ].forEach(function(cfg) {
-        var path = document.createElementNS(NS, 'path');
-        path.setAttribute('d', wavyRingPath(cfg.r, cfg.amp, cfg.waves));
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#FFD700');
-        path.setAttribute('stroke-width', cfg.w);
-        path.setAttribute('opacity', cfg.op);
-        rings.appendChild(path);
+      [document.getElementById('corona-rings'), document.getElementById('corona-rings-2')].forEach(function(rings) {
+        [
+          {r: 38,  amp: 4, waves: 7,  op: 0.9, w: 3.5},
+          {r: 60,  amp: 5, waves: 9,  op: 0.75, w: 3.0},
+          {r: 85,  amp: 6, waves: 11, op: 0.6,  w: 2.5},
+          {r: 110, amp: 7, waves: 13, op: 0.45, w: 2.0},
+          {r: 135, amp: 8, waves: 15, op: 0.3,  w: 1.5},
+        ].forEach(function(cfg) {
+          var path = document.createElementNS(NS, 'path');
+          path.setAttribute('d', wavyRingPath(cfg.r, cfg.amp, cfg.waves));
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', '#FFD700');
+          path.setAttribute('stroke-width', cfg.w);
+          path.setAttribute('opacity', cfg.op);
+          rings.appendChild(path);
+        });
       });
     })();
   </script>
@@ -360,24 +433,8 @@
     });
   </script>
 
-  <script>
-    var fsTimer;
-    function checkFullscreen() {
-      var isFull = window.outerHeight >= screen.height * 0.97 ||
-                   !!document.fullscreenElement ||
-                   !!document.webkitFullscreenElement;
-      document.body.classList.toggle('is-fullscreen', isFull);
-    }
-    checkFullscreen();
-    window.addEventListener('resize', function() {
-      checkFullscreen();
-      clearTimeout(fsTimer);
-      fsTimer = setTimeout(checkFullscreen, 650);
-    });
-    document.addEventListener('fullscreenchange', checkFullscreen);
-    document.addEventListener('webkitfullscreenchange', checkFullscreen);
-  </script>
 
 
+<script src="cursors.js"></script>
 </body>
 </html>

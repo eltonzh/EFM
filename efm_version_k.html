@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elton's Fun Math — Chapters</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><style>text{fill:%23000}@media(prefers-color-scheme:dark){text{fill:%23fff}}</style><text x='32' y='50' font-size='52' font-family='system-ui,sans-serif' font-weight='800' text-anchor='middle'>&#x3A3;</text></svg>">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+  background: #0d1f3c;
+  display: flex; flex-direction: column;
+  z-index: 10;
+  box-shadow: inset -4px 0 20px rgba(59,130,246,0.25), inset 0 0 40px rgba(29,78,216,0.15);
+  overflow: hidden;
+}
+.logo {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  background: #000;
+}
+.logo-name { font-size: 15px; font-weight: 600; color: #fff; text-shadow: none; }
+.logo-sub  { font-size: 11px; color: #ff8c00; margin-top: 3px; }
+@media (prefers-color-scheme: dark) {
+  .logo { background: #fff; }
+  .logo-name { color: #000; }
+}
+
+/* Home link */
+.home-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255,140,0,0.08);
+  border-bottom: 1px solid rgba(255,140,0,0.2);
+  text-decoration: none;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.home-link:hover { background: rgba(255,140,0,0.18); }
+.home-link-icon { font-size: 14px; }
+.home-link-text { font-size: 11px; font-weight: 500; color: #ff8c00; }
+
+.nav-label {
+  font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 8px 16px 4px; flex-shrink: 0;
+}
+.nav-scroll { overflow-y: auto; flex: 1; padding: 4px 0; }
+.nav-scroll::-webkit-scrollbar { width: 4px; }
+.nav-scroll::-webkit-scrollbar-track { background: #0d1f3c; }
+.nav-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.5); border-radius: 4px; box-shadow: 0 0 6px rgba(59,130,246,0.5); }
+
+.ch-btn {
+  width: 100%; background: none; border: none;
+  padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+  cursor: pointer; text-align: left; font-family: inherit;
+  transition: background 0.15s;
+}
+.ch-btn:hover { background: rgba(59,130,246,0.12); }
+.ch-btn.active { background: rgba(255,140,0,0.12); }
+.ch-num {
+  width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600;
+  background: rgba(29,78,216,0.6); color: #93c5fd;
+  box-shadow: 0 0 8px rgba(59,130,246,0.5), inset 0 0 4px rgba(147,197,253,0.2);
+  transition: all 0.15s;
+}
+.ch-btn.active .ch-num { background: #ff8c00; color: #fff; box-shadow: 0 0 8px rgba(255,140,0,0.6); }
+.ch-label { font-size: 11px; font-weight: 500; color: #bfdbfe; line-height: 1.3; flex: 1; }
+.ch-arrow { font-size: 10px; color: rgba(59,130,246,0.6); transition: transform 0.2s; flex-shrink: 0; }
+.ch-btn.open .ch-arrow { transform: rotate(90deg); }
+.sec-list { display: none; background: rgba(0,0,0,0.25); border-left: 2px solid rgba(59,130,246,0.2); margin-left: 16px; }
+.sec-list.open { display: block; }
+.sec-link {
+  display: block; padding: 6px 16px 6px 30px;
+  font-size: 10px; color: #7db4e8;
+  border-left: 2px solid transparent;
+  transition: color 0.12s, border-color 0.12s, background 0.12s; cursor: pointer;
+}
+.sec-link:hover { color: #ff8c00; border-left-color: #ff8c00; background: rgba(255,140,0,0.08); }
+.sec-link.active { color: #ff8c00; border-left-color: #ff8c00; }
+.sec-num { color: rgba(59,130,246,0.7); margin-right: 6px; font-size: 9px; }
+
+/* ── MAIN ── */
+.main {
+  margin-left: 240px; min-height: 100vh;
+  background: #d6e8d6;
+  display: flex; flex-direction: column;
+}
+.topbar {
+  background: #1e3a5f; padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 5;
+  border-bottom: 2px solid #ff8c00;
+  box-shadow: 0 2px 16px rgba(30,58,95,0.35);
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-home {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #ff8c00; font-weight: 500;
+  text-decoration: none; padding: 4px 10px;
+  border: 1px solid rgba(255,140,0,0.3);
+  border-radius: 6px; background: rgba(255,140,0,0.08);
+  transition: background 0.15s;
+}
+.topbar-home:hover { background: rgba(255,140,0,0.2); }
+.topbar-divider { color: rgba(255,255,255,0.2); font-size: 14px; }
+.topbar-title { font-size: 14px; color: #bfdbfe; font-weight: 500; }
+.topbar-badge {
+  font-size: 11px; background: #ff8c00; color: #fff;
+  border-radius: 20px; padding: 3px 14px; font-weight: 600;
+  box-shadow: 0 0 8px rgba(255,140,0,0.35);
+}
+
+.content { flex: 1; padding: 24px; }
+
+/* Hero */
+.hero-row { display: flex; gap: 12px; margin-bottom: 20px; }
+.hero {
+  flex: 1;
+  background: #1e3a5f; border-radius: 12px; padding: 28px;
+  border: 1px solid rgba(59,130,246,0.3);
+  box-shadow: 0 4px 24px rgba(30,58,95,0.25);
+}
+.hero h1 { font-size: 24px; font-weight: 600; color: #e0f2fe; margin-bottom: 6px; }
+.hero-orange { font-size: 12px; color: #ff8c00; margin-bottom: 6px; }
+.hero-sub { font-size: 11px; color: #7db4e8; line-height: 1.7; }
+.begin-box {
+  background: #1e3a5f; border-radius: 8px; padding: 10px 12px;
+  border: 1px solid rgba(59,130,246,0.3);
+  box-shadow: 0 2px 10px rgba(30,58,95,0.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 0; width: fit-content; cursor: pointer; text-decoration: none;
+  transition: border-color 0.15s;
+}
+.begin-box:hover { border-color: #ff8c00; }
+.begin-box-title { font-size: 9px; color: #7db4e8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 7px; text-align: center; }
+.begin-box-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; }
+.begin-op { font-size: 16px; font-weight: 800; text-align: center; line-height: 1; }
+
+/* fullscreen: begin-box inside hero, below subtitle */
+.begin-box-inside { display: none; margin-top: 16px; align-self: flex-start; }
+.begin-box-outside { display: flex; }
+@media (min-width: 600px) {
+  .begin-box-inside  { display: flex; }
+  .begin-box-outside { display: none; }
+  .hero { display: flex; flex-direction: column; }
+}
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.stat { background: #fff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 16px; border-top: 3px solid #1e3a8a; }
+.stat-num { font-size: 22px; font-weight: 600; color: #1e3a5f; }
+.stat-label { font-size: 10px; color: #6b7280; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Chapter grid */
+.section-label {
+  font-size: 11px; font-weight: 600; color: #1e3a5f;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid #bae6fd;
+}
+.cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.card {
+  background: #fff; border: 1.5px solid #93c5fd;
+  border-radius: 10px; padding: 14px; cursor: pointer;
+  transition: all 0.15s; border-top: 3px solid #60a5fa;
+}
+.card:hover { border-color: #ff8c00; border-top-color: #ff8c00; box-shadow: 0 4px 16px rgba(30,58,95,0.12); transform: translateY(-2px); }
+.card-num { font-size: 10px; color: #3b82f6; margin-bottom: 4px; font-weight: 600; }
+.card-title { font-size: 12px; font-weight: 600; color: #1e3a5f; line-height: 1.3; margin-bottom: 4px; }
+.card-count { font-size: 10px; color: #6b7280; }
+
+/* Lesson */
+.lesson-view { display: none; }
+.lesson-view.active { display: block; }
+.lesson-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #bae6fd; }
+.lesson-header h2 { font-size: 18px; font-weight: 600; color: #1e3a5f; margin-bottom: 4px; }
+.lesson-header p { font-size: 11px; color: #6b7280; }
+.lesson-body {
+  background: #fff; border: 1px solid #93c5fd;
+  border-left: 4px solid #3b82f6;
+  border-radius: 10px; padding: 20px;
+  font-size: 13px; color: #374151; line-height: 1.9;
+}
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #1e3a5f; background: #e0f2fe;
+  border: 1px solid #bae6fd; border-radius: 8px;
+  cursor: pointer; font-family: inherit;
+  margin-bottom: 16px; padding: 6px 14px;
+  transition: background 0.15s;
+}
+.back-btn:hover { background: #bae6fd; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-name">EFM</div>
+    <div class="logo-sub">Elton's Fun Math</div>
+  </div>
+  <a class="home-link" href="#" onclick="efmGoBack();return false;">
+    <span class="home-link-icon">🏠</span>
+    <span class="home-link-text">← Back to Home</span>
+  </a>
+  <div class="nav-label">Chapters</div>
+  <div class="nav-scroll" id="navScroll"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-home" href="index.html">🏠 Home</a>
+      <span class="topbar-divider">|</span>
+      <span class="topbar-title" id="topbarTitle">Welcome</span>
+    </div>
+    <div class="topbar-badge" id="topbarBadge">15 Chapters</div>
+  </div>
+
+  <div class="content">
+    <div id="homeView">
+      <div class="hero-row">
+        <div class="hero">
+          <h1>Welcome to Elton's Fun Math!</h1>
+          <div class="hero-sub">Choose a chapter from the left panel or click on a box below to start learning. If you're not familiar with addition, subtraction, multiplication, and division, you can just begin from there!</div>
+          <a href="page3.html" class="begin-box begin-box-inside">
+            <div class="begin-box-title">Begin From</div>
+            <div class="begin-box-ops">
+              <div class="begin-op" style="color:#3b82f6">+</div>
+              <div class="begin-op" style="color:#ff8c00">−</div>
+              <div class="begin-op" style="color:#22c55e">×</div>
+              <div class="begin-op" style="color:#a855f7">÷</div>
+            </div>
+          </a>
+        </div>
+        <a href="page3.html" class="begin-box begin-box-outside">
+          <div class="begin-box-title">Begin From</div>
+          <div class="begin-box-ops">
+            <div class="begin-op" style="color:#3b82f6">+</div>
+            <div class="begin-op" style="color:#ff8c00">−</div>
+            <div class="begin-op" style="color:#22c55e">×</div>
+            <div class="begin-op" style="color:#a855f7">÷</div>
+          </div>
+        </a>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num">15</div><div class="stat-label">Chapters</div></div>
+        <div class="stat"><div class="stat-num">97</div><div class="stat-label">Sections</div></div>
+        <div class="stat"><div class="stat-num">Free</div><div class="stat-label">Always</div></div>
+      </div>
+      <div class="section-label">All Chapters</div>
+      <div class="cards" id="chapterCards"></div>
+    </div>
+    <div class="lesson-view" id="lessonView">
+      <button class="back-btn" id="backBtn">← Back to all chapters</button>
+      <div class="lesson-header">
+        <h2 id="lessonTitle"></h2>
+        <p id="lessonSub"></p>
+      </div>
+      <div class="lesson-body" id="lessonBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  { num:1,  title:'Properties of Arithmetic',          secs:['Why Start with Arithmetic?','Addition','Multiplication','Negation','Subtraction','Reciprocals','Division','Summary'] },
+  { num:2,  title:'Exponents',                          secs:['Squares','Higher Exponents','Zero as an Exponent','Negative Exponents','Summary'] },
+  { num:3,  title:'Number Theory',                      secs:['Multiples','Divisibility Tests','Prime Numbers','Prime Factorization','Least Common Multiple','Divisors','Greatest Common Divisor','Summary'] },
+  { num:4,  title:'Fractions',                          secs:['What is a Fraction?','Multiplying Fractions','Dividing by a Fraction','Raising Fractions to Powers','Simplest Form of a Fraction','Comparing Fractions','Adding and Subtracting Fractions','Mixed Numbers','Summary'] },
+  { num:5,  title:'Equations and Inequalities',         secs:['Expressions','Solving Linear Equations I','Solving Linear Equations II','Word Problems','Inequalities','Summary'] },
+  { num:6,  title:'Decimals',                           secs:['Arithmetic with Decimals','Rounding','Decimals and Fractions','Repeating Decimals','Summary'] },
+  { num:7,  title:'Ratios, Conversions, and Rates',     secs:['What is a Ratio?','Multi-way Ratios','Proportions','Conversions','Speed','Other Rates','Summary'] },
+  { num:8,  title:'Percents',                           secs:['What is a Percent?','Word Problems','Percent Increase and Decrease','Summary'] },
+  { num:9,  title:'Square Roots',                       secs:['From Squares to Square Roots','Square Roots of Non-square Integers','Arithmetic with Square Roots','Summary'] },
+  { num:10, title:'Angles',                             secs:['Measuring Angles','Parallel Lines','Angles in Polygons','Summary'] },
+  { num:11, title:'Perimeter and Area',                 secs:['Measuring Segments','Area','Circles','Summary'] },
+  { num:12, title:'Right Triangles and Quadrilaterals', secs:['The Pythagorean Theorem','Some Special Triangles','Types of Quadrilaterals','Summary'] },
+  { num:13, title:'Data and Statistics',                secs:['Basic Statistics','Limits of Basic Statistics','Tables, Graphs, and Charts','Summary'] },
+  { num:14, title:'Counting',                           secs:['Counting with Addition and Subtraction','The Multiplication Principle','Casework','Counting Pairs','Probability','Summary'] },
+  { num:15, title:'Problem-Solving Strategies',         secs:['Find a Pattern','Make a List','Draw a Picture','Work Backwards'] },
+];
+
+const navScroll=document.getElementById('navScroll');
+const chapterCards=document.getElementById('chapterCards');
+const homeView=document.getElementById('homeView');
+const lessonView=document.getElementById('lessonView');
+const lessonTitle=document.getElementById('lessonTitle');
+const lessonSub=document.getElementById('lessonSub');
+const lessonBody=document.getElementById('lessonBody');
+const topbarTitle=document.getElementById('topbarTitle');
+const topbarBadge=document.getElementById('topbarBadge');
+const backBtn=document.getElementById('backBtn');
+
+function showLesson(ch,i){
+  const sec=ch.secs[i];
+  lessonTitle.textContent=`${ch.num}.${i+1} — ${sec}`;
+  lessonSub.textContent=`Chapter ${ch.num}: ${ch.title}`;
+  lessonBody.textContent=`This is where the lesson content for "${sec}" will appear. Students can read explanations, work through examples, and practice problems right here on the EFM website.`;
+  topbarTitle.textContent=`Ch.${ch.num} › ${sec}`;
+  topbarBadge.textContent=`Chapter ${ch.num}`;
+  homeView.style.display='none';
+  lessonView.classList.add('active');
+  document.querySelectorAll('.sec-link').forEach(l=>l.classList.remove('active'));
+  const t=document.querySelector(`[data-ch="${ch.num}"][data-sec="${i}"]`);
+  if(t)t.classList.add('active');
+}
+
+backBtn.addEventListener('click',()=>{
+  homeView.style.display='block';
+  lessonView.classList.remove('active');
+  topbarTitle.textContent='Welcome';
+  topbarBadge.textContent='15 Chapters';
+  document.querySelectorAll('.sec-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+});
+
+chapters.forEach(ch=>{
+  const btn=document.createElement('button');
+  btn.className='ch-btn';
+  btn.innerHTML=`<span class="ch-num">${ch.num}</span><span class="ch-label">${ch.title}</span><span class="ch-arrow">▶</span>`;
+  const list=document.createElement('div');
+  list.className='sec-list';
+  ch.secs.forEach((sec,i)=>{
+    const a=document.createElement('div');
+    a.className='sec-link';
+    a.dataset.ch=ch.num;a.dataset.sec=i;
+    a.innerHTML=`<span class="sec-num">${ch.num}.${i+1}</span>${sec}`;
+    a.addEventListener('click',()=>{
+      document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      showLesson(ch,i);
+    });
+    list.appendChild(a);
+  });
+  btn.addEventListener('click',()=>{
+    const isOpen=list.classList.contains('open');
+    document.querySelectorAll('.sec-list').forEach(l=>l.classList.remove('open'));
+    document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('open'));
+    if(!isOpen){list.classList.add('open');btn.classList.add('open');}
+  });
+  navScroll.appendChild(btn);
+  navScroll.appendChild(list);
+  const card=document.createElement('div');
+  card.className='card';
+  card.innerHTML=`<div class="card-num">Chapter ${ch.num}</div><div class="card-title">${ch.title}</div><div class="card-count">${ch.secs.length} sections</div>`;
+  card.addEventListener('click',()=>{btn.click();navScroll.scrollTo({top:btn.offsetTop-40,behavior:'smooth'});});
+  chapterCards.appendChild(card);
+});
+</script>
+<script src="cursors.js"></script>
+</body>
+</html>

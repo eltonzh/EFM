@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat History – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #d4ecd4;
+      min-height: 100dvh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    #header {
+      background: #0f0f13;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    #header a {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    #header a:hover { color: #fff; }
+    #header .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #2a7a2a;
+      flex-shrink: 0;
+    }
+    #header .title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+    #content {
+      flex: 1;
+      padding: 20px 14px 40px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .day-section { margin-bottom: 28px; }
+    .day-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2a5a2a;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+    .day-msgs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .msg-row { display: flex; flex-direction: column; max-width: 80%; }
+    .msg-row.own { align-self: flex-end; align-items: flex-end; }
+    .msg-row.other { align-self: flex-start; align-items: flex-start; }
+    .msg-name {
+      font-size: 0.72rem;
+      color: #2a5a2a;
+      margin-bottom: 3px;
+      padding: 0 4px;
+    }
+    .msg-bubble {
+      padding: 9px 13px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .msg-row.own .msg-bubble {
+      background: #2a7a2a;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-row.other .msg-bubble {
+      background: rgba(255,255,255,0.75);
+      color: #0f0f13;
+      border-bottom-left-radius: 4px;
+    }
+    .msg-time {
+      font-size: 0.68rem;
+      color: rgba(0,0,0,0.35);
+      margin-top: 3px;
+      padding: 0 4px;
+    }
+    #empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #2a5a2a;
+      opacity: 0.6;
+      text-align: center;
+      gap: 8px;
+      padding: 60px 32px;
+      font-size: 0.9rem;
+    }
+    #empty .big { font-size: 2rem; }
+  </style>
+</head>
+<body>
+
+  <div id="header">
+    <a href="#" onclick="efmGoBack();return false;">← Back</a>
+    <div class="dot"></div>
+    <span class="title">Chat History</span>
+  </div>
+
+  <div id="content"></div>
+
+  <script>
+    var myName = localStorage.getItem('efm_cursor_name') || 'You';
+
+    (function () {
+      var c = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
+      var el = document.createElement('style');
+      el.textContent = '#content .msg-row.own .msg-bubble{background:' + c + '}';
+      document.head.appendChild(el);
+    })();
+
+    function fmtTime(iso) {
+      var d = new Date(iso);
+      var h = d.getHours(), m = d.getMinutes();
+      return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + (h < 12 ? 'am' : 'pm');
+    }
+
+    function fmtDay(dateStr) {
+      var d = new Date(dateStr + 'T12:00:00');
+      var today = new Date().toISOString().slice(0, 10);
+      var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (dateStr === today) return 'Today';
+      if (dateStr === yesterday) return 'Yesterday';
+      return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    var days = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.startsWith('efm_chat_20')) {
+        var dateStr = k.replace('efm_chat_', '');
+        var msgs = JSON.parse(localStorage.getItem(k) || '[]');
+        if (msgs.length > 0) days.push({ date: dateStr, msgs: msgs });
+      }
+    }
+    days.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+    var content = document.getElementById('content');
+
+    if (days.length === 0) {
+      content.innerHTML = '<div id="empty"><div class="big">📭</div><div>No history yet.</div><div>Messages are saved here for 30 days.</div></div>';
+    } else {
+      days.forEach(function(day) {
+        var section = document.createElement('div');
+        section.className = 'day-section';
+
+        var label = document.createElement('div');
+        label.className = 'day-label';
+        label.textContent = fmtDay(day.date);
+        section.appendChild(label);
+
+        var msgsEl = document.createElement('div');
+        msgsEl.className = 'day-msgs';
+
+        day.msgs.forEach(function(msg) {
+          var isOwn = msg.name === myName;
+          var row = document.createElement('div');
+          row.className = 'msg-row ' + (isOwn ? 'own' : 'other');
+
+          if (!isOwn) {
+            var nameEl = document.createElement('div');
+            nameEl.className = 'msg-name';
+            nameEl.textContent = msg.name;
+            row.appendChild(nameEl);
+          }
+
+          var bubble = document.createElement('div');
+          bubble.className = 'msg-bubble';
+          bubble.textContent = msg.text;
+          row.appendChild(bubble);
+
+          var time = document.createElement('div');
+          time.className = 'msg-time';
+          time.textContent = fmtTime(msg.time);
+          row.appendChild(time);
+
+          msgsEl.appendChild(row);
+        });
+
+        section.appendChild(msgsEl);
+        content.appendChild(section);
+      });
+    }
+  </script>
+
+<script src="cursors.js"></script>
+</body>
+</html>
