@@ -620,6 +620,18 @@
     });
 
     connectChat();
+
+    if (window.location.hash === '#claude') {
+      history.replaceState(null, '', window.location.pathname);
+      var panel = document.getElementById('claude-panel');
+      panel.classList.add('open');
+      document.getElementById('claude-btn').style.background = 'rgba(224,112,64,0.35)';
+      if (!document.getElementById('claude-msgs').firstChild) {
+        if (!restoreClaudeHistory()) {
+          addClaudeBubble("Hi! I'm Claude — I helped build this EFM math site. Ask me anything about math or the website!", 'ai');
+        }
+      }
+    }
   </script>
 
 <script src="cursors.js"></script>
