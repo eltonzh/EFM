@@ -72,7 +72,7 @@
       white-space: pre-wrap;
     }
     .bubble.user {
-      background: #2a7a2a;
+      background: var(--accent, #e07040);
       color: #fff;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
@@ -216,6 +216,16 @@
       };
       ws.onclose = function() { setTimeout(connect, 3000); };
     }
+
+    var accentColor = localStorage.getItem('efm_cursor_color2')
+                   || localStorage.getItem('efm_cursor_color')
+                   || '#e07040';
+    document.getElementById('top-bar').style.background = accentColor;
+    document.getElementById('send-btn').style.background = accentColor;
+    document.getElementById('chat-input').style.borderColor = accentColor;
+    document.querySelector('#send-btn').onmouseover = function() { this.style.filter = 'brightness(0.85)'; };
+    document.querySelector('#send-btn').onmouseout  = function() { this.style.filter = ''; };
+    document.documentElement.style.setProperty('--accent', accentColor);
 
     if (!restoreHistory()) {
       addBubble("Hi! I'm Claude — I helped build this EFM math site. Ask me anything about math or the website!", 'ai');
