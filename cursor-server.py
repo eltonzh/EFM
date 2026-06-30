@@ -231,25 +231,34 @@ async def handler(websocket):
                 if not isinstance(raw_history, list):
                     raw_history = []
                 raw_history = raw_history[-MAX_HISTORY_ITEMS:]
-                api_key = os.environ.get('OPENAI_API_KEY', '')
+                api_key = os.environ.get('ANTHROPIC_API_KEY', '')
                 if not api_key:
-                    reply = "I can't respond right now — no OpenAI API key is configured."
+                    reply = "I can't respond right now — no API key is configured."
                 else:
                     try:
-                        aclient = openai.AsyncOpenAI(api_key=api_key)
-                        messages = [{'role': 'system', 'content': "You are ChatGPT, embedded in EFM (Elton's Fun Math), a kids' math learning website. Be friendly, brief, and encouraging. Answer math questions clearly."}]
+                        aclient = anthropic.AsyncAnthropic(api_key=api_key)
+                        messages = []
                         for m in raw_history:
                             if not isinstance(m, dict):
                                 continue
                             role = 'user' if m.get('who') == 'user' else 'assistant'
                             messages.append({'role': role, 'content': str(m.get('text', ''))[:MAX_TEXT_LEN]})
-                        messages.append({'role': 'user', 'content': user_text})
-                        response = await aclient.chat.completions.create(
-                            model='gpt-4o-mini',
+                        while messages and messages[0]['role'] != 'user':
+                            messages.pop(0)
+                        clean = []
+                        for msg in messages:
+                            if clean and clean[-1]['role'] == msg['role']:
+                                clean[-1] = msg
+                            else:
+                                clean.append(msg)
+                        clean.append({'role': 'user', 'content': user_text})
+                        response = await aclient.messages.create(
+                            model='claude-sonnet-4-6',
                             max_tokens=512,
-                            messages=messages
+                            system="You are a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never re-introduce yourself — just answer directly.",
+                            messages=clean
                         )
-                        reply = response.choices[0].message.content
+                        reply = response.content[0].text
                     except Exception as e:
                         reply = f"Oops, something went wrong: {str(e)[:80]}"
                 await websocket.send(json.dumps({'type': 'gpt_reply', 'name': 'ChatGPT', 'text': reply, 'time': now_iso()}))
