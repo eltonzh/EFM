@@ -351,7 +351,7 @@
   </div>
 
   <script>
-    var myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+    var myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
     var chatWs;
 
     // All the named colors the user wants for other people's bubbles
@@ -388,7 +388,7 @@
 
     function applyUserColor() {
       var c = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
-      myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+      myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
       var el = document.getElementById('_efm_color');
       if (!el) { el = document.createElement('style'); el.id = '_efm_color'; document.head.appendChild(el); }
       el.textContent = '#info-bar{background:' + c + ';border-bottom-color:' + c + '} #info-bar span{color:#fff} #input-bar{background:' + c + '} #msg-input{background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.4);color:#fff} #msg-input::placeholder{color:rgba(255,255,255,0.7)} #msg-input:focus{background:rgba(255,255,255,0.35);border-color:#fff} #send-btn{background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5)} #send-btn:active{filter:brightness(0.85)}';
@@ -500,7 +500,7 @@
     function connectChat() {
       try { chatWs = new WebSocket(CHAT_WS); } catch(e) { return; }
       chatWs.onopen = function() {
-        myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+        myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
         chatWs.send(JSON.stringify({ type: 'chat_join', name: myName }));
       };
       chatWs.onmessage = function(e) {
@@ -598,7 +598,7 @@
       var input = document.getElementById('msg-input');
       var text = input.value.trim();
       if (!text) return;
-      myName = localStorage.getItem('efm_cursor_name') || 'Guest';
+      myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
 
       var TODAY = new Date().toISOString().slice(0, 10);
       var STORE_KEY = 'efm_chat_' + TODAY;

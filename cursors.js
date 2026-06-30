@@ -28,6 +28,50 @@ function efmGoBack() {
     return { id: id, name: name, color: color || '#888' };
   }
 
+  function showWelcomeScreen() {
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.style.cssText = [
+        'position:fixed;inset:0;background:rgba(0,0,0,0.6);',
+        'display:flex;align-items:center;justify-content:center;',
+        'z-index:999999;font-family:system-ui,sans-serif;'
+      ].join('');
+
+      var card = document.createElement('div');
+      card.style.cssText = [
+        'background:#fff;border-radius:18px;padding:44px 36px;',
+        'box-shadow:0 12px 60px rgba(0,0,0,0.3);width:320px;text-align:center;'
+      ].join('');
+
+      var logo = document.createElement('div');
+      logo.style.cssText = 'font-size:2.4rem;font-weight:800;color:#0f0f13;letter-spacing:0.05em;margin-bottom:10px;';
+      logo.textContent = 'EFM';
+
+      var title = document.createElement('div');
+      title.style.cssText = 'font-size:1rem;font-weight:700;color:#111;margin-bottom:8px;';
+      title.textContent = 'Welcome to Elton\'s Fun Math!';
+
+      var btn = document.createElement('button');
+      btn.style.cssText = [
+        'width:100%;padding:13px;background:#0f0f13;color:#fff;',
+        'border:none;border-radius:10px;font-size:1rem;',
+        'font-weight:700;cursor:pointer;letter-spacing:0.03em;',
+        'font-family:system-ui,sans-serif;'
+      ].join('');
+      btn.textContent = 'Start →';
+      btn.addEventListener('click', function () {
+        overlay.remove();
+        resolve();
+      });
+
+      card.appendChild(logo);
+      card.appendChild(title);
+      card.appendChild(btn);
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+    });
+  }
+
   function showNamePrompt(color) {
     return new Promise(function (resolve) {
       var overlay = document.createElement('div');
@@ -221,7 +265,10 @@ function efmGoBack() {
   function init() {
     var identity = getIdentity();
 
-    Promise.resolve(identity.name || showNamePrompt(identity.color))
+    Promise.resolve(identity.name ? null : showWelcomeScreen())
+      .then(function () {
+        return identity.name || showNamePrompt(identity.color);
+      })
       .then(function (name) {
         identity.name = name;
         var storedColor = localStorage.getItem('efm_cursor_color');
@@ -266,7 +313,13 @@ function efmGoBack() {
 
       ws.onmessage = function (e) {
         var data = JSON.parse(e.data);
-        if (data.type === 'init') {
+        if (data.type === 'color_assign') {
+          if (data.name && data.name !== identity.name) {
+            sessionStorage.setItem('efm_display_name', data.name);
+          } else {
+            sessionStorage.removeItem('efm_display_name');
+          }
+        } else if (data.type === 'init') {
           data.cursors.forEach(function (c) { addCursor(c.id, c.name, c.color); });
         } else if (data.type === 'join') {
           addCursor(data.id, data.name, data.color);
@@ -284,7 +337,7 @@ function efmGoBack() {
     }
 
     function addCursor(id, name, color) {
-      if (id === identity.id || name === identity.name) return;
+      if (id === identity.id) return;
       if (!remote[id]) remote[id] = makeCursorEl(name, color);
     }
     function moveCursor(id, x, y) {

@@ -16,10 +16,14 @@ async def process_request(connection, request):
     if file_path.is_file():
         mime, _ = mimetypes.guess_type(str(file_path))
         body = file_path.read_bytes()
-        return Response(200, 'OK', Headers([
+        no_cache = mime and (mime.startswith('text/') or mime in ('application/javascript',))
+        headers = [
             ('Content-Type', mime or 'application/octet-stream'),
             ('Content-Length', str(len(body))),
-        ]), body)
+        ]
+        if no_cache:
+            headers.append(('Cache-Control', 'no-cache'))
+        return Response(200, 'OK', Headers(headers), body)
     return Response(404, 'Not Found', Headers([('Content-Type', 'text/plain')]), b'Not found')
 import anthropic
 
@@ -69,10 +73,18 @@ async def handler(websocket):
 
             # ── cursor events ──────────────────────────────────────────
             if kind == 'join':
+                original_name = data['name']
+                existing_names = {v['name'] for v in clients.values()}
+                display_name = original_name
+                if display_name in existing_names:
+                    n = 2
+                    while f'{original_name} {n}' in existing_names:
+                        n += 1
+                    display_name = f'{original_name} {n}'
                 color = pick_color()
-                info  = {'id': data['id'], 'name': data['name'], 'color': color}
+                info  = {'id': data['id'], 'name': display_name, 'color': color}
                 clients[websocket] = info
-                await websocket.send(json.dumps({'type': 'color_assign', 'color': color}))
+                await websocket.send(json.dumps({'type': 'color_assign', 'color': color, 'name': display_name}))
                 existing = [v for k, v in clients.items() if k is not websocket]
                 if existing:
                     await websocket.send(json.dumps({'type': 'init', 'cursors': existing}))
