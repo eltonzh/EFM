@@ -156,7 +156,7 @@ function efmGoBack() {
         'font-weight:600;cursor:pointer;letter-spacing:0.02em;',
         'font-family:system-ui,sans-serif;'
       ].join('');
-      btn.textContent = "Let's go! →";
+      btn.textContent = "Select";
       btn.addEventListener('click', function () {
         overlay.remove();
         resolve(selected);
@@ -217,7 +217,7 @@ function efmGoBack() {
     var ws;
 
     // Show own cursor with favorite color and hide the native cursor
-    var ownCursor = makeCursorEl(identity.name, identity.color);
+    var ownCursor = makeCursorEl('You', identity.color);
     ownCursor.style.transition = 'none'; // no lag on own cursor
     var noNative = document.createElement('style');
     noNative.textContent = '* { cursor: none !important; }';
@@ -255,6 +255,7 @@ function efmGoBack() {
     }
 
     function addCursor(id, name, color) {
+      if (id === identity.id) return;
       if (!remote[id]) remote[id] = makeCursorEl(name, color);
     }
     function moveCursor(id, x, y) {

@@ -1,5 +1,26 @@
-import asyncio, json, random, os
+import asyncio, json, random, os, mimetypes
+from pathlib import Path
 import websockets
+from websockets import Response
+from websockets.datastructures import Headers
+
+REPO_DIR = Path(__file__).parent
+
+async def process_request(connection, request):
+    if request.headers.get('Upgrade', '').lower() == 'websocket':
+        return None  # let WebSocket upgrade proceed normally
+    path = request.path.split('?')[0].lstrip('/')
+    if not path:
+        path = 'index.html'
+    file_path = REPO_DIR / path
+    if file_path.is_file():
+        mime, _ = mimetypes.guess_type(str(file_path))
+        body = file_path.read_bytes()
+        return Response(200, 'OK', Headers([
+            ('Content-Type', mime or 'application/octet-stream'),
+            ('Content-Length', str(len(body))),
+        ]), body)
+    return Response(404, 'Not Found', Headers([('Content-Type', 'text/plain')]), b'Not found')
 import anthropic
 
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
@@ -75,6 +96,7 @@ async def handler(websocket):
             elif kind == 'ask_claude':
                 user_text = data.get('text', '')
                 api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+                print(f'[ask_claude] key present: {bool(api_key)}, len: {len(api_key)}', flush=True)
                 if not api_key:
                     reply = "I can't respond right now — no API key is configured."
                 else:
@@ -105,7 +127,7 @@ async def handler(websocket):
 async def main():
     port = int(os.environ.get('PORT', 8080))
     host = '0.0.0.0'
-    async with websockets.serve(handler, host, port):
+    async with websockets.serve(handler, host, port, process_request=process_request):
         print(f'Cursor + chat server running on {host}:{port}')
         await asyncio.Future()
 
