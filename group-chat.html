@@ -605,11 +605,15 @@
 
     function toggleClaudePanel(e) {
       e.preventDefault();
-      var panel = document.getElementById('claude-panel');
-      panel.classList.toggle('open');
-      if (panel.classList.contains('open')) {
-        document.getElementById('chatgpt-panel').classList.remove('open');
-        document.getElementById('chatgpt-btn').style.background = '';
+      var claude = document.getElementById('claude-panel');
+      var gpt    = document.getElementById('chatgpt-panel');
+      if (claude.classList.contains('open')) {
+        claude.classList.remove('open');
+        document.getElementById('claude-btn').style.background = '';
+        if (gpt.classList.contains('open')) gpt.style.left = '68px';
+      } else {
+        claude.style.left = gpt.classList.contains('open') ? '400px' : '68px';
+        claude.classList.add('open');
         document.getElementById('claude-btn').style.background = 'rgba(224,112,64,0.35)';
         if (!document.getElementById('claude-msgs').firstChild) {
           if (!restoreClaudeHistory()) {
@@ -617,8 +621,6 @@
           }
         }
         document.getElementById('claude-input').focus();
-      } else {
-        document.getElementById('claude-btn').style.background = '';
       }
     }
 
@@ -675,11 +677,15 @@
 
     function toggleGPTPanel(e) {
       e.preventDefault();
-      var panel = document.getElementById('chatgpt-panel');
-      panel.classList.toggle('open');
-      if (panel.classList.contains('open')) {
-        document.getElementById('claude-panel').classList.remove('open');
-        document.getElementById('claude-btn').style.background = '';
+      var claude = document.getElementById('claude-panel');
+      var gpt    = document.getElementById('chatgpt-panel');
+      if (gpt.classList.contains('open')) {
+        gpt.classList.remove('open');
+        document.getElementById('chatgpt-btn').style.background = '';
+        if (claude.classList.contains('open')) claude.style.left = '68px';
+      } else {
+        gpt.style.left = claude.classList.contains('open') ? '400px' : '68px';
+        gpt.classList.add('open');
         document.getElementById('chatgpt-btn').style.background = 'rgba(16,163,127,0.35)';
         if (!document.getElementById('gpt-msgs').firstChild) {
           if (!restoreGPTHistory()) {
@@ -687,8 +693,6 @@
           }
         }
         document.getElementById('gpt-input').focus();
-      } else {
-        document.getElementById('chatgpt-btn').style.background = '';
       }
     }
 
@@ -770,8 +774,10 @@
 
     if (window.location.hash === '#claude') {
       history.replaceState(null, '', window.location.pathname);
-      var panel = document.getElementById('claude-panel');
-      panel.classList.add('open');
+      var claude = document.getElementById('claude-panel');
+      var gpt    = document.getElementById('chatgpt-panel');
+      claude.style.left = gpt.classList.contains('open') ? '400px' : '68px';
+      claude.classList.add('open');
       document.getElementById('claude-btn').style.background = 'rgba(224,112,64,0.35)';
       if (!document.getElementById('claude-msgs').firstChild) {
         if (!restoreClaudeHistory()) {
