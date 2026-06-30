@@ -73,7 +73,7 @@ function efmGoBack() {
     });
   }
 
-  function showColorPrompt(name) {
+  function showColorPrompt(name, subtitle) {
     return new Promise(function (resolve) {
       var swatchColors = [
         // originals
@@ -121,7 +121,7 @@ function efmGoBack() {
 
       var sub = document.createElement('div');
       sub.style.cssText = 'font-size:0.82rem;color:#888;margin-bottom:18px;';
-      sub.textContent = 'Pick your favorite color';
+      sub.textContent = subtitle || 'Pick your favorite color';
 
       var grid = document.createElement('div');
       grid.style.cssText = 'display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:20px;justify-items:center;';
@@ -207,6 +207,11 @@ function efmGoBack() {
         identity.color = color;
         localStorage.setItem('efm_cursor_color', color);
         window.dispatchEvent(new CustomEvent('efm_color_ready'));
+        var storedColor2 = localStorage.getItem('efm_cursor_color2');
+        return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
+      })
+      .then(function (color2) {
+        localStorage.setItem('efm_cursor_color2', color2);
         var page = window.location.pathname.split('/').pop() || 'index.html';
         if (page === 'index.html' || page === '') startCursors(identity);
       });
@@ -255,7 +260,7 @@ function efmGoBack() {
     }
 
     function addCursor(id, name, color) {
-      if (id === identity.id) return;
+      if (id === identity.id || name === identity.name) return;
       if (!remote[id]) remote[id] = makeCursorEl(name, color);
     }
     function moveCursor(id, x, y) {
@@ -270,9 +275,10 @@ function efmGoBack() {
     var rafPending = false, px = 0, py = 0;
     document.addEventListener('mousemove', function (e) {
       var overButton = !!e.target.closest('button, a, input, [role="button"]');
-      if (overButton) {
+      var overEFM = !!e.target.closest('#efm-title');
+      if (overButton || overEFM) {
         ownCursor.style.display = 'none';
-        noNative.textContent = ''; // restore classic cursor for yourself
+        noNative.textContent = '';
         return;
       }
       noNative.textContent = '* { cursor: none !important; }';
