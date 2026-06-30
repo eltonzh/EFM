@@ -326,7 +326,7 @@
   <div id="claude-panel">
     <div id="claude-panel-header">
       <span>✦ Ask Claude</span>
-      <button onclick="document.getElementById('claude-msgs').innerHTML=''" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.75rem;cursor:pointer;padding:2px 8px;border-radius:6px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Reset</button>
+      <button onclick="document.getElementById('claude-msgs').innerHTML='';sessionStorage.removeItem('efm_claude_history')" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.75rem;cursor:pointer;padding:2px 8px;border-radius:6px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Reset</button>
       <button id="claude-panel-close" onclick="toggleClaudePanel(event)">✕</button>
     </div>
     <div id="claude-msgs"></div>
@@ -535,12 +535,30 @@
       if (panel.classList.contains('open')) {
         document.getElementById('claude-btn').style.background = 'rgba(224,112,64,0.35)';
         if (!document.getElementById('claude-msgs').firstChild) {
-          addClaudeBubble("Hi! I'm Claude — I helped build this EFM math site. Ask me anything about math or the website!", 'ai');
+          if (!restoreClaudeHistory()) {
+            addClaudeBubble("Hi! I'm Claude — I helped build this EFM math site. Ask me anything about math or the website!", 'ai');
+          }
         }
         document.getElementById('claude-input').focus();
       } else {
         document.getElementById('claude-btn').style.background = '';
       }
+    }
+
+    function saveClaudeHistory() {
+      var bubbles = document.querySelectorAll('#claude-msgs .claude-bubble:not(.thinking)');
+      var history = Array.from(bubbles).map(function(b) {
+        return { text: b.textContent, who: b.classList.contains('user') ? 'user' : 'ai' };
+      });
+      sessionStorage.setItem('efm_claude_history', JSON.stringify(history));
+    }
+
+    function restoreClaudeHistory() {
+      var saved = sessionStorage.getItem('efm_claude_history');
+      if (!saved) return false;
+      var history = JSON.parse(saved);
+      history.forEach(function(m) { addClaudeBubble(m.text, m.who); });
+      return history.length > 0;
     }
 
     function addClaudeBubble(text, who) {
@@ -550,6 +568,7 @@
       b.textContent = text;
       msgs.appendChild(b);
       msgs.scrollTop = msgs.scrollHeight;
+      if (who !== 'thinking') saveClaudeHistory();
       return b;
     }
 
