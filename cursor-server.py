@@ -118,7 +118,17 @@ async def handler(websocket):
                         for m in history:
                             role = 'user' if m.get('who') == 'user' else 'assistant'
                             messages.append({'role': role, 'content': m.get('text', '')})
-                        messages.append({'role': 'user', 'content': user_text})
+                        # API requires messages to start with 'user' and alternate roles
+                        while messages and messages[0]['role'] != 'user':
+                            messages.pop(0)
+                        clean = []
+                        for msg in messages:
+                            if clean and clean[-1]['role'] == msg['role']:
+                                clean[-1] = msg  # keep the later of consecutive same-role
+                            else:
+                                clean.append(msg)
+                        clean.append({'role': 'user', 'content': user_text})
+                        messages = clean
                         response = client.messages.create(
                             model='claude-sonnet-4-6',
                             max_tokens=512,
