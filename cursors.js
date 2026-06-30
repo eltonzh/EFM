@@ -39,16 +39,21 @@ function efmGoBack() {
 
       overlay.innerHTML = [
         '<div style="background:#fff;border-radius:14px;padding:32px 28px;',
-        'box-shadow:0 8px 40px rgba(0,0,0,0.25);width:280px;text-align:center;">',
+        'box-shadow:0 8px 40px rgba(0,0,0,0.25);width:300px;text-align:center;">',
           '<div style="width:36px;height:36px;border-radius:50%;background:' + color + ';',
           'margin:0 auto 14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);"></div>',
           '<div style="font-size:1.05rem;font-weight:700;color:#111;margin-bottom:6px;">',
             'What\'s your name?</div>',
           '<div style="font-size:0.82rem;color:#888;margin-bottom:18px;">',
-            'Enter the name you want to use for this website</div>',
-          '<input id="_cn_input" type="text" maxlength="20" placeholder="Your name"',
-          ' style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;',
-          'font-size:0.95rem;outline:none;box-sizing:border-box;text-align:center;">',
+            'Enter the first name and last initial you want to use for this website</div>',
+          '<div style="display:flex;gap:8px;margin-bottom:0;">',
+            '<input id="_cn_first" type="text" maxlength="20" placeholder="First name"',
+            ' style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;',
+            'font-size:0.95rem;outline:none;box-sizing:border-box;text-align:center;">',
+            '<input id="_cn_last" type="text" maxlength="1" placeholder="A"',
+            ' style="width:52px;padding:10px 8px;border:1.5px solid #ddd;border-radius:8px;',
+            'font-size:0.95rem;outline:none;box-sizing:border-box;text-align:center;">',
+          '</div>',
           '<button id="_cn_btn" style="margin-top:12px;width:100%;padding:11px;',
           'background:#0f0f13;color:#fff;border:none;border-radius:8px;',
           'font-size:0.95rem;font-weight:600;cursor:pointer;letter-spacing:0.02em;',
@@ -58,18 +63,26 @@ function efmGoBack() {
       ].join('');
 
       document.body.appendChild(overlay);
-      var input = document.getElementById('_cn_input');
-      var btn   = document.getElementById('_cn_btn');
-      input.focus();
+      var firstInput = document.getElementById('_cn_first');
+      var lastInput  = document.getElementById('_cn_last');
+      var btn        = document.getElementById('_cn_btn');
+      firstInput.focus();
+
+      lastInput.addEventListener('input', function () {
+        lastInput.value = lastInput.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 1);
+      });
 
       function submit() {
-        var name = input.value.trim() || 'Guest';
+        var first = firstInput.value.trim();
+        var last  = lastInput.value.trim().toUpperCase();
+        var name  = (first || 'Guest') + (last ? ' ' + last + '.' : '');
         localStorage.setItem('efm_cursor_name', name);
         overlay.remove();
         resolve(name);
       }
       btn.addEventListener('click', submit);
-      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+      firstInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') lastInput.focus(); });
+      lastInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
     });
   }
 
@@ -117,7 +130,7 @@ function efmGoBack() {
 
       var heading = document.createElement('div');
       heading.style.cssText = 'font-size:1.05rem;font-weight:700;color:#111;margin-bottom:4px;';
-      heading.textContent = 'Hi ' + name + '!';
+      heading.textContent = 'Hi ' + name.split(' ')[0] + '!';
 
       var sub = document.createElement('div');
       sub.style.cssText = 'font-size:0.82rem;color:#888;margin-bottom:18px;';
@@ -276,7 +289,7 @@ function efmGoBack() {
     document.addEventListener('mousemove', function (e) {
       var overButton = !!e.target.closest('button, a, input, [role="button"]');
       var overEFM = !!e.target.closest('#efm-title');
-      if (overButton || overEFM) {
+      if (overButton) {
         ownCursor.style.display = 'none';
         noNative.textContent = '';
         return;
@@ -285,6 +298,7 @@ function efmGoBack() {
       ownCursor.style.display = '';
       ownCursor.style.left = e.clientX + 'px';
       ownCursor.style.top  = e.clientY + 'px';
+      if (overEFM) return;
       px = (e.clientX / window.innerWidth)  * 100;
       py = (e.clientY / window.innerHeight) * 100;
       if (!rafPending && ws && ws.readyState === 1) {
