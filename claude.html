@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask Claude — EFM</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f13;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: #e07040;
+      flex-shrink: 0;
+    }
+    #back-btn {
+      background: rgba(0,0,0,0.2);
+      border: none;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: system-ui, sans-serif;
+    }
+    #back-btn:hover { background: rgba(0,0,0,0.35); }
+    #top-title {
+      font-size: 1rem;
+      font-weight: 700;
+      flex: 1;
+    }
+    #reset-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: system-ui, sans-serif;
+    }
+    #reset-btn:hover { color: #fff; }
+
+    #msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      max-width: min(75%, 560px);
+      white-space: pre-wrap;
+    }
+    .bubble.user {
+      background: #2a7a2a;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble.ai {
+      background: #fff3ee;
+      color: #2a1a10;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e8c4a8;
+    }
+    .bubble.thinking {
+      color: #666;
+      font-style: italic;
+      align-self: flex-start;
+    }
+
+    #input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1a1a20;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    #chat-input {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 99px;
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      font-family: system-ui, sans-serif;
+      outline: none;
+      background: #0f0f13;
+      color: #fff;
+    }
+    #chat-input::placeholder { color: #555; }
+    #send-btn {
+      background: #e07040;
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 10px 20px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+    }
+    #send-btn:hover { background: #c85e2e; }
+  </style>
+</head>
+<body>
+
+  <div id="top-bar">
+    <a id="back-btn" href="group-chat.html">← Back</a>
+    <div id="top-title">✦ Ask Claude</div>
+    <button id="reset-btn" onclick="resetChat()">Reset</button>
+  </div>
+
+  <div id="msgs"></div>
+
+  <div id="input-row">
+    <input id="chat-input" type="text" placeholder="Ask Claude anything…" maxlength="500" autofocus>
+    <button id="send-btn" onclick="send()">Send</button>
+  </div>
+
+  <script>
+    var RAILWAY_URL = 'acceptable-adaptation-production-565f.up.railway.app';
+    var WS_URL = window.location.hostname === 'localhost'
+      ? 'ws://localhost:8080'
+      : 'wss://' + RAILWAY_URL;
+
+    var ws, thinking = false;
+
+    function saveHistory() {
+      var bubbles = document.querySelectorAll('#msgs .bubble:not(.thinking)');
+      var history = Array.from(bubbles).map(function(b) {
+        return { text: b.textContent, who: b.classList.contains('user') ? 'user' : 'ai' };
+      });
+      sessionStorage.setItem('efm_claude_history', JSON.stringify(history));
+    }
+
+    function addBubble(text, who) {
+      var msgs = document.getElementById('msgs');
+      var b = document.createElement('div');
+      b.className = 'bubble ' + who;
+      b.textContent = text;
+      msgs.appendChild(b);
+      msgs.scrollTop = msgs.scrollHeight;
+      if (who !== 'thinking') saveHistory();
+      return b;
+    }
+
+    function restoreHistory() {
+      var saved = sessionStorage.getItem('efm_claude_history');
+      if (!saved) return false;
+      var history = JSON.parse(saved);
+      history.forEach(function(m) { addBubble(m.text, m.who); });
+      return history.length > 0;
+    }
+
+    function resetChat() {
+      document.getElementById('msgs').innerHTML = '';
+      sessionStorage.removeItem('efm_claude_history');
+    }
+
+    function send() {
+      var input = document.getElementById('chat-input');
+      var text = input.value.trim();
+      if (!text || thinking) return;
+      input.value = '';
+      addBubble(text, 'user');
+      thinking = true;
+      var thinkingBubble = addBubble('…', 'ai thinking');
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'ask_claude', text: text }));
+      } else {
+        thinkingBubble.remove();
+        addBubble("I'm not connected right now. Try again in a moment!", 'ai');
+        thinking = false;
+      }
+    }
+
+    document.getElementById('chat-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') send();
+    });
+
+    function connect() {
+      try { ws = new WebSocket(WS_URL); } catch(e) { return; }
+      ws.onopen = function() {
+        ws.send(JSON.stringify({ type: 'chat_join', name: localStorage.getItem('efm_cursor_name') || 'Guest' }));
+      };
+      ws.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        if (data.type === 'claude_reply') {
+          var t = document.querySelector('#msgs .thinking');
+          if (t) t.remove();
+          addBubble(data.text, 'ai');
+          thinking = false;
+        }
+      };
+      ws.onclose = function() { setTimeout(connect, 3000); };
+    }
+
+    if (!restoreHistory()) {
+      addBubble("Hi! I'm Claude — I helped build this EFM math site. Ask me anything about math or the website!", 'ai');
+    }
+    connect();
+  </script>
+</body>
+</html>
