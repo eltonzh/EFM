@@ -107,18 +107,23 @@ async def handler(websocket):
 
             elif kind == 'ask_claude':
                 user_text = data.get('text', '')
+                history = data.get('history', [])
                 api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-                print(f'[ask_claude] key present: {bool(api_key)}, len: {len(api_key)}', flush=True)
                 if not api_key:
                     reply = "I can't respond right now — no API key is configured."
                 else:
                     try:
                         client = anthropic.Anthropic(api_key=api_key)
+                        messages = []
+                        for m in history:
+                            role = 'user' if m.get('who') == 'user' else 'assistant'
+                            messages.append({'role': role, 'content': m.get('text', '')})
+                        messages.append({'role': 'user', 'content': user_text})
                         response = client.messages.create(
                             model='claude-sonnet-4-6',
                             max_tokens=512,
-                            system="You are Claude, an AI assistant embedded in EFM (Elton's Fun Math), a kids' math learning website. You helped build the site. Be friendly, brief, and encouraging. If kids ask math questions, answer them clearly.",
-                            messages=[{'role': 'user', 'content': user_text}]
+                            system="You are Claude, a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never greet with 'Welcome to EFM' or re-introduce yourself — just answer directly.",
+                            messages=messages
                         )
                         reply = response.content[0].text
                     except Exception as e:

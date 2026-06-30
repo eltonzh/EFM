@@ -195,7 +195,8 @@
       thinking = true;
       var thinkingBubble = addBubble('…', 'ai thinking');
       if (ws && ws.readyState === 1) {
-        ws.send(JSON.stringify({ type: 'ask_claude', text: text }));
+        var history = JSON.parse(localStorage.getItem('efm_claude_history') || '[]');
+        ws.send(JSON.stringify({ type: 'ask_claude', text: text, history: history }));
       } else {
         thinkingBubble.remove();
         addBubble("I'm not connected right now. Try again in a moment!", 'ai');

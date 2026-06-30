@@ -582,7 +582,8 @@
       claudeThinking = true;
       var thinking = addClaudeBubble('…', 'ai thinking');
       if (chatWs && chatWs.readyState === 1) {
-        chatWs.send(JSON.stringify({ type: 'ask_claude', text: text }));
+        var history = JSON.parse(localStorage.getItem('efm_claude_history') || '[]');
+        chatWs.send(JSON.stringify({ type: 'ask_claude', text: text, history: history }));
       } else {
         thinking.remove();
         addClaudeBubble("I'm not connected right now. Try again in a moment!", 'ai');
