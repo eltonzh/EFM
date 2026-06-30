@@ -159,7 +159,7 @@
       var history = Array.from(bubbles).map(function(b) {
         return { text: b.textContent, who: b.classList.contains('user') ? 'user' : 'ai' };
       });
-      sessionStorage.setItem('efm_claude_history', JSON.stringify(history));
+      localStorage.setItem('efm_claude_history', JSON.stringify(history));
     }
 
     function addBubble(text, who) {
@@ -174,7 +174,7 @@
     }
 
     function restoreHistory() {
-      var saved = sessionStorage.getItem('efm_claude_history');
+      var saved = localStorage.getItem('efm_claude_history');
       if (!saved) return false;
       var history = JSON.parse(saved);
       history.forEach(function(m) { addBubble(m.text, m.who); });
@@ -183,7 +183,7 @@
 
     function resetChat() {
       document.getElementById('msgs').innerHTML = '';
-      sessionStorage.removeItem('efm_claude_history');
+      localStorage.removeItem('efm_claude_history');
     }
 
     function send() {

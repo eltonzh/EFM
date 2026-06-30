@@ -326,7 +326,7 @@
   <div id="claude-panel">
     <div id="claude-panel-header">
       <span>✦ Ask Claude</span>
-      <button onclick="document.getElementById('claude-msgs').innerHTML='';sessionStorage.removeItem('efm_claude_history')" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.75rem;cursor:pointer;padding:2px 8px;border-radius:6px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Reset</button>
+      <button onclick="document.getElementById('claude-msgs').innerHTML='';localStorage.removeItem('efm_claude_history')" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:0.75rem;cursor:pointer;padding:2px 8px;border-radius:6px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Reset</button>
       <a href="claude.html" title="Full page" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:2px 6px;display:flex;align-items:center;text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></a>
       <button id="claude-panel-close" onclick="toggleClaudePanel(event)">✕</button>
     </div>
@@ -551,11 +551,11 @@
       var history = Array.from(bubbles).map(function(b) {
         return { text: b.textContent, who: b.classList.contains('user') ? 'user' : 'ai' };
       });
-      sessionStorage.setItem('efm_claude_history', JSON.stringify(history));
+      localStorage.setItem('efm_claude_history', JSON.stringify(history));
     }
 
     function restoreClaudeHistory() {
-      var saved = sessionStorage.getItem('efm_claude_history');
+      var saved = localStorage.getItem('efm_claude_history');
       if (!saved) return false;
       var history = JSON.parse(saved);
       history.forEach(function(m) { addClaudeBubble(m.text, m.who); });
