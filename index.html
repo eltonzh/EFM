@@ -224,7 +224,7 @@
       document.body.appendChild(overlay);
       document.getElementById('_rp_cancel').addEventListener('click', function() { overlay.remove(); });
       document.getElementById('_rp_confirm').addEventListener('click', function() {
-        ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color'].forEach(function(k){ localStorage.removeItem(k); });
+        ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color','efm_cursor_color2'].forEach(function(k){ localStorage.removeItem(k); });
         window.location.reload();
       });
     }

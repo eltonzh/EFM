@@ -96,14 +96,25 @@ function efmGoBack() {
         // named colors
         '#DC143C','#FF2400','#9B111E','#800020','#800000', // Crimson Scarlet Ruby Burgundy Maroon
         '#FF007F','#FF6B6B','#FA8072','#FF00FF','#DD77FF', // Rose Coral Salmon Magenta Fuchsia
+        '#DA70D6','#DE5D83', // Orchid Blush
         '#FFBF00','#F4C430','#F28500','#FFCBA4','#FBCEB1', // Amber Saffron Tangerine Peach Apricot
-        '#FFD700','#FFDB58','#FFFF99','#FFF44F','#FFFDD0', // Gold Mustard Canary Lemon Cream
+        '#FFD700','#FFDB58','#FFFF99','#FFF44F', // Gold Mustard Canary Lemon
         '#50C878','#808000','#BCB88A','#98FF98','#00A86B', // Emerald Olive Sage Mint Jade
         '#32CD32','#228B22','#008080','#7FFF00','#AACC00', // Lime ForestGreen Teal Chartreuse Peridot
         '#0F52BA','#4B0082','#0047AB','#001F5B','#007BA7', // Sapphire Indigo Cobalt Navy Cerulean
         '#40E0D0','#967BB6','#C8A2C8','#9966CC','#DDA0DD', // Turquoise Lavender Lilac Amethyst Plum
         '#483C32','#704214','#A0522D','#CC7722','#36454F', // Taupe Sepia Sienna Ochre Charcoal
-        '#708090','#FFFFF0','#F5F5DC','#555D50','#F2F0E6'  // Slate Ivory Beige Ebony Alabaster
+        '#708090','#F5F5DC','#555D50','#F2F0E6', // Slate Beige Ebony Alabaster
+        // Icy & Pale
+        '#3EB489','#9FE2BF','#ACE1AF','#B0E0E6','#87CEEB', // Mint Seafoam Celadon PowderBlue SkyBlue
+        // Earthy Greens
+        '#8A9A86','#8A9A5B','#93C572',                     // Sage Moss Pistachio
+        // Vibrant & Jewel
+        '#4CBB17','#4169E1','#7DF9FF',                     // KellyGreen RoyalBlue ElectricBlue
+        // Deep & Moody
+        '#000080','#191970','#355E3B','#01796F',            // Navy Midnight HunterGreen PineGreen
+        // Blue-Green Blends
+        '#00FFFF','#7FFFD4','#00CCCC'                      // Cyan Aquamarine RobinsEgg
       ];
       var selected = swatchColors[4]; // default blue
 
