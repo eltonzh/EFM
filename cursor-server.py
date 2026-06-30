@@ -1,10 +1,45 @@
-import asyncio, json, random, os, mimetypes
+import asyncio, json, random, os, mimetypes, datetime, time
 from pathlib import Path
 import websockets
 from websockets import Response
 from websockets.datastructures import Headers
+import anthropic
 
-REPO_DIR = Path(__file__).parent
+REPO_DIR = Path(__file__).parent.resolve()
+CHAT_FILE = REPO_DIR / 'chat_history.json'
+
+MAX_NAME_LEN      = 40
+MAX_TEXT_LEN      = 1000
+MAX_ID_LEN        = 64
+MAX_MSG_BYTES     = 65_536   # 64 KB hard cap per WebSocket message
+MAX_HISTORY_ITEMS = 20       # history items client may send for Claude context
+CLAUDE_RPM        = 5        # max ask_claude calls per connection per 60 s
+
+def load_chat_history():
+    if CHAT_FILE.exists():
+        try:
+            data = json.loads(CHAT_FILE.read_text())
+            if data.get('date') == datetime.date.today().isoformat():
+                return data.get('messages', [])
+        except Exception:
+            pass
+    return []
+
+def save_chat_history():
+    CHAT_FILE.write_text(json.dumps({'date': datetime.date.today().isoformat(), 'messages': chat_history}))
+
+def check_daily_reset():
+    if CHAT_FILE.exists():
+        try:
+            data = json.loads(CHAT_FILE.read_text())
+            if data.get('date') != datetime.date.today().isoformat():
+                chat_history.clear()
+                save_chat_history()
+        except Exception:
+            pass
+
+def now_iso():
+    return datetime.datetime.utcnow().isoformat() + 'Z'
 
 async def process_request(connection, request):
     if request.headers.get('Upgrade', '').lower() == 'websocket':
@@ -12,7 +47,10 @@ async def process_request(connection, request):
     path = request.path.split('?')[0].lstrip('/')
     if not path:
         path = 'index.html'
-    file_path = REPO_DIR / path
+    # Prevent path traversal — resolve and confirm it stays inside REPO_DIR
+    file_path = (REPO_DIR / path).resolve()
+    if not str(file_path).startswith(str(REPO_DIR) + os.sep) and file_path != REPO_DIR:
+        return Response(403, 'Forbidden', Headers([('Content-Type', 'text/plain')]), b'Forbidden')
     if file_path.is_file():
         mime, _ = mimetypes.guess_type(str(file_path))
         body = file_path.read_bytes()
@@ -25,14 +63,13 @@ async def process_request(connection, request):
             headers.append(('Cache-Control', 'no-cache'))
         return Response(200, 'OK', Headers(headers), body)
     return Response(404, 'Not Found', Headers([('Content-Type', 'text/plain')]), b'Not found')
-import anthropic
 
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
 COLORS = [f'hsl({h * 10}, 82%, 56%)' for h in range(36)]
 
 clients      = {}    # websocket -> {id, name, color}
 chat_clients = set() # websockets that are in the chat room
-chat_history = []    # {name, text, time} — cleared daily by the server restart
+chat_history = load_chat_history()
 MAX_HISTORY  = 500
 
 free_colors = list(COLORS)
@@ -66,23 +103,33 @@ async def broadcast_chat(data):
 
 async def handler(websocket):
     color = None
+    claude_timestamps = []  # per-connection rate-limit window
     try:
         async for raw in websocket:
-            data = json.loads(raw)
+            # Drop oversized messages before parsing
+            if isinstance(raw, (bytes, str)) and len(raw) > MAX_MSG_BYTES:
+                continue
+            try:
+                data = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                continue
+            if not isinstance(data, dict):
+                continue
             kind = data.get('type')
 
             # ── cursor events ──────────────────────────────────────────
             if kind == 'join':
-                original_name = data['name']
+                name = str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                cid  = str(data.get('id',   ''))[:MAX_ID_LEN]
                 existing_names = {v['name'] for v in clients.values()}
-                display_name = original_name
+                display_name = name
                 if display_name in existing_names:
                     n = 2
-                    while f'{original_name} {n}' in existing_names:
+                    while f'{name} {n}' in existing_names:
                         n += 1
-                    display_name = f'{original_name} {n}'
+                    display_name = f'{name} {n}'
                 color = pick_color()
-                info  = {'id': data['id'], 'name': display_name, 'color': color}
+                info  = {'id': cid, 'name': display_name, 'color': color}
                 clients[websocket] = info
                 await websocket.send(json.dumps({'type': 'color_assign', 'color': color, 'name': display_name}))
                 existing = [v for k, v in clients.items() if k is not websocket]
@@ -91,7 +138,14 @@ async def handler(websocket):
                 await broadcast_cursors({'type': 'join', **info}, exclude=websocket)
 
             elif kind == 'move':
-                await broadcast_cursors(data, exclude=websocket)
+                # Only relay validated numeric coords + known id — never forward raw data
+                try:
+                    x = float(data.get('x', 0))
+                    y = float(data.get('y', 0))
+                    cid = str(data.get('id', ''))[:MAX_ID_LEN]
+                    await broadcast_cursors({'type': 'move', 'id': cid, 'x': x, 'y': y}, exclude=websocket)
+                except (TypeError, ValueError):
+                    pass
 
             # ── chat events ────────────────────────────────────────────
             elif kind == 'chat_join':
@@ -99,15 +153,41 @@ async def handler(websocket):
                 await websocket.send(json.dumps({'type': 'chat_history', 'messages': chat_history}))
 
             elif kind == 'chat':
-                msg = {'name': data['name'], 'text': data['text'], 'time': data['time']}
+                check_daily_reset()
+                name = str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
+                if not text:
+                    continue
+                # Use server timestamp — never trust client-supplied time
+                msg = {'name': name, 'text': text, 'time': now_iso()}
                 chat_history.append(msg)
                 if len(chat_history) > MAX_HISTORY:
                     chat_history.pop(0)
+                save_chat_history()
                 await broadcast_chat({'type': 'chat', **msg})
 
             elif kind == 'ask_claude':
-                user_text = data.get('text', '')
-                history = data.get('history', [])
+                # Per-connection rate limit: CLAUDE_RPM requests per 60 s
+                ts_now = time.monotonic()
+                claude_timestamps = [t for t in claude_timestamps if ts_now - t < 60]
+                if len(claude_timestamps) >= CLAUDE_RPM:
+                    await websocket.send(json.dumps({
+                        'type': 'claude_reply', 'name': 'Claude',
+                        'text': "You're asking too fast — wait a moment and try again.",
+                        'time': now_iso()
+                    }))
+                    continue
+                claude_timestamps.append(ts_now)
+
+                user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
+                if not user_text:
+                    continue
+
+                raw_history = data.get('history', [])
+                if not isinstance(raw_history, list):
+                    raw_history = []
+                raw_history = raw_history[-MAX_HISTORY_ITEMS:]  # cap depth
+
                 api_key = os.environ.get('ANTHROPIC_API_KEY', '')
                 if not api_key:
                     reply = "I can't respond right now — no API key is configured."
@@ -115,32 +195,64 @@ async def handler(websocket):
                     try:
                         client = anthropic.Anthropic(api_key=api_key)
                         messages = []
-                        for m in history:
-                            role = 'user' if m.get('who') == 'user' else 'assistant'
-                            messages.append({'role': role, 'content': m.get('text', '')})
+                        for m in raw_history:
+                            if not isinstance(m, dict):
+                                continue
+                            role    = 'user' if m.get('who') == 'user' else 'assistant'
+                            content = str(m.get('text', ''))[:MAX_TEXT_LEN]
+                            messages.append({'role': role, 'content': content})
                         # API requires messages to start with 'user' and alternate roles
                         while messages and messages[0]['role'] != 'user':
                             messages.pop(0)
                         clean = []
                         for msg in messages:
                             if clean and clean[-1]['role'] == msg['role']:
-                                clean[-1] = msg  # keep the later of consecutive same-role
+                                clean[-1] = msg
                             else:
                                 clean.append(msg)
                         clean.append({'role': 'user', 'content': user_text})
-                        messages = clean
                         response = client.messages.create(
                             model='claude-sonnet-4-6',
                             max_tokens=512,
                             system="You are Claude, a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never greet with 'Welcome to EFM' or re-introduce yourself — just answer directly.",
-                            messages=messages
+                            messages=clean
                         )
                         reply = response.content[0].text
                     except Exception as e:
                         reply = f"Oops, something went wrong: {str(e)[:80]}"
-                import datetime
-                reply_msg = {'name': 'Claude', 'text': reply, 'time': datetime.datetime.utcnow().isoformat() + 'Z'}
-                await websocket.send(json.dumps({'type': 'claude_reply', **reply_msg}))
+                await websocket.send(json.dumps({'type': 'claude_reply', 'name': 'Claude', 'text': reply, 'time': now_iso()}))
+
+            elif kind == 'ask_chatgpt':
+                user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
+                if not user_text:
+                    continue
+                raw_history = data.get('history', [])
+                if not isinstance(raw_history, list):
+                    raw_history = []
+                raw_history = raw_history[-MAX_HISTORY_ITEMS:]
+                api_key = os.environ.get('OPENAI_API_KEY', '')
+                if not api_key:
+                    reply = "I can't respond right now — no OpenAI API key is configured."
+                else:
+                    try:
+                        import openai
+                        client = openai.OpenAI(api_key=api_key)
+                        messages = [{'role': 'system', 'content': "You are ChatGPT, embedded in EFM (Elton's Fun Math), a kids' math learning website. Be friendly, brief, and encouraging. Answer math questions clearly."}]
+                        for m in raw_history:
+                            if not isinstance(m, dict):
+                                continue
+                            role = 'user' if m.get('who') == 'user' else 'assistant'
+                            messages.append({'role': role, 'content': str(m.get('text', ''))[:MAX_TEXT_LEN]})
+                        messages.append({'role': 'user', 'content': user_text})
+                        response = client.chat.completions.create(
+                            model='gpt-4o-mini',
+                            max_tokens=512,
+                            messages=messages
+                        )
+                        reply = response.choices[0].message.content
+                    except Exception as e:
+                        reply = f"Oops, something went wrong: {str(e)[:80]}"
+                await websocket.send(json.dumps({'type': 'gpt_reply', 'name': 'ChatGPT', 'text': reply, 'time': now_iso()}))
 
     except websockets.exceptions.ConnectionClosed:
         pass
