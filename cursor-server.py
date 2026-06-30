@@ -4,6 +4,7 @@ import websockets
 from websockets import Response
 from websockets.datastructures import Headers
 import anthropic
+import openai
 
 REPO_DIR = Path(__file__).parent.resolve()
 CHAT_FILE = REPO_DIR / 'chat_history.json'
@@ -193,7 +194,7 @@ async def handler(websocket):
                     reply = "I can't respond right now — no API key is configured."
                 else:
                     try:
-                        client = anthropic.Anthropic(api_key=api_key)
+                        aclient = anthropic.AsyncAnthropic(api_key=api_key)
                         messages = []
                         for m in raw_history:
                             if not isinstance(m, dict):
@@ -211,7 +212,7 @@ async def handler(websocket):
                             else:
                                 clean.append(msg)
                         clean.append({'role': 'user', 'content': user_text})
-                        response = client.messages.create(
+                        response = await aclient.messages.create(
                             model='claude-sonnet-4-6',
                             max_tokens=512,
                             system="You are Claude, a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never greet with 'Welcome to EFM' or re-introduce yourself — just answer directly.",
@@ -235,8 +236,7 @@ async def handler(websocket):
                     reply = "I can't respond right now — no OpenAI API key is configured."
                 else:
                     try:
-                        import openai
-                        client = openai.OpenAI(api_key=api_key)
+                        aclient = openai.AsyncOpenAI(api_key=api_key)
                         messages = [{'role': 'system', 'content': "You are ChatGPT, embedded in EFM (Elton's Fun Math), a kids' math learning website. Be friendly, brief, and encouraging. Answer math questions clearly."}]
                         for m in raw_history:
                             if not isinstance(m, dict):
@@ -244,7 +244,7 @@ async def handler(websocket):
                             role = 'user' if m.get('who') == 'user' else 'assistant'
                             messages.append({'role': role, 'content': str(m.get('text', ''))[:MAX_TEXT_LEN]})
                         messages.append({'role': 'user', 'content': user_text})
-                        response = client.chat.completions.create(
+                        response = await aclient.chat.completions.create(
                             model='gpt-4o-mini',
                             max_tokens=512,
                             messages=messages
