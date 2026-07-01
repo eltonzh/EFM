@@ -13,7 +13,7 @@ MAX_NAME_LEN      = 40
 MAX_TEXT_LEN      = 1000
 MAX_ID_LEN        = 64
 MAX_MSG_BYTES     = 65_536   # 64 KB hard cap per WebSocket message
-MAX_HISTORY_ITEMS = 20       # history items client may send for Claude context
+MAX_HISTORY_ITEMS = 6        # history items client may send for Claude context
 CLAUDE_RPM        = 5        # max ask_claude calls per connection per 60 s
 
 def load_chat_history():
@@ -214,7 +214,7 @@ async def handler(websocket):
                         clean.append({'role': 'user', 'content': user_text})
                         response = await aclient.messages.create(
                             model='claude-sonnet-4-6',
-                            max_tokens=512,
+                            max_tokens=250,
                             system="You are Claude, a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never greet with 'Welcome to EFM' or re-introduce yourself — just answer directly.",
                             messages=clean
                         )
@@ -254,7 +254,7 @@ async def handler(websocket):
                         clean.append({'role': 'user', 'content': user_text})
                         response = await aclient.messages.create(
                             model='claude-sonnet-4-6',
-                            max_tokens=512,
+                            max_tokens=250,
                             system="You are a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never re-introduce yourself — just answer directly.",
                             messages=clean
                         )
