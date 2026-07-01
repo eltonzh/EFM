@@ -264,28 +264,59 @@ function efmGoBack() {
 
   function init() {
     var identity = getIdentity();
+    var page = window.location.pathname.split('/').pop() || 'index.html';
+    var onIndex = (page === 'index.html' || page === '');
 
-    Promise.resolve(identity.name ? null : showWelcomeScreen())
-      .then(function () {
-        return identity.name || showNamePrompt(identity.color);
-      })
-      .then(function (name) {
-        identity.name = name;
-        var storedColor = localStorage.getItem('efm_cursor_color');
-        return storedColor || showColorPrompt(name);
-      })
-      .then(function (color) {
-        identity.color = color;
-        localStorage.setItem('efm_cursor_color', color);
-        window.dispatchEvent(new CustomEvent('efm_color_ready'));
-        var storedColor2 = localStorage.getItem('efm_cursor_color2');
-        return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
-      })
-      .then(function (color2) {
-        localStorage.setItem('efm_cursor_color2', color2);
-        var page = window.location.pathname.split('/').pop() || 'index.html';
-        if (page === 'index.html' || page === '') startCursors(identity);
-      });
+    function runSetup() {
+      Promise.resolve(showWelcomeScreen())
+        .then(function () {
+          return identity.name || showNamePrompt(identity.color);
+        })
+        .then(function (name) {
+          identity.name = name;
+          var storedColor = localStorage.getItem('efm_cursor_color');
+          return storedColor || showColorPrompt(name);
+        })
+        .then(function (color) {
+          identity.color = color;
+          localStorage.setItem('efm_cursor_color', color);
+          window.dispatchEvent(new CustomEvent('efm_color_ready'));
+          var storedColor2 = localStorage.getItem('efm_cursor_color2');
+          return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
+        })
+        .then(function (color2) {
+          localStorage.setItem('efm_cursor_color2', color2);
+          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+          if (onIndex) startCursors(identity);
+        });
+    }
+
+    if (!identity.name && onIndex) {
+      // Let the Go! button trigger setup instead of auto-showing
+      window.efmBeginSetup = runSetup;
+    } else {
+      // Non-index pages or already set up: run normally
+      Promise.resolve(identity.name ? null : showWelcomeScreen())
+        .then(function () {
+          return identity.name || showNamePrompt(identity.color);
+        })
+        .then(function (name) {
+          identity.name = name;
+          var storedColor = localStorage.getItem('efm_cursor_color');
+          return storedColor || showColorPrompt(name);
+        })
+        .then(function (color) {
+          identity.color = color;
+          localStorage.setItem('efm_cursor_color', color);
+          window.dispatchEvent(new CustomEvent('efm_color_ready'));
+          var storedColor2 = localStorage.getItem('efm_cursor_color2');
+          return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
+        })
+        .then(function (color2) {
+          localStorage.setItem('efm_cursor_color2', color2);
+          if (onIndex) startCursors(identity);
+        });
+    }
   }
 
   function startCursors(identity) {
