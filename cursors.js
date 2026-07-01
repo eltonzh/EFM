@@ -381,8 +381,8 @@ function efmGoBack() {
 
       var codeInput = document.createElement('input');
       codeInput.type = 'text';
-      codeInput.maxLength = 8;
-      codeInput.placeholder = 'Account code (e.g. KPQ38)';
+      codeInput.maxLength = 5;
+      codeInput.placeholder = 'Account code (e.g. EZ!@#)';
       codeInput.style.cssText = [
         'display:block;width:100%;padding:14px 16px;',
         'border:1.5px solid #e0e0e0;border-radius:12px;',
@@ -394,7 +394,7 @@ function efmGoBack() {
       codeInput.addEventListener('focus', function () { codeInput.style.borderColor = '#0f0f13'; });
       codeInput.addEventListener('blur',  function () { codeInput.style.borderColor = '#e0e0e0'; });
       codeInput.addEventListener('input', function () {
-        codeInput.value = codeInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        codeInput.value = codeInput.value.replace(/[^a-zA-Z0-9!@#$%&*+]/g, '').toUpperCase();
         var active = codeInput.value.length >= 5;
         codeBtn.style.background  = active ? '#0f0f13' : '#ccc';
         codeBtn.style.cursor      = active ? 'pointer' : 'default';

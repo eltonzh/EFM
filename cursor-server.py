@@ -37,12 +37,33 @@ def load_identities():
 def save_identities_file():
     IDENTITY_FILE.write_text(json.dumps(identity_store))
 
-def generate_code():
+def initials_from_name(name):
+    parts = name.strip().split()
+    if not parts:
+        return 'XX'
+    first_init = parts[0][0].upper() if parts[0] else 'X'
+    if len(parts) >= 2:
+        last_part = parts[-1]
+        # "Z." format (last initial with dot)
+        if len(last_part) == 2 and last_part[1] == '.':
+            last_init = last_part[0].upper()
+        else:
+            last_init = last_part[0].upper()
+    else:
+        # No last initial — use second letter of first name
+        last_init = parts[0][1].upper() if len(parts[0]) > 1 else 'X'
+    return first_init + last_init
+
+SUFFIX_CHARS = '0123456789!@#$%&*+'
+
+def generate_code(name=''):
+    prefix = initials_from_name(name) if name else 'XX'
     for _ in range(100):
-        code = ''.join(random.choice(CODE_CHARS) for _ in range(5))
+        suffix = ''.join(random.choice(SUFFIX_CHARS) for _ in range(3))
+        code = prefix + suffix
         if code not in identity_store['by_code']:
             return code
-    return ''.join(random.choice(CODE_CHARS) for _ in range(7))
+    return prefix + ''.join(random.choice(SUFFIX_CHARS) for _ in range(5))
 
 MAX_NAME_LEN      = 40
 MAX_TEXT_LEN      = 1000
@@ -274,7 +295,7 @@ async def handler(websocket):
                     await websocket.send(json.dumps({'type': 'register_error', 'message': 'That email is already registered. Use your account code to log in.'}))
                     continue
                 pw_hash = hashlib.sha256(password.encode()).hexdigest()
-                code    = generate_code()
+                code    = generate_code(name)
                 accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code}
                 identity_store['by_code'][code]             = 'email:' + email
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
@@ -289,7 +310,7 @@ async def handler(websocket):
                 sfv       = str(data.get('sfv', ''))[:64].strip()
                 if device_id and name:
                     existing = identity_store['by_device'].get(device_id, {})
-                    code = existing.get('code') or generate_code()
+                    code = existing.get('code') or generate_code(name)
                     identity_store['by_device'][device_id] = {'name': name, 'fv': fv, 'sfv': sfv, 'code': code}
                     identity_store['by_code'][code] = device_id
                     save_identities_file()
