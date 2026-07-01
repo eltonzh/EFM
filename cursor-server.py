@@ -1,4 +1,4 @@
-import asyncio, json, random, os, mimetypes, datetime, time
+import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo
 from pathlib import Path
 import websockets
 from websockets import Response
@@ -20,20 +20,20 @@ def load_chat_history():
     if CHAT_FILE.exists():
         try:
             data = json.loads(CHAT_FILE.read_text())
-            if data.get('date') == datetime.date.today().isoformat():
+            if data.get('date') == datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat():
                 return data.get('messages', [])
         except Exception:
             pass
     return []
 
 def save_chat_history():
-    CHAT_FILE.write_text(json.dumps({'date': datetime.date.today().isoformat(), 'messages': chat_history}))
+    CHAT_FILE.write_text(json.dumps({'date': datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat(), 'messages': chat_history}))
 
 def check_daily_reset():
     if CHAT_FILE.exists():
         try:
             data = json.loads(CHAT_FILE.read_text())
-            if data.get('date') != datetime.date.today().isoformat():
+            if data.get('date') != datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat():
                 chat_history.clear()
                 save_chat_history()
         except Exception:
