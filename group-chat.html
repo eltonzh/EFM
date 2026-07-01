@@ -519,7 +519,7 @@
     function renderMessage(msg) {
       var empty = document.getElementById('empty-state');
       if (empty) empty.remove();
-      var isOwn = msg.name === myName;
+      var isOwn = msg._mine || msg.name === myName;
       var bgColor = isOwn
         ? (localStorage.getItem('efm_cursor_color') || '#2a7a2a')
         : getNameColor(msg.name);
@@ -755,7 +755,7 @@
 
       var TODAY = new Date().toISOString().slice(0, 10);
       var STORE_KEY = 'efm_chat_' + TODAY;
-      var msg = { name: myName, text: text, time: new Date().toISOString() };
+      var msg = { name: myName, text: text, time: new Date().toISOString(), _mine: true };
       var stored = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
       stored.push(msg);
       localStorage.setItem(STORE_KEY, JSON.stringify(stored));
