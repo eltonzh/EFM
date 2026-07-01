@@ -197,7 +197,7 @@
     <!-- Danger zone -->
     <div class="card">
       <div class="card-title">Danger Zone</div>
-      <button class="danger-btn" id="reset-btn">Reset Progress &amp; Log Out</button>
+      <button class="danger-btn" id="reset-btn">Delete Account</button>
     </div>
   </div>
 
@@ -246,7 +246,7 @@
     });
 
     document.getElementById('reset-btn').addEventListener('click', function () {
-      if (!confirm('Reset all your EFM progress and log out?')) return;
+      if (!confirm('Delete your EFM account? This cannot be undone.')) return;
       localStorage.clear();
       window.location.href = 'index.html';
     });
