@@ -147,6 +147,69 @@
       white-space: nowrap;
     }
     .toast.show { opacity: 1; }
+
+    /* Speech bubbles */
+    .bubble {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #e53e3e;
+      border-radius: 12px;
+      padding: 6px 13px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #e53e3e;
+      white-space: nowrap;
+      box-shadow: 0 3px 12px rgba(229,62,62,0.18);
+      pointer-events: none;
+      animation: bubblePop 0.25s cubic-bezier(.34,1.56,.64,1) both;
+      z-index: 10;
+    }
+    @keyframes bubblePop {
+      from { opacity:0; transform: scale(0.7); }
+      to   { opacity:1; transform: scale(1); }
+    }
+    /* tail pointing DOWN (from bubble toward card) */
+    .bubble-down::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-top-color: #e53e3e;
+    }
+    .bubble-down::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: -2px;
+      border: 7px solid transparent;
+      border-top-color: #fff;
+      z-index: 1;
+    }
+    /* tail pointing DOWN-RIGHT (toward copy button) */
+    .bubble-copy::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 14px;
+      border: 7px solid transparent;
+      border-top-color: #e53e3e;
+    }
+    .bubble-copy::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 14px;
+      margin-top: -2px;
+      border: 7px solid transparent;
+      border-top-color: #fff;
+      z-index: 1;
+    }
+    .card-code-wrap { position: relative; }
+    .copy-wrap { position: relative; display: inline-block; }
   </style>
 </head>
 <body>
@@ -248,6 +311,8 @@
     document.getElementById('reset-btn').addEventListener('click', function () {
       if (!confirm('Delete your EFM account? This cannot be undone.')) return;
       localStorage.clear();
+      // Wipe device ID cookie so the server can't restore the identity automatically
+      document.cookie = 'efm_device_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
       window.location.href = 'index.html';
     });
 
