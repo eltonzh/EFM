@@ -137,8 +137,13 @@ function efmGoBack() {
       var mathSymbols = [
         '∑','∫','π','±','√','×','÷','≠','∞','θ',
         'Δ','α','β','φ','λ','≈','≤','≥','∂','∇',
-        '²','³','½','%','+','−','=','(',')',
-        '∑','π','√','∞','×','÷','≠','θ','Δ','≈'
+        '²','³','½','%','+','−','=','(',')','{','}',
+        'γ','ε','μ','σ','ω','ρ','ζ','η','κ','ξ',
+        '∏','∈','∉','∅','⊂','⊃','∪','∩','→','↔',
+        '∀','∃','∧','∨','¬','⊕','⊗','⟨','⟩','|',
+        '∑','π','√','∞','×','Δ','≈','∫','α','β',
+        '≠','θ','φ','λ','≤','≥','±','÷','∂','∇',
+        '!','?','#','8','3','7','2','9','4','6'
       ];
 
       var styleEl = document.createElement('style');
@@ -322,9 +327,9 @@ function efmGoBack() {
       var orRow = document.createElement('div');
       orRow.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:22px;';
       orRow.innerHTML = [
-        '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>',
+        '<div style="flex:1;height:1.5px;background:#0f0f13;"></div>',
         '<span style="font-size:0.85rem;color:#0f0f13;font-weight:600;">or</span>',
-        '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>'
+        '<div style="flex:1;height:1.5px;background:#0f0f13;"></div>'
       ].join('');
 
       // ── Account code section ──
