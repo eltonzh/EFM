@@ -80,6 +80,17 @@ function efmGoBack() {
     );
   }
 
+  function registerAccount(email, password, name) {
+    return _identityWS(
+      function () { return {type: 'register', email: email, password: password, name: name}; },
+      function (d) {
+        if (d.type === 'register_ok')    return {ok: true,  code: d.code};
+        if (d.type === 'register_error') return {ok: false, message: d.message};
+      },
+      8000
+    );
+  }
+
   function showCodeNotification(code) {
     if (!code) return;
     var bar = document.createElement('div');
@@ -192,6 +203,27 @@ function efmGoBack() {
       signupLabel.style.cssText = 'font-size:1rem;font-weight:700;color:#0f0f13;margin-bottom:10px;';
       signupLabel.textContent = 'Create an account...';
 
+      function makeInput(type, placeholder, extraCss) {
+        var inp = document.createElement('input');
+        inp.type = type;
+        inp.placeholder = placeholder;
+        inp.autocomplete = type === 'password' ? 'new-password' : type === 'email' ? 'email' : 'off';
+        inp.style.cssText = [
+          'display:block;width:100%;padding:14px 16px;',
+          'border:1.5px solid #e0e0e0;border-radius:12px;',
+          'font-size:1rem;box-sizing:border-box;outline:none;',
+          'font-family:system-ui,sans-serif;color:#0f0f13;',
+          'transition:border-color 0.15s;margin-bottom:10px;',
+          extraCss || ''
+        ].join('');
+        inp.addEventListener('focus', function () { inp.style.borderColor = '#0f0f13'; });
+        inp.addEventListener('blur',  function () { inp.style.borderColor = '#e0e0e0'; });
+        return inp;
+      }
+
+      var emailInput = makeInput('email', 'Email address');
+      var passInput  = makeInput('password', 'Password');
+
       var nameRow = document.createElement('div');
       nameRow.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;';
 
@@ -223,12 +255,20 @@ function efmGoBack() {
       lastInput.addEventListener('input', function () {
         lastInput.value = lastInput.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 1);
       });
-      firstInput.addEventListener('input', updateSignupBtn);
+
+      [emailInput, passInput, firstInput].forEach(function (inp) {
+        inp.addEventListener('input', updateSignupBtn);
+      });
+      emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') passInput.focus(); });
+      passInput.addEventListener('keydown',  function (e) { if (e.key === 'Enter') firstInput.focus(); });
       firstInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') lastInput.focus(); });
-      lastInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitSignup(); });
+      lastInput.addEventListener('keydown',  function (e) { if (e.key === 'Enter') submitSignup(); });
 
       nameRow.appendChild(firstInput);
       nameRow.appendChild(lastInput);
+
+      var signupErr = document.createElement('div');
+      signupErr.style.cssText = 'font-size:0.78rem;color:#c0392b;min-height:18px;margin-bottom:8px;';
 
       var signupBtn = document.createElement('button');
       signupBtn.style.cssText = [
@@ -240,19 +280,40 @@ function efmGoBack() {
       signupBtn.textContent = 'Create Account';
 
       function updateSignupBtn() {
-        var active = firstInput.value.trim().length > 0;
+        var active = emailInput.value.trim().length > 0 &&
+                     passInput.value.length > 0 &&
+                     firstInput.value.trim().length > 0;
         signupBtn.style.background = active ? '#0f0f13' : '#ccc';
         signupBtn.style.cursor     = active ? 'pointer' : 'default';
       }
 
       function submitSignup() {
+        var email = emailInput.value.trim();
+        var pass  = passInput.value;
         var first = firstInput.value.trim();
-        if (!first) { firstInput.focus(); return; }
+        if (!email || !pass || !first) { signupErr.textContent = 'Please fill in all fields.'; return; }
+        if (!email.includes('@')) { signupErr.textContent = 'Enter a valid email address.'; emailInput.focus(); return; }
+        if (pass.length < 6) { signupErr.textContent = 'Password must be at least 6 characters.'; passInput.focus(); return; }
         var last = lastInput.value.trim().toUpperCase();
         var name = first + (last ? ' ' + last + '.' : '');
-        localStorage.setItem('efm_cursor_name', name);
-        overlay.remove();
-        resolve(null);
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Creating account…';
+        signupErr.textContent = '';
+        registerAccount(email, pass, name).then(function (result) {
+          if (!result) {
+            signupErr.textContent = 'Could not connect — check your connection and try again.';
+            signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; return;
+          }
+          if (!result.ok) {
+            signupErr.textContent = result.message || 'Something went wrong.';
+            signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; return;
+          }
+          localStorage.setItem('efm_cursor_name', name);
+          if (deviceId) saveIdentityToServer(deviceId, name, '', '');
+          showCodeNotification(result.code);
+          overlay.remove();
+          resolve(null);
+        });
       }
 
       signupBtn.addEventListener('click', submitSignup);
@@ -333,7 +394,10 @@ function efmGoBack() {
       wrap.appendChild(sub);
       wrap.appendChild(hr1);
       wrap.appendChild(signupLabel);
+      wrap.appendChild(emailInput);
+      wrap.appendChild(passInput);
       wrap.appendChild(nameRow);
+      wrap.appendChild(signupErr);
       wrap.appendChild(signupBtn);
       wrap.appendChild(orRow);
       wrap.appendChild(codeLabel);

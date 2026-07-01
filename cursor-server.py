@@ -1,4 +1,4 @@
-import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo
+import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib
 from pathlib import Path
 import websockets
 from websockets import Response
@@ -12,6 +12,19 @@ IDENTITY_FILE = REPO_DIR / 'identities.json'
 
 # Unambiguous chars (no I, O, 0, 1)
 CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+
+ACCOUNTS_FILE = REPO_DIR / 'accounts.json'
+
+def load_accounts():
+    if ACCOUNTS_FILE.exists():
+        try:
+            return json.loads(ACCOUNTS_FILE.read_text())
+        except Exception:
+            pass
+    return {}
+
+def save_accounts():
+    ACCOUNTS_FILE.write_text(json.dumps(accounts))
 
 def load_identities():
     if IDENTITY_FILE.exists():
@@ -94,6 +107,7 @@ clients        = {}    # websocket -> {id, name, color}
 chat_clients   = set() # websockets that are in the chat room
 chat_history   = load_chat_history()
 identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {code: device_id}}
+accounts       = load_accounts()    # {email: {password_hash, name, fv, sfv, code}}
 MAX_HISTORY  = 500
 
 free_colors = list(COLORS)
@@ -245,6 +259,28 @@ async def handler(websocket):
                     except Exception as e:
                         reply = f"Oops, something went wrong: {str(e)[:80]}"
                 await websocket.send(json.dumps({'type': 'claude_reply', 'name': 'Claude', 'text': reply, 'time': now_iso()}))
+
+            elif kind == 'register':
+                email    = str(data.get('email',    '')).lower().strip()[:120]
+                password = str(data.get('password', ''))[:200]
+                name     = str(data.get('name',     ''))[:MAX_NAME_LEN].strip()
+                if not email or '@' not in email or not password or not name:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'Please fill in all fields.'}))
+                    continue
+                if len(password) < 6:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'Password must be at least 6 characters.'}))
+                    continue
+                if email in accounts:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'That email is already registered. Use your account code to log in.'}))
+                    continue
+                pw_hash = hashlib.sha256(password.encode()).hexdigest()
+                code    = generate_code()
+                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code}
+                identity_store['by_code'][code]             = 'email:' + email
+                identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
+                save_accounts()
+                save_identities_file()
+                await websocket.send(json.dumps({'type': 'register_ok', 'code': code}))
 
             elif kind == 'save_identity':
                 device_id = str(data.get('device_id', ''))[:64].strip()
