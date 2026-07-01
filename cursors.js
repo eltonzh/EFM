@@ -355,6 +355,7 @@ function efmGoBack() {
             signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; return;
           }
           localStorage.setItem('efm_cursor_name', name);
+          if (result.code) localStorage.setItem('efm_account_code', result.code);
           if (deviceId) saveIdentityToServer(deviceId, name, '', '');
           showCodeNotification(result.code);
           overlay.remove();
@@ -424,8 +425,9 @@ function efmGoBack() {
             codeBtn.textContent = 'Continue';
           } else {
             localStorage.setItem('efm_cursor_name', rec.name);
-            if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
-            if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
+            if (rec.fv)   localStorage.setItem('efm_cursor_color',    rec.fv);
+            if (rec.sfv)  localStorage.setItem('efm_cursor_color2',   rec.sfv);
+            if (rec.code) localStorage.setItem('efm_account_code',    rec.code);
             if (deviceId) saveIdentityToServer(deviceId, rec.name, rec.fv || '', rec.sfv || '');
             overlay.remove();
             resolve({restored: true, name: rec.name, fv: rec.fv, sfv: rec.sfv});
