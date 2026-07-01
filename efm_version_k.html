@@ -241,7 +241,8 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
 
 /* Lesson */
 .lesson-view { display: none; }
-.lesson-view.active { display: block; }
+.lesson-view.active { display: flex; gap: 20px; align-items: flex-start; }
+.lesson-main { flex: 1; min-width: 0; }
 .lesson-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid hsl(var(--fv-h),95%,86%); }
 .lesson-header h2 { font-size: 18px; font-weight: 600; color: hsl(var(--fv-h),52%,24%); margin-bottom: 4px; }
 .lesson-header p { font-size: 11px; color: #6b7280; }
@@ -260,6 +261,31 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   transition: background 0.15s;
 }
 .back-btn:hover { background: hsl(var(--fv-h),95%,86%); }
+
+/* Right floating boxes — 2×2 mini grid */
+.lesson-aside {
+  width: 88px; flex-shrink: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  position: sticky; top: 80px;
+  animation: floatAside 4s ease-in-out infinite;
+}
+@keyframes floatAside {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+.aside-box {
+  width: 42px; height: 42px;
+  background: #fff; border-radius: 8px;
+  border: 1.5px solid hsl(var(--fv-h),95%,78%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+  text-decoration: none; display: flex;
+  align-items: center; justify-content: center;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s, background 0.15s;
+  cursor: pointer; position: relative;
+}
+.aside-box:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.15); transform: scale(1.12); border-color: var(--sfv); background: hsl(var(--fv-h),94%,94%); z-index: 1; }
+.aside-box-icon { font-size: 18px; line-height: 1; }
+.aside-box-title, .aside-box-desc { display: none; }
 </style>
 </head>
 <body>
@@ -324,12 +350,35 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
       <div class="cards" id="chapterCards"></div>
     </div>
     <div class="lesson-view" id="lessonView">
-      <button class="back-btn" id="backBtn">← Back to all chapters</button>
-      <div class="lesson-header">
-        <h2 id="lessonTitle"></h2>
-        <p id="lessonSub"></p>
+      <div class="lesson-main">
+        <button class="back-btn" id="backBtn">← Back to all chapters</button>
+        <div class="lesson-header">
+          <h2 id="lessonTitle"></h2>
+          <p id="lessonSub"></p>
+        </div>
+        <div class="lesson-body" id="lessonBody"></div>
       </div>
-      <div class="lesson-body" id="lessonBody"></div>
+      <aside class="lesson-aside">
+        <a class="aside-box" href="claude.html" title="Ask Claude">
+          <div class="aside-box-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(11,11)"><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(0)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(30)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(60)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(90)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(120)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(150)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(180)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(210)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(240)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(270)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(300)"/><rect x="-1.4" y="-9.5" width="2.8" height="7" rx="1.4" fill="#e07040" transform="rotate(330)"/></g></svg></div>
+          <div class="aside-box-title">Ask Claude</div>
+          <div class="aside-box-desc">Get help with this topic from Claude AI</div>
+        </a>
+        <a class="aside-box" href="group-chat.html" title="Group Chat">
+          <div class="aside-box-icon">💬</div>
+          <div class="aside-box-title">Group Chat</div>
+          <div class="aside-box-desc">Discuss with other students live</div>
+        </a>
+        <a class="aside-box" href="notebook.html" title="Notebook">
+          <div class="aside-box-icon">📓</div>
+          <div class="aside-box-title">Notebook</div>
+          <div class="aside-box-desc">Jot down notes for this section</div>
+        </a>
+        <div class="aside-box" id="navBox" style="padding:0;overflow:hidden;display:flex;gap:0;" title="Previous / Next section">
+          <button id="prevSecBtn" style="flex:1;height:100%;border:none;border-right:1px solid hsl(var(--fv-h),95%,78%);background:none;cursor:pointer;font-size:14px;color:hsl(var(--fv-h),52%,24%);font-family:inherit;border-radius:0;" title="Previous section">←</button>
+          <button id="nextSecBtn" style="flex:1;height:100%;border:none;background:none;cursor:pointer;font-size:14px;color:hsl(var(--fv-h),52%,24%);font-family:inherit;border-radius:0;" title="Next section">→</button>
+        </div>
+      </aside>
     </div>
   </div>
 </div>
@@ -367,8 +416,24 @@ const lessonBody=document.getElementById('lessonBody');
 const topbarTitle=document.getElementById('topbarTitle');
 const topbarBadge=document.getElementById('topbarBadge');
 const backBtn=document.getElementById('backBtn');
+const prevSecBtn=document.getElementById('prevSecBtn');
+const nextSecBtn=document.getElementById('nextSecBtn');
+
+let currentChIdx=0, currentSecIdx=0;
+
+function updateNavBtns(){
+  const ch=chapters[currentChIdx];
+  const isFirst=currentSecIdx===0;
+  const isLast=currentSecIdx===ch.secs.length-1;
+  prevSecBtn.disabled=isFirst;
+  prevSecBtn.style.opacity=isFirst?'0.35':'1';
+  nextSecBtn.disabled=isLast;
+  nextSecBtn.style.opacity=isLast?'0.35':'1';
+}
 
 function showLesson(ch,i){
+  currentChIdx=chapters.indexOf(ch);
+  currentSecIdx=i;
   const sec=ch.secs[i];
   lessonTitle.textContent=`${ch.num}.${i+1} — ${sec}`;
   lessonSub.textContent=`Chapter ${ch.num}: ${ch.title}`;
@@ -380,6 +445,7 @@ function showLesson(ch,i){
   document.querySelectorAll('.sec-link').forEach(l=>l.classList.remove('active'));
   const t=document.querySelector(`[data-ch="${ch.num}"][data-sec="${i}"]`);
   if(t)t.classList.add('active');
+  updateNavBtns();
 }
 
 backBtn.addEventListener('click',()=>{
@@ -389,6 +455,17 @@ backBtn.addEventListener('click',()=>{
   topbarBadge.textContent='15 Chapters';
   document.querySelectorAll('.sec-link').forEach(l=>l.classList.remove('active'));
   document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+});
+
+prevSecBtn.addEventListener('click',()=>{
+  if(currentSecIdx===0) return;
+  showLesson(chapters[currentChIdx], currentSecIdx-1);
+});
+
+nextSecBtn.addEventListener('click',()=>{
+  const ch=chapters[currentChIdx];
+  if(currentSecIdx>=ch.secs.length-1) return;
+  showLesson(ch, currentSecIdx+1);
 });
 
 chapters.forEach(ch=>{

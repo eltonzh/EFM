@@ -7,7 +7,29 @@ import anthropic
 import openai
 
 REPO_DIR = Path(__file__).parent.resolve()
-CHAT_FILE = REPO_DIR / 'chat_history.json'
+CHAT_FILE     = REPO_DIR / 'chat_history.json'
+IDENTITY_FILE = REPO_DIR / 'identities.json'
+
+# Unambiguous chars (no I, O, 0, 1)
+CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+
+def load_identities():
+    if IDENTITY_FILE.exists():
+        try:
+            return json.loads(IDENTITY_FILE.read_text())
+        except Exception:
+            pass
+    return {'by_device': {}, 'by_code': {}}
+
+def save_identities_file():
+    IDENTITY_FILE.write_text(json.dumps(identity_store))
+
+def generate_code():
+    for _ in range(100):
+        code = ''.join(random.choice(CODE_CHARS) for _ in range(6))
+        if code not in identity_store['by_code']:
+            return code
+    return ''.join(random.choice(CODE_CHARS) for _ in range(8))
 
 MAX_NAME_LEN      = 40
 MAX_TEXT_LEN      = 1000
@@ -68,9 +90,10 @@ async def process_request(connection, request):
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
 COLORS = [f'hsl({h * 10}, 82%, 56%)' for h in range(36)]
 
-clients      = {}    # websocket -> {id, name, color}
-chat_clients = set() # websockets that are in the chat room
-chat_history = load_chat_history()
+clients        = {}    # websocket -> {id, name, color}
+chat_clients   = set() # websockets that are in the chat room
+chat_history   = load_chat_history()
+identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {code: device_id}}
 MAX_HISTORY  = 500
 
 free_colors = list(COLORS)
@@ -222,6 +245,30 @@ async def handler(websocket):
                     except Exception as e:
                         reply = f"Oops, something went wrong: {str(e)[:80]}"
                 await websocket.send(json.dumps({'type': 'claude_reply', 'name': 'Claude', 'text': reply, 'time': now_iso()}))
+
+            elif kind == 'save_identity':
+                device_id = str(data.get('device_id', ''))[:64].strip()
+                name      = str(data.get('name', ''))[:MAX_NAME_LEN].strip()
+                fv        = str(data.get('fv',  ''))[:64].strip()
+                sfv       = str(data.get('sfv', ''))[:64].strip()
+                if device_id and name:
+                    existing = identity_store['by_device'].get(device_id, {})
+                    code = existing.get('code') or generate_code()
+                    identity_store['by_device'][device_id] = {'name': name, 'fv': fv, 'sfv': sfv, 'code': code}
+                    identity_store['by_code'][code] = device_id
+                    save_identities_file()
+                    await websocket.send(json.dumps({'type': 'identity_saved', 'code': code}))
+
+            elif kind == 'get_identity':
+                device_id = str(data.get('device_id', ''))[:64].strip()
+                record    = identity_store['by_device'].get(device_id)
+                await websocket.send(json.dumps({'type': 'identity_data', 'identity': record}))
+
+            elif kind == 'get_identity_by_code':
+                code      = str(data.get('code', '')).upper().strip()[:8]
+                device_id = identity_store['by_code'].get(code)
+                record    = identity_store['by_device'].get(device_id) if device_id else None
+                await websocket.send(json.dumps({'type': 'identity_data', 'identity': record, 'from_code': True}))
 
             elif kind == 'ask_chatgpt':
                 user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()

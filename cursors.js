@@ -17,6 +17,90 @@ function efmGoBack() {
     ? 'ws://localhost:8080'
     : 'wss://' + RAILWAY_URL;
 
+  // ── Device identity (cookie + localStorage + server) ──────────────
+  function getOrCreateDeviceId() {
+    var id = localStorage.getItem('efm_device_id');
+    if (!id) {
+      var match = document.cookie.match(/(?:^|;\s*)efm_device_id=([^;]+)/);
+      id = match ? decodeURIComponent(match[1]) : null;
+    }
+    if (!id) {
+      id = 'efm_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    }
+    localStorage.setItem('efm_device_id', id);
+    var exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
+    document.cookie = 'efm_device_id=' + encodeURIComponent(id) + ';expires=' + exp.toUTCString() + ';path=/;SameSite=Lax';
+    return id;
+  }
+
+  function _identityWS(buildMsg, onReply, timeoutMs) {
+    return new Promise(function (resolve) {
+      try {
+        var ws = new WebSocket(WS_URL);
+        var done = false;
+        var timer = setTimeout(function () {
+          if (!done) { done = true; try { ws.close(); } catch (e) {} resolve(null); }
+        }, timeoutMs || 4000);
+        ws.onopen = function () { ws.send(JSON.stringify(buildMsg())); };
+        ws.onmessage = function (e) {
+          try {
+            var d = JSON.parse(e.data);
+            var result = onReply(d);
+            if (result !== undefined && !done) {
+              done = true; clearTimeout(timer); try { ws.close(); } catch (er) {} resolve(result);
+            }
+          } catch (err) {}
+        };
+        ws.onerror = function () { if (!done) { done = true; clearTimeout(timer); resolve(null); } };
+        ws.onclose = function () { if (!done) { done = true; clearTimeout(timer); resolve(null); } };
+      } catch (e) { resolve(null); }
+    });
+  }
+
+  function fetchIdentityFromServer(deviceId) {
+    return _identityWS(
+      function () { return {type: 'get_identity', device_id: deviceId}; },
+      function (d) { if (d.type === 'identity_data') return d.identity || null; }
+    );
+  }
+
+  function fetchIdentityByCode(code) {
+    return _identityWS(
+      function () { return {type: 'get_identity_by_code', code: code}; },
+      function (d) { if (d.type === 'identity_data' && d.from_code) return d.identity || null; },
+      6000
+    );
+  }
+
+  function saveIdentityToServer(deviceId, name, fv, sfv) {
+    return _identityWS(
+      function () { return {type: 'save_identity', device_id: deviceId, name: name, fv: fv, sfv: sfv}; },
+      function (d) { if (d.type === 'identity_saved') return d.code || null; },
+      6000
+    );
+  }
+
+  function showCodeNotification(code) {
+    if (!code) return;
+    var bar = document.createElement('div');
+    bar.style.cssText = [
+      'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);',
+      'background:#0f0f13;color:#fff;padding:12px 20px;border-radius:12px;',
+      'font-family:system-ui,sans-serif;font-size:0.88rem;z-index:9999999;',
+      'box-shadow:0 4px 24px rgba(0,0,0,0.45);display:flex;align-items:center;gap:14px;',
+      'max-width:92vw;white-space:nowrap;'
+    ].join('');
+    bar.innerHTML = [
+      '<span>Your EFM code: <strong style="letter-spacing:0.1em;font-size:1rem;">' + code + '</strong>',
+      ' &mdash; save this to log in from any browser</span>',
+      '<button style="background:none;border:none;color:rgba(255,255,255,0.45);',
+      'cursor:pointer;font-size:1.2rem;padding:0;line-height:1;flex-shrink:0;" title="Dismiss">&times;</button>'
+    ].join('');
+    bar.querySelector('button').addEventListener('click', function () { bar.remove(); });
+    document.body.appendChild(bar);
+    setTimeout(function () { if (bar.parentNode) bar.remove(); }, 14000);
+  }
+
   function getIdentity() {
     var id    = localStorage.getItem('efm_cursor_id');
     var name  = localStorage.getItem('efm_cursor_name');
@@ -28,7 +112,7 @@ function efmGoBack() {
     return { id: id, name: name, color: color || '#888' };
   }
 
-  function showWelcomeScreen() {
+  function showWelcomeScreen(deviceId) {
     return new Promise(function (resolve) {
       var overlay = document.createElement('div');
       overlay.style.cssText = [
@@ -56,19 +140,87 @@ function efmGoBack() {
         'width:100%;padding:13px;background:#0f0f13;color:#fff;',
         'border:none;border-radius:10px;font-size:1rem;',
         'font-weight:700;cursor:pointer;letter-spacing:0.03em;',
-        'font-family:system-ui,sans-serif;'
+        'font-family:system-ui,sans-serif;margin-bottom:14px;'
       ].join('');
       btn.textContent = 'Start →';
       btn.addEventListener('click', function () {
         overlay.remove();
-        resolve();
+        resolve(null);
+      });
+
+      // ── "Have a code?" section ──
+      var codeToggle = document.createElement('div');
+      codeToggle.style.cssText = 'font-size:0.8rem;color:#2980b9;cursor:pointer;margin-bottom:4px;';
+      codeToggle.textContent = 'Have an account code? →';
+
+      var codeArea = document.createElement('div');
+      codeArea.style.cssText = 'display:none;margin-top:10px;';
+      codeArea.innerHTML = [
+        '<input id="_efm_code_in" type="text" maxlength="8" placeholder="e.g. ABCD12"',
+        ' style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;',
+        'font-size:1rem;letter-spacing:0.12em;text-align:center;text-transform:uppercase;',
+        'box-sizing:border-box;outline:none;font-family:system-ui,sans-serif;">',
+        '<div id="_efm_code_err" style="font-size:0.75rem;color:#c0392b;margin-top:5px;min-height:16px;"></div>',
+        '<button id="_efm_code_btn" style="margin-top:4px;width:100%;padding:10px;',
+        'background:#2980b9;color:#fff;border:none;border-radius:8px;font-size:0.9rem;',
+        'font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">',
+        'Log in with code</button>'
+      ].join('');
+
+      codeToggle.addEventListener('click', function () {
+        codeArea.style.display = codeArea.style.display === 'none' ? 'block' : 'none';
+        if (codeArea.style.display === 'block') {
+          setTimeout(function () { document.getElementById('_efm_code_in').focus(); }, 50);
+        }
+      });
+
+      function submitCode() {
+        var code = document.getElementById('_efm_code_in').value.toUpperCase().trim();
+        var errEl = document.getElementById('_efm_code_err');
+        var submitBtn = document.getElementById('_efm_code_btn');
+        if (code.length < 4) { errEl.textContent = 'Enter your full code.'; return; }
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Looking up…';
+        errEl.textContent = '';
+        fetchIdentityByCode(code).then(function (rec) {
+          if (!rec || !rec.name) {
+            errEl.textContent = 'Code not found — double-check and try again.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Log in with code';
+          } else {
+            // Restore identity
+            localStorage.setItem('efm_cursor_name', rec.name);
+            if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
+            if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
+            // Register this device_id on the server too
+            if (deviceId) {
+              saveIdentityToServer(deviceId, rec.name, rec.fv || '', rec.sfv || '');
+            }
+            overlay.remove();
+            resolve({restored: true, name: rec.name, fv: rec.fv, sfv: rec.sfv});
+          }
+        });
+      }
+
+      document.addEventListener('keydown', function onKey(e) {
+        if (e.key === 'Enter' && codeArea.style.display !== 'none') {
+          document.removeEventListener('keydown', onKey);
+          submitCode();
+        }
       });
 
       card.appendChild(logo);
       card.appendChild(title);
       card.appendChild(btn);
+      card.appendChild(codeToggle);
+      card.appendChild(codeArea);
       overlay.appendChild(card);
       document.body.appendChild(overlay);
+
+      setTimeout(function () {
+        var codeBtn = document.getElementById('_efm_code_btn');
+        if (codeBtn) codeBtn.addEventListener('click', submitCode);
+      }, 0);
     });
   }
 
@@ -264,58 +416,101 @@ function efmGoBack() {
 
   function init() {
     var identity = getIdentity();
-    var page = window.location.pathname.split('/').pop() || 'index.html';
-    var onIndex = (page === 'index.html' || page === '');
+    var deviceId = getOrCreateDeviceId();
+    var page     = window.location.pathname.split('/').pop() || 'index.html';
+    var onIndex  = (page === 'index.html' || page === '');
 
-    function runSetup() {
-      Promise.resolve(showWelcomeScreen())
-        .then(function () {
-          return identity.name || showNamePrompt(identity.color);
-        })
-        .then(function (name) {
-          identity.name = name;
-          var storedColor = localStorage.getItem('efm_cursor_color');
-          return storedColor || showColorPrompt(name);
-        })
-        .then(function (color) {
-          identity.color = color;
-          localStorage.setItem('efm_cursor_color', color);
-          window.dispatchEvent(new CustomEvent('efm_color_ready'));
-          var storedColor2 = localStorage.getItem('efm_cursor_color2');
-          return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
-        })
-        .then(function (color2) {
-          localStorage.setItem('efm_cursor_color2', color2);
-          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
-          if (onIndex) startCursors(identity);
-        });
+    function afterSetup(name, color, color2) {
+      identity.name  = name;
+      identity.color = color;
+      // Save to server, show code notification
+      saveIdentityToServer(deviceId, name, color, color2).then(showCodeNotification);
     }
 
-    if (!identity.name && onIndex) {
-      // Let the Go! button trigger setup instead of auto-showing
-      window.efmBeginSetup = runSetup;
-    } else {
-      // Non-index pages or already set up: run normally
-      Promise.resolve(identity.name ? null : showWelcomeScreen())
-        .then(function () {
-          return identity.name || showNamePrompt(identity.color);
-        })
-        .then(function (name) {
-          identity.name = name;
-          var storedColor = localStorage.getItem('efm_cursor_color');
-          return storedColor || showColorPrompt(name);
-        })
-        .then(function (color) {
-          identity.color = color;
-          localStorage.setItem('efm_cursor_color', color);
+    function runFullSetup() {
+      showWelcomeScreen(deviceId).then(function (restored) {
+        if (restored) {
+          // Restored via account code
+          identity.name  = restored.name;
+          identity.color = restored.fv || identity.color;
           window.dispatchEvent(new CustomEvent('efm_color_ready'));
-          var storedColor2 = localStorage.getItem('efm_cursor_color2');
-          return storedColor2 || showColorPrompt(identity.name, 'Pick another color');
-        })
-        .then(function (color2) {
-          localStorage.setItem('efm_cursor_color2', color2);
+          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
           if (onIndex) startCursors(identity);
-        });
+          return;
+        }
+        // Normal name → FV → SFV flow
+        Promise.resolve(identity.name || showNamePrompt(identity.color))
+          .then(function (name) {
+            identity.name = name;
+            return localStorage.getItem('efm_cursor_color') || showColorPrompt(name);
+          })
+          .then(function (color) {
+            identity.color = color;
+            localStorage.setItem('efm_cursor_color', color);
+            window.dispatchEvent(new CustomEvent('efm_color_ready'));
+            return localStorage.getItem('efm_cursor_color2') || showColorPrompt(identity.name, 'Pick another color');
+          })
+          .then(function (color2) {
+            localStorage.setItem('efm_cursor_color2', color2);
+            afterSetup(identity.name, identity.color, color2);
+            window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+            if (onIndex) startCursors(identity);
+          });
+      });
+    }
+
+    function continueWithIdentity() {
+      // Identity is already in localStorage; start normally
+      window.dispatchEvent(new CustomEvent('efm_color_ready'));
+      if (onIndex) {
+        window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+        startCursors(identity);
+      } else {
+        // Non-index pages may still need color prompts if not set
+        Promise.resolve(localStorage.getItem('efm_cursor_color') || showColorPrompt(identity.name))
+          .then(function (color) {
+            identity.color = color;
+            localStorage.setItem('efm_cursor_color', color);
+            return localStorage.getItem('efm_cursor_color2') || showColorPrompt(identity.name, 'Pick another color');
+          })
+          .then(function (color2) {
+            localStorage.setItem('efm_cursor_color2', color2);
+          });
+      }
+    }
+
+    if (identity.name) {
+      // Already set up locally
+      continueWithIdentity();
+    } else if (onIndex) {
+      // Try server lookup first; if found, unlock silently; if not, wait for Go!
+      fetchIdentityFromServer(deviceId).then(function (rec) {
+        if (rec && rec.name) {
+          localStorage.setItem('efm_cursor_name', rec.name);
+          if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
+          if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
+          identity.name  = rec.name;
+          identity.color = rec.fv || identity.color;
+          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+          startCursors(identity);
+        } else {
+          window.efmBeginSetup = runFullSetup;
+        }
+      });
+    } else {
+      // Non-index page, no local identity — try server, then setup if needed
+      fetchIdentityFromServer(deviceId).then(function (rec) {
+        if (rec && rec.name) {
+          localStorage.setItem('efm_cursor_name', rec.name);
+          if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
+          if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
+          identity.name  = rec.name;
+          identity.color = rec.fv || identity.color;
+          continueWithIdentity();
+        } else {
+          runFullSetup();
+        }
+      });
     }
   }
 
