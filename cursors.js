@@ -114,113 +114,131 @@ function efmGoBack() {
 
   function showWelcomeScreen(deviceId) {
     return new Promise(function (resolve) {
+      // Full white page, Gimkit-style
       var overlay = document.createElement('div');
       overlay.style.cssText = [
-        'position:fixed;inset:0;background:rgba(0,0,0,0.6);',
-        'display:flex;align-items:center;justify-content:center;',
+        'position:fixed;inset:0;background:#fff;',
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;',
         'z-index:999999;font-family:system-ui,sans-serif;'
       ].join('');
 
-      var card = document.createElement('div');
-      card.style.cssText = [
-        'background:#fff;border-radius:18px;padding:44px 36px;',
-        'box-shadow:0 12px 60px rgba(0,0,0,0.3);width:320px;text-align:center;'
-      ].join('');
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'width:100%;max-width:480px;padding:0 28px;box-sizing:border-box;';
 
+      // ── Big EFM title ──
       var logo = document.createElement('div');
-      logo.style.cssText = 'font-size:2.4rem;font-weight:800;color:#0f0f13;letter-spacing:0.05em;margin-bottom:10px;';
+      logo.style.cssText = [
+        'font-size:4rem;font-weight:900;color:#0f0f13;',
+        'text-align:center;letter-spacing:0.04em;margin-bottom:6px;',
+        'line-height:1;'
+      ].join('');
       logo.textContent = 'EFM';
 
-      var title = document.createElement('div');
-      title.style.cssText = 'font-size:1rem;font-weight:700;color:#111;margin-bottom:8px;';
-      title.textContent = 'Welcome to Elton\'s Fun Math!';
+      var sub = document.createElement('div');
+      sub.style.cssText = 'font-size:0.95rem;color:#999;text-align:center;margin-bottom:28px;font-weight:500;';
+      sub.textContent = "Elton's Fun Math";
 
-      var btn = document.createElement('button');
-      btn.style.cssText = [
-        'width:100%;padding:13px;background:#0f0f13;color:#fff;',
-        'border:none;border-radius:10px;font-size:1rem;',
-        'font-weight:700;cursor:pointer;letter-spacing:0.03em;',
-        'font-family:system-ui,sans-serif;margin-bottom:14px;'
+      var hr1 = document.createElement('hr');
+      hr1.style.cssText = 'border:none;border-top:1.5px solid #ebebeb;margin:0 0 28px;';
+
+      // ── Primary button ──
+      var startBtn = document.createElement('button');
+      startBtn.style.cssText = [
+        'display:block;width:100%;padding:16px 20px;',
+        'background:#0f0f13;color:#fff;border:none;border-radius:12px;',
+        'font-size:1.05rem;font-weight:700;cursor:pointer;',
+        'font-family:system-ui,sans-serif;margin-bottom:24px;',
+        'box-shadow:0 2px 10px rgba(0,0,0,0.14);',
+        'transition:background 0.15s;'
       ].join('');
-      btn.textContent = 'Start →';
-      btn.addEventListener('click', function () {
-        overlay.remove();
-        resolve(null);
-      });
+      startBtn.textContent = 'Get Started →';
+      startBtn.addEventListener('mouseenter', function () { startBtn.style.background = '#2a2a35'; });
+      startBtn.addEventListener('mouseleave', function () { startBtn.style.background = '#0f0f13'; });
+      startBtn.addEventListener('click', function () { overlay.remove(); resolve(null); });
 
-      // ── "Have a code?" section ──
-      var codeToggle = document.createElement('div');
-      codeToggle.style.cssText = 'font-size:0.8rem;color:#2980b9;cursor:pointer;margin-bottom:4px;';
-      codeToggle.textContent = 'Have an account code? →';
-
-      var codeArea = document.createElement('div');
-      codeArea.style.cssText = 'display:none;margin-top:10px;';
-      codeArea.innerHTML = [
-        '<input id="_efm_code_in" type="text" maxlength="8" placeholder="e.g. ABCD12"',
-        ' style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;',
-        'font-size:1rem;letter-spacing:0.12em;text-align:center;text-transform:uppercase;',
-        'box-sizing:border-box;outline:none;font-family:system-ui,sans-serif;">',
-        '<div id="_efm_code_err" style="font-size:0.75rem;color:#c0392b;margin-top:5px;min-height:16px;"></div>',
-        '<button id="_efm_code_btn" style="margin-top:4px;width:100%;padding:10px;',
-        'background:#2980b9;color:#fff;border:none;border-radius:8px;font-size:0.9rem;',
-        'font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">',
-        'Log in with code</button>'
+      // ── "or" divider ──
+      var orRow = document.createElement('div');
+      orRow.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:22px;';
+      orRow.innerHTML = [
+        '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>',
+        '<span style="font-size:0.85rem;color:#bbb;font-weight:600;">or</span>',
+        '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>'
       ].join('');
 
-      codeToggle.addEventListener('click', function () {
-        codeArea.style.display = codeArea.style.display === 'none' ? 'block' : 'none';
-        if (codeArea.style.display === 'block') {
-          setTimeout(function () { document.getElementById('_efm_code_in').focus(); }, 50);
-        }
+      // ── Account code section ──
+      var codeLabel = document.createElement('div');
+      codeLabel.style.cssText = 'font-size:1rem;font-weight:700;color:#0f0f13;margin-bottom:10px;';
+      codeLabel.textContent = 'Log in with an account code...';
+
+      var codeInput = document.createElement('input');
+      codeInput.type = 'text';
+      codeInput.maxLength = 8;
+      codeInput.placeholder = 'Account code (e.g. KPQT38)';
+      codeInput.style.cssText = [
+        'display:block;width:100%;padding:14px 16px;',
+        'border:1.5px solid #e0e0e0;border-radius:12px;',
+        'font-size:1rem;letter-spacing:0.12em;text-align:center;',
+        'text-transform:uppercase;box-sizing:border-box;outline:none;',
+        'font-family:system-ui,sans-serif;margin-bottom:10px;',
+        'color:#0f0f13;transition:border-color 0.15s;'
+      ].join('');
+      codeInput.addEventListener('focus', function () { codeInput.style.borderColor = '#0f0f13'; });
+      codeInput.addEventListener('blur',  function () { codeInput.style.borderColor = '#e0e0e0'; });
+      codeInput.addEventListener('input', function () {
+        codeInput.value = codeInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        var active = codeInput.value.length >= 4;
+        codeBtn.style.background  = active ? '#0f0f13' : '#ccc';
+        codeBtn.style.cursor      = active ? 'pointer' : 'default';
       });
+
+      var codeErr = document.createElement('div');
+      codeErr.style.cssText = 'font-size:0.78rem;color:#c0392b;min-height:18px;margin-bottom:8px;';
+
+      var codeBtn = document.createElement('button');
+      codeBtn.style.cssText = [
+        'display:block;width:100%;padding:14px 20px;',
+        'background:#ccc;color:#fff;border:none;border-radius:12px;',
+        'font-size:1rem;font-weight:700;cursor:default;',
+        'font-family:system-ui,sans-serif;transition:background 0.15s;'
+      ].join('');
+      codeBtn.textContent = 'Continue';
 
       function submitCode() {
-        var code = document.getElementById('_efm_code_in').value.toUpperCase().trim();
-        var errEl = document.getElementById('_efm_code_err');
-        var submitBtn = document.getElementById('_efm_code_btn');
-        if (code.length < 4) { errEl.textContent = 'Enter your full code.'; return; }
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Looking up…';
-        errEl.textContent = '';
+        var code = codeInput.value.toUpperCase().trim();
+        if (code.length < 4) { codeErr.textContent = 'Enter your full code.'; return; }
+        codeBtn.disabled = true;
+        codeBtn.textContent = 'Looking up…';
+        codeErr.textContent = '';
         fetchIdentityByCode(code).then(function (rec) {
           if (!rec || !rec.name) {
-            errEl.textContent = 'Code not found — double-check and try again.';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Log in with code';
+            codeErr.textContent = 'Code not found — double-check and try again.';
+            codeBtn.disabled = false;
+            codeBtn.textContent = 'Continue';
           } else {
-            // Restore identity
             localStorage.setItem('efm_cursor_name', rec.name);
             if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
             if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
-            // Register this device_id on the server too
-            if (deviceId) {
-              saveIdentityToServer(deviceId, rec.name, rec.fv || '', rec.sfv || '');
-            }
+            if (deviceId) saveIdentityToServer(deviceId, rec.name, rec.fv || '', rec.sfv || '');
             overlay.remove();
             resolve({restored: true, name: rec.name, fv: rec.fv, sfv: rec.sfv});
           }
         });
       }
 
-      document.addEventListener('keydown', function onKey(e) {
-        if (e.key === 'Enter' && codeArea.style.display !== 'none') {
-          document.removeEventListener('keydown', onKey);
-          submitCode();
-        }
-      });
+      codeBtn.addEventListener('click', submitCode);
+      codeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitCode(); });
 
-      card.appendChild(logo);
-      card.appendChild(title);
-      card.appendChild(btn);
-      card.appendChild(codeToggle);
-      card.appendChild(codeArea);
-      overlay.appendChild(card);
+      wrap.appendChild(logo);
+      wrap.appendChild(sub);
+      wrap.appendChild(hr1);
+      wrap.appendChild(startBtn);
+      wrap.appendChild(orRow);
+      wrap.appendChild(codeLabel);
+      wrap.appendChild(codeInput);
+      wrap.appendChild(codeErr);
+      wrap.appendChild(codeBtn);
+      overlay.appendChild(wrap);
       document.body.appendChild(overlay);
-
-      setTimeout(function () {
-        var codeBtn = document.getElementById('_efm_code_btn');
-        if (codeBtn) codeBtn.addEventListener('click', submitCode);
-      }, 0);
     });
   }
 
