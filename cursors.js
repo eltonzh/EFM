@@ -117,13 +117,59 @@ function efmGoBack() {
       // Full white page, Gimkit-style
       var overlay = document.createElement('div');
       overlay.style.cssText = [
-        'position:fixed;inset:0;background:#fff;',
+        'position:fixed;inset:0;background:#fff;overflow:hidden;',
         'display:flex;flex-direction:column;align-items:center;justify-content:center;',
         'z-index:999999;font-family:system-ui,sans-serif;'
       ].join('');
 
+      // ── Floating math symbols background ──
+      var mathSymbols = [
+        '∑','∫','π','±','√','×','÷','≠','∞','θ',
+        'Δ','α','β','φ','λ','≈','≤','≥','∂','∇',
+        '²','³','½','%','+','−','=','(',')',
+        '∑','π','√','∞','×','÷','≠','θ','Δ','≈'
+      ];
+
+      var styleEl = document.createElement('style');
+      styleEl.textContent = [
+        '@keyframes efmFloat {',
+        '  0%   { transform: translateY(0)   rotate(0deg);   }',
+        '  30%  { transform: translateY(-22px) rotate(6deg); }',
+        '  60%  { transform: translateY(10px)  rotate(-4deg);}',
+        '  100% { transform: translateY(0)   rotate(0deg);   }',
+        '}'
+      ].join('');
+      document.head.appendChild(styleEl);
+
+      var bg = document.createElement('div');
+      bg.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+
+      mathSymbols.forEach(function (sym, i) {
+        var el = document.createElement('span');
+        var size   = 22 + Math.random() * 52;          // 22–74 px
+        var left   = Math.random() * 96;               // 0–96 vw
+        var top    = Math.random() * 92;               // 0–92 vh
+        var dur    = 7  + Math.random() * 14;          // 7–21 s
+        var delay  = -(Math.random() * dur);           // stagger start
+        var op     = 0.06 + Math.random() * 0.10;     // 0.06–0.16
+        el.textContent = sym;
+        el.style.cssText = [
+          'position:absolute;',
+          'left:' + left + 'vw;',
+          'top:'  + top  + 'vh;',
+          'font-size:' + size + 'px;',
+          'color:#0f0f13;',
+          'opacity:' + op.toFixed(2) + ';',
+          'animation:efmFloat ' + dur.toFixed(1) + 's ' + delay.toFixed(1) + 's ease-in-out infinite;',
+          'user-select:none;font-weight:600;',
+          'font-family:Georgia,serif;'
+        ].join('');
+        bg.appendChild(el);
+      });
+      overlay.appendChild(bg);
+
       var wrap = document.createElement('div');
-      wrap.style.cssText = 'width:100%;max-width:480px;padding:0 28px;box-sizing:border-box;';
+      wrap.style.cssText = 'width:100%;max-width:480px;padding:0 28px;box-sizing:border-box;position:relative;';
 
       // ── Big EFM title ──
       var logo = document.createElement('div');
