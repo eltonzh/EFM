@@ -382,7 +382,7 @@ function efmGoBack() {
       var codeInput = document.createElement('input');
       codeInput.type = 'text';
       codeInput.maxLength = 8;
-      codeInput.placeholder = 'Account code (e.g. KPQT38)';
+      codeInput.placeholder = 'Account code (e.g. KPQ38)';
       codeInput.style.cssText = [
         'display:block;width:100%;padding:14px 16px;',
         'border:1.5px solid #e0e0e0;border-radius:12px;',
@@ -395,7 +395,7 @@ function efmGoBack() {
       codeInput.addEventListener('blur',  function () { codeInput.style.borderColor = '#e0e0e0'; });
       codeInput.addEventListener('input', function () {
         codeInput.value = codeInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        var active = codeInput.value.length >= 4;
+        var active = codeInput.value.length >= 5;
         codeBtn.style.background  = active ? '#0f0f13' : '#ccc';
         codeBtn.style.cursor      = active ? 'pointer' : 'default';
       });
@@ -414,7 +414,7 @@ function efmGoBack() {
 
       function submitCode() {
         var code = codeInput.value.toUpperCase().trim();
-        if (code.length < 4) { codeErr.textContent = 'Enter your full code.'; return; }
+        if (code.length < 5) { codeErr.textContent = 'Enter your full code.'; return; }
         codeBtn.disabled = true;
         codeBtn.textContent = 'Looking up…';
         codeErr.textContent = '';

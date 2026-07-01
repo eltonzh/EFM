@@ -39,10 +39,10 @@ def save_identities_file():
 
 def generate_code():
     for _ in range(100):
-        code = ''.join(random.choice(CODE_CHARS) for _ in range(6))
+        code = ''.join(random.choice(CODE_CHARS) for _ in range(5))
         if code not in identity_store['by_code']:
             return code
-    return ''.join(random.choice(CODE_CHARS) for _ in range(8))
+    return ''.join(random.choice(CODE_CHARS) for _ in range(7))
 
 MAX_NAME_LEN      = 40
 MAX_TEXT_LEN      = 1000
