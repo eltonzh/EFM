@@ -139,22 +139,77 @@ function efmGoBack() {
       sub.textContent = "Elton's Fun Math";
 
       var hr1 = document.createElement('hr');
-      hr1.style.cssText = 'border:none;border-top:1.5px solid #ebebeb;margin:0 0 28px;';
+      hr1.style.cssText = 'border:none;border-top:1.5px solid #ebebeb;margin:0 0 22px;';
 
-      // ── Primary button ──
-      var startBtn = document.createElement('button');
-      startBtn.style.cssText = [
-        'display:block;width:100%;padding:16px 20px;',
-        'background:#0f0f13;color:#fff;border:none;border-radius:12px;',
-        'font-size:1.05rem;font-weight:700;cursor:pointer;',
-        'font-family:system-ui,sans-serif;margin-bottom:24px;',
-        'box-shadow:0 2px 10px rgba(0,0,0,0.14);',
-        'transition:background 0.15s;'
+      // ── Sign up section ──
+      var signupLabel = document.createElement('div');
+      signupLabel.style.cssText = 'font-size:1rem;font-weight:700;color:#0f0f13;margin-bottom:10px;';
+      signupLabel.textContent = 'Create an account...';
+
+      var nameRow = document.createElement('div');
+      nameRow.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;';
+
+      var firstInput = document.createElement('input');
+      firstInput.type = 'text';
+      firstInput.maxLength = 20;
+      firstInput.placeholder = 'First name';
+      firstInput.style.cssText = [
+        'flex:1;padding:14px 16px;border:1.5px solid #e0e0e0;border-radius:12px;',
+        'font-size:1rem;box-sizing:border-box;outline:none;',
+        'font-family:system-ui,sans-serif;color:#0f0f13;transition:border-color 0.15s;'
       ].join('');
-      startBtn.textContent = 'Get Started →';
-      startBtn.addEventListener('mouseenter', function () { startBtn.style.background = '#2a2a35'; });
-      startBtn.addEventListener('mouseleave', function () { startBtn.style.background = '#0f0f13'; });
-      startBtn.addEventListener('click', function () { overlay.remove(); resolve(null); });
+
+      var lastInput = document.createElement('input');
+      lastInput.type = 'text';
+      lastInput.maxLength = 1;
+      lastInput.placeholder = 'A';
+      lastInput.style.cssText = [
+        'width:52px;padding:14px 10px;border:1.5px solid #e0e0e0;border-radius:12px;',
+        'font-size:1rem;text-align:center;text-transform:uppercase;',
+        'box-sizing:border-box;outline:none;',
+        'font-family:system-ui,sans-serif;color:#0f0f13;transition:border-color 0.15s;'
+      ].join('');
+
+      [firstInput, lastInput].forEach(function (inp) {
+        inp.addEventListener('focus', function () { inp.style.borderColor = '#0f0f13'; });
+        inp.addEventListener('blur',  function () { inp.style.borderColor = '#e0e0e0'; });
+      });
+      lastInput.addEventListener('input', function () {
+        lastInput.value = lastInput.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 1);
+      });
+      firstInput.addEventListener('input', updateSignupBtn);
+      firstInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') lastInput.focus(); });
+      lastInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitSignup(); });
+
+      nameRow.appendChild(firstInput);
+      nameRow.appendChild(lastInput);
+
+      var signupBtn = document.createElement('button');
+      signupBtn.style.cssText = [
+        'display:block;width:100%;padding:14px 20px;',
+        'background:#ccc;color:#fff;border:none;border-radius:12px;',
+        'font-size:1rem;font-weight:700;cursor:default;',
+        'font-family:system-ui,sans-serif;transition:background 0.15s;margin-bottom:24px;'
+      ].join('');
+      signupBtn.textContent = 'Create Account';
+
+      function updateSignupBtn() {
+        var active = firstInput.value.trim().length > 0;
+        signupBtn.style.background = active ? '#0f0f13' : '#ccc';
+        signupBtn.style.cursor     = active ? 'pointer' : 'default';
+      }
+
+      function submitSignup() {
+        var first = firstInput.value.trim();
+        if (!first) { firstInput.focus(); return; }
+        var last = lastInput.value.trim().toUpperCase();
+        var name = first + (last ? ' ' + last + '.' : '');
+        localStorage.setItem('efm_cursor_name', name);
+        overlay.remove();
+        resolve(null);
+      }
+
+      signupBtn.addEventListener('click', submitSignup);
 
       // ── "or" divider ──
       var orRow = document.createElement('div');
@@ -231,7 +286,9 @@ function efmGoBack() {
       wrap.appendChild(logo);
       wrap.appendChild(sub);
       wrap.appendChild(hr1);
-      wrap.appendChild(startBtn);
+      wrap.appendChild(signupLabel);
+      wrap.appendChild(nameRow);
+      wrap.appendChild(signupBtn);
       wrap.appendChild(orRow);
       wrap.appendChild(codeLabel);
       wrap.appendChild(codeInput);
@@ -456,12 +513,9 @@ function efmGoBack() {
           if (onIndex) startCursors(identity);
           return;
         }
-        // Normal name → FV → SFV flow
-        Promise.resolve(identity.name || showNamePrompt(identity.color))
-          .then(function (name) {
-            identity.name = name;
-            return localStorage.getItem('efm_cursor_color') || showColorPrompt(name);
-          })
+        // Name already saved by welcome screen; go straight to colors
+        identity.name = localStorage.getItem('efm_cursor_name') || identity.name;
+        Promise.resolve(localStorage.getItem('efm_cursor_color') || showColorPrompt(identity.name))
           .then(function (color) {
             identity.color = color;
             localStorage.setItem('efm_cursor_color', color);
