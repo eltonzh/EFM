@@ -25,18 +25,20 @@
     .back-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #555;
+      gap: 7px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
       text-decoration: none;
       margin-bottom: 28px;
-      background: none;
+      background: #0f0f13;
       border: none;
+      border-radius: 10px;
       cursor: pointer;
-      padding: 0;
+      padding: 9px 16px;
+      transition: background 0.15s;
     }
-    .back-btn:hover { color: #0f0f13; }
+    .back-btn:hover { background: #2a2a35; }
     h1 {
       font-size: 2rem;
       font-weight: 800;
@@ -245,16 +247,22 @@
     </div>
 
     <!-- Account code -->
-    <div class="card">
-      <div class="card-title">Account Code</div>
-      <div class="row">
-        <span class="row-label">Your code</span>
-        <span class="code-badge" id="val-code">——</span>
-        <button class="copy-btn" id="copy-btn">Copy</button>
+    <div class="card-code-wrap">
+      <div class="bubble bubble-down" id="important-bubble" style="bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);">Important!</div>
+      <div class="card">
+        <div class="card-title">Account Code</div>
+        <div class="row">
+          <span class="row-label">Your code</span>
+          <span class="code-badge" id="val-code">——</span>
+          <div class="copy-wrap">
+            <div class="bubble bubble-copy" id="copy-bubble" style="bottom:calc(100% + 10px);right:0;">Copy this! ↓</div>
+            <button class="copy-btn" id="copy-btn">Copy</button>
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:#aaa;margin-top:10px;line-height:1.5;">
+          Use this code to log in from any browser — Chrome, Safari, Edge, or any device.
+        </p>
       </div>
-      <p style="font-size:0.8rem;color:#aaa;margin-top:10px;line-height:1.5;">
-        Use this code to log in from any browser — Chrome, Safari, Edge, or any device.
-      </p>
     </div>
 
     <!-- Danger zone -->
@@ -298,6 +306,17 @@
       else       dotSFV.style.display = 'none';
     }
 
+    function dismissBubbles() {
+      var ib = document.getElementById('important-bubble');
+      var cb = document.getElementById('copy-bubble');
+      if (ib) ib.style.display = 'none';
+      if (cb) cb.style.display = 'none';
+      localStorage.setItem('efm_code_copied', '1');
+    }
+
+    // Hide bubbles immediately if already copied before
+    if (localStorage.getItem('efm_code_copied')) dismissBubbles();
+
     document.getElementById('copy-btn').addEventListener('click', function () {
       var code = document.getElementById('val-code').textContent;
       if (code === '——') { showToast('No code yet — finish setup first.'); return; }
@@ -306,6 +325,7 @@
       }).catch(function () {
         showToast('Code: ' + code);
       });
+      dismissBubbles();
     });
 
     document.getElementById('reset-btn').addEventListener('click', function () {
