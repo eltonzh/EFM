@@ -262,7 +262,7 @@ function efmGoBack() {
       orRow.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:22px;';
       orRow.innerHTML = [
         '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>',
-        '<span style="font-size:0.85rem;color:#bbb;font-weight:600;">or</span>',
+        '<span style="font-size:0.85rem;color:#0f0f13;font-weight:600;">or</span>',
         '<div style="flex:1;height:1.5px;background:#ebebeb;"></div>'
       ].join('');
 
