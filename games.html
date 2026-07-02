@@ -138,6 +138,8 @@
     .progress-bar-bg { flex: 1; background: #eee; border-radius: 99px; height: 6px; }
     .progress-bar { background: #0f0f13; border-radius: 99px; height: 6px; transition: width 0.3s; }
     .progress-num { font-size: 13px; font-weight: 700; color: #888; white-space: nowrap; }
+    .timer-num { font-size: 15px; font-weight: 900; color: #0f0f13; white-space: nowrap; min-width: 36px; text-align: right; }
+    .timer-num.urgent { color: #dc2626; }
     .q-display {
       font-size: 30px; font-weight: 900; text-align: center;
       margin-bottom: 20px; color: #0f0f13; letter-spacing: -0.5px;
@@ -241,6 +243,7 @@
       <div class="progress-row">
         <div class="progress-bar-bg"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
         <div class="progress-num" id="prog-num">0 / 15</div>
+        <div class="timer-num" id="timer-num">3:30</div>
       </div>
       <div id="test-body">
         <div class="q-display" id="q-display"></div>
@@ -260,7 +263,8 @@
 
     var intermediateGames = [
       { name: 'Exponential Mountaineer', icon: '⛰️', desc: 'Climb to the summit by solving exponent problems', href: 'game-exponential-mountaineer.html' },
-      { name: 'Meteor Math', icon: '☄️', desc: 'Blast 15 meteors to save the city. Win: +10 🪙  Lose: −5 🪙', href: 'game-meteor-math-easy.html' }
+      { name: 'Meteor Math', icon: '☄️', desc: 'Blast 15 meteors to save the city. Win: +10 🪙  Lose: −5 🪙', href: 'game-meteor-math-easy.html' },
+      { name: 'Bubble Pop', icon: '🫧', desc: 'Pop bubbles that match the math challenge. Win: +10 🪙  Lose: −5 🪙', href: 'game-bubble-pop.html' }
     ];
 
     var advancedGames = [
@@ -269,9 +273,13 @@
 
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-    function makeQuestion() {
-      var ops = ['+', '-', '×', '÷'];
-      var op = ops[rand(0, 3)];
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+
+    function makeQuestion(op) {
       var a, b, ans;
       if (op === '+') { a = rand(1, 90); b = rand(1, 99 - a); ans = a + b; }
       else if (op === '-') { a = rand(2, 99); b = rand(1, a - 1); ans = a - b; }
@@ -279,6 +287,30 @@
       else { ans = rand(2, 12); b = rand(2, 9); a = ans * b; }
       return { text: a + ' ' + op + ' ' + b + ' = ?', ans: ans };
     }
+
+    var timerInterval = null, timerSec = 0;
+    var TIMER_DURATION = 210;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerSec = TIMER_DURATION;
+      updateTimerDisplay();
+      timerInterval = setInterval(function() {
+        timerSec--;
+        updateTimerDisplay();
+        if (timerSec <= 0) { clearInterval(timerInterval); showResult(); }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      var el = document.getElementById('timer-num');
+      if (!el) return;
+      var m = Math.floor(timerSec / 60), s = timerSec % 60;
+      el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      el.className = 'timer-num' + (timerSec <= 30 ? ' urgent' : '');
+    }
+
+    function stopTimer() { clearInterval(timerInterval); }
 
     function renderIntermediate() {
       var grid = document.getElementById('intermediate-grid');
@@ -332,13 +364,14 @@
     }
 
     function openTest() {
-      questions = [];
-      for (var i = 0; i < TOTAL; i++) questions.push(makeQuestion());
+      var opPool = shuffle(['+','+','+','+','-','-','-','-','×','×','×','×','÷','÷','÷']);
+      questions = opPool.map(function(op) { return makeQuestion(op); });
       qi = 0; score = 0;
       document.getElementById('result-area').style.display = 'none';
       document.getElementById('test-body').style.display = 'block';
       document.getElementById('modal-bg').classList.add('open');
       showQuestion();
+      startTimer();
     }
 
     function showQuestion() {
@@ -377,6 +410,7 @@
     }
 
     function showResult() {
+      stopTimer();
       document.getElementById('prog-bar').style.width = '100%';
       document.getElementById('prog-num').textContent = TOTAL + ' / ' + TOTAL;
       document.getElementById('test-body').style.display = 'none';
@@ -396,6 +430,7 @@
     }
 
     function closeTest(passed) {
+      stopTimer();
       document.getElementById('modal-bg').classList.remove('open');
       if (passed) {
         localStorage.setItem('efm_games_intermediate_unlocked', '1');
