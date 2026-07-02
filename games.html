@@ -118,6 +118,21 @@
       font-family: inherit;
       cursor: default;
     }
+    .buy-btn {
+      margin-top: 8px;
+      background: #facc15;
+      color: #0f0f13;
+      border: none;
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .buy-btn:hover { background: #fbbf24; }
+    .buy-btn:disabled { background: #e8e8e8; color: #999; cursor: default; }
 
     /* Modal */
     .modal-bg {
@@ -177,7 +192,6 @@
   <div class="topbar">
     <button class="back-btn" onclick="history.back()">← Back</button>
     <h1>🎮 Games</h1>
-    <div style="width:80px;"></div>
   </div>
 
   <div class="content">
@@ -261,14 +275,27 @@
     var PASS_SCORE = 15, TOTAL = 15;
     var questions = [], qi = 0, score = 0, answered = false;
 
+    function getCoins() { return parseInt(localStorage.getItem('efm_coins') || '0'); }
+    function getCash() { return parseInt(localStorage.getItem('efm_coins') || '0'); }
+    function setCash(n) { localStorage.setItem('efm_coins', Math.max(0, n)); }
+    function isPurchased(href) { return !!localStorage.getItem('efm_game_bought_' + href); }
+
+    function buyGame(href) {
+      var cash = getCash();
+      if (cash < 50) { alert('Not enough cash! You need 50 cash to buy this game.'); return; }
+      setCash(cash - 50);
+      localStorage.setItem('efm_game_bought_' + href, '1');
+      renderIntermediate();
+    }
+
     var intermediateGames = [
       { name: 'Exponential Mountaineer', icon: '⛰️', desc: 'Climb to the summit by solving exponent problems', href: 'game-exponential-mountaineer.html' },
-      { name: 'Meteor Math', icon: '☄️', desc: 'Blast 15 meteors to save the city. Win: +10 🪙  Lose: −5 🪙', href: 'game-meteor-math-easy.html' },
-      { name: 'Bubble Pop', icon: '🫧', desc: 'Pop bubbles that match the math challenge. Win: +10 🪙  Lose: −5 🪙', href: 'game-bubble-pop.html' }
+      { name: 'Meteor Math', icon: '☄️', desc: 'Blast 15 meteors to save the city. Win: +10 coins  Lose: −5 coins', href: 'game-meteor-math-easy.html' },
+      { name: 'Bubble Pop', icon: '🫧', desc: 'Pop bubbles that match the math challenge. Win: +10 coins  Lose: −5 coins', href: 'game-bubble-pop.html' }
     ];
 
     var advancedGames = [
-      { name: 'Meteor Math: Hard', icon: '☄️', desc: 'Exponent meteors fall fast. Win: +10 🪙  Lose: −5 🪙', href: 'game-meteor-math.html' }
+      { name: 'Meteor Math: Hard', icon: '☄️', desc: 'Exponent meteors fall fast. Win: +10 coins  Lose: −5 coins', href: 'game-meteor-math.html' }
     ];
 
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -317,14 +344,26 @@
       grid.innerHTML = '';
       if (localStorage.getItem('efm_games_intermediate_unlocked')) {
         intermediateGames.forEach(function(g) {
-          var a = document.createElement('a');
-          a.className = 'game-card';
-          a.href = g.href;
-          a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
-            '<div class="game-card-name">' + g.name + '</div>' +
-            '<div class="game-card-desc">' + g.desc + '</div>' +
-            '<div class="game-card-play">Play →</div>';
-          grid.appendChild(a);
+          if (isPurchased(g.href)) {
+            var a = document.createElement('a');
+            a.className = 'game-card';
+            a.href = g.href;
+            a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
+              '<div class="game-card-name">' + g.name + '</div>' +
+              '<div class="game-card-desc">' + g.desc + '</div>' +
+              '<div class="game-card-play">Play →</div>';
+            grid.appendChild(a);
+          } else {
+            var cash = getCash();
+            var card = document.createElement('div');
+            card.className = 'lock-card';
+            card.innerHTML = '<div class="lock-card-icon">' + g.icon + '</div>' +
+              '<div class="lock-card-title">' + g.name + '</div>' +
+              '<div class="lock-card-desc">' + g.desc + '</div>' +
+              '<button class="buy-btn"' + (cash < 50 ? ' disabled title="Not enough cash"' : '') +
+              ' onclick="buyGame(\'' + g.href + '\')">Buy · 50 cash</button>';
+            grid.appendChild(card);
+          }
         });
       } else {
         var card = document.createElement('div');

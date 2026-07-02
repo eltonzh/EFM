@@ -51,7 +51,7 @@
 
   <div style="position:absolute;top:20px;left:calc(69px + 28vh);">
     <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
-      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 18px 6px #fb923c, 0 0 40px 12px #f9731688;">
         <svg id="coin-svg" viewBox="-35 -40 230 285" overflow="visible" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="glow-grad" cx="80" cy="100" r="140" gradientUnits="userSpaceOnUse">
@@ -138,102 +138,104 @@
         <div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Use coins to continue your math course!</div>
         <div id="coinAmount" style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: None</div>
         <script>var c=localStorage.getItem('mathCoins');if(c)document.getElementById('coinAmount').textContent='Amount: '+c;</script>
+        <a href="efm_version_k.html" style="margin-top:10px;padding:6px 14px;background:#b45309;color:#fff;border-radius:8px;font-size:0.8rem;font-weight:700;text-decoration:none;display:inline-block;">Start Learning →</a>
       </div>
     </div>
   </div>
 
-  <div style="position:absolute;top:20px;left:calc(69px + 56vh + 16px);">
-    <div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
-      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        <svg id="coin-svg-2" viewBox="-35 -40 230 285" overflow="visible" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="glow-grad-2" cx="80" cy="100" r="140" gradientUnits="userSpaceOnUse">
-              <stop offset="0%"   stop-color="#fff7a0" stop-opacity="0.95"/>
-              <stop offset="18%"  stop-color="#FFE97A" stop-opacity="0.85"/>
-              <stop offset="50%"  stop-color="#FFD700" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <circle cx="80" cy="100" r="140" fill="url(#glow-grad-2)"/>
-          <g id="shine-rays-2"></g>
-          <g id="corona-rings-2"></g>
-          <ellipse cx="80" cy="200" rx="75" ry="11" fill="rgba(0,0,0,0.18)"/>
-          <ellipse cx="14"  cy="191" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="14"  cy="186" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="14"  cy="186" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="48"  cy="194" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="48"  cy="189" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="48"  cy="189" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="28"  cy="183" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="28"  cy="178" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="28"  cy="178" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="62"  cy="188" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="62"  cy="183" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="62"  cy="183" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="97"  cy="192" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="97"  cy="187" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="97"  cy="187" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="75"  cy="186" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="75"  cy="181" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="75"  cy="181" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="115" cy="190" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="115" cy="185" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="115" cy="185" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="132" cy="183" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="132" cy="178" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="132" cy="178" rx="13" ry="5" fill="#FFE97A"/>
-          <ellipse cx="150" cy="188" rx="20" ry="8" fill="#a86400"/>
-          <ellipse cx="150" cy="183" rx="20" ry="8" fill="#FFD700"/>
-          <ellipse cx="150" cy="183" rx="13" ry="5" fill="#FFE97A"/>
-          <rect x="16" y="105" width="38" height="65" rx="3" fill="#a86400"/>
-          <ellipse cx="35" cy="105" rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="35" cy="96"  rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="35" cy="87"  rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="35" cy="78"  rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="35" cy="78"  rx="12" ry="5" fill="#FFE97A"/>
-          <rect x="106" y="112" width="38" height="58" rx="3" fill="#a86400"/>
-          <ellipse cx="125" cy="112" rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="125" cy="103" rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="125" cy="94"  rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="125" cy="85"  rx="19" ry="8" fill="#FFD700"/>
-          <ellipse cx="125" cy="85"  rx="12" ry="5" fill="#FFE97A"/>
-          <rect x="58" y="55" width="44" height="115" rx="3" fill="#a86400"/>
-          <ellipse cx="80" cy="55"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="46"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="37"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="28"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="19"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="10"  rx="22" ry="9" fill="#FFD700"/>
-          <ellipse cx="80" cy="10"  rx="14" ry="6" fill="#FFE97A"/>
-        </svg>
-      </div>
-      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:8px 12px;font-family:system-ui,sans-serif;color:#0f0f13;">
-        <div style="font-size:1.15rem;font-weight:700;">Coins</div>
-        <div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Use coins to continue your math course!</div>
-        <div id="coinAmount2" style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: None</div>
-        <script>var c2=localStorage.getItem('mathCoins');if(c2)document.getElementById('coinAmount2').textContent='Amount: '+c2;</script>
-      </div>
-    </div>
-  </div>
+  <div id="cash-card" style="position:absolute;top:20px;left:calc(69px + 56vh + 16px);"></div>
+  <script>
+  (function() {
+    var coins = +(localStorage.getItem('mathCoins') || 0);
+    var unlocked = coins >= 50;
+    var card = document.getElementById('cash-card');
+    if (unlocked) {
+      card.innerHTML = '<div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">'
+        + '<div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 18px 6px #4ade80, 0 0 40px 12px #22c55e88;">'
+        + '<svg id="cash-svg" viewBox="0 0 160 205" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">'
+        + '<defs><radialGradient id="cash-glow" cx="80" cy="105" r="100" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#d4f5d4" stop-opacity="0.9"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></radialGradient></defs>'
+        + '<circle cx="80" cy="105" r="110" fill="url(#cash-glow)"/>'
+        + '<ellipse cx="80" cy="196" rx="68" ry="8" fill="rgba(0,0,0,0.15)"/>'
+        + '<g transform="rotate(-12,80,120)"><rect x="14" y="108" width="110" height="62" rx="5" fill="#2d6a2d"/><rect x="18" y="112" width="102" height="54" rx="3" fill="#3a8a3a"/><rect x="22" y="116" width="94" height="46" rx="2" fill="#2d6a2d" opacity="0.3"/><circle cx="69" cy="139" r="14" fill="none" stroke="#5aaa5a" stroke-width="2" opacity="0.6"/><text x="69" y="144" text-anchor="middle" font-size="12" font-weight="900" fill="#c8f0c8" font-family="serif">$</text><rect x="26" y="120" width="20" height="8" rx="2" fill="#1a4a1a" opacity="0.5"/><rect x="92" y="148" width="20" height="8" rx="2" fill="#1a4a1a" opacity="0.5"/></g>'
+        + '<g transform="rotate(10,80,120)"><rect x="18" y="104" width="110" height="62" rx="5" fill="#256325"/><rect x="22" y="108" width="102" height="54" rx="3" fill="#2e7d2e"/><rect x="26" y="112" width="94" height="46" rx="2" fill="#256325" opacity="0.3"/><circle cx="73" cy="135" r="14" fill="none" stroke="#4a9a4a" stroke-width="2" opacity="0.6"/><text x="73" y="140" text-anchor="middle" font-size="12" font-weight="900" fill="#b8e8b8" font-family="serif">$</text><rect x="30" y="116" width="20" height="8" rx="2" fill="#1a3a1a" opacity="0.5"/><rect x="96" y="144" width="20" height="8" rx="2" fill="#1a3a1a" opacity="0.5"/></g>'
+        + '<rect x="20" y="98" width="120" height="68" rx="6" fill="#1a5c1a"/><rect x="25" y="103" width="110" height="58" rx="4" fill="#228b22"/><rect x="30" y="108" width="100" height="48" rx="2" fill="#1a5c1a" opacity="0.25"/>'
+        + '<ellipse cx="80" cy="132" rx="22" ry="16" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.7"/>'
+        + '<text x="80" y="138" text-anchor="middle" font-size="18" font-weight="900" fill="#b0ffb0" font-family="serif">$</text>'
+        + '<text x="32" y="116" font-size="7" font-weight="700" fill="#90ee90" font-family="sans-serif">1</text><text x="122" y="116" font-size="7" font-weight="700" fill="#90ee90" font-family="sans-serif" text-anchor="end">1</text><text x="32" y="158" font-size="7" font-weight="700" fill="#90ee90" font-family="sans-serif">1</text><text x="122" y="158" font-size="7" font-weight="700" fill="#90ee90" font-family="sans-serif" text-anchor="end">1</text>'
+        + '<rect x="34" y="125" width="28" height="4" rx="2" fill="#4ade80" opacity="0.4"/><rect x="98" y="125" width="28" height="4" rx="2" fill="#4ade80" opacity="0.4"/><rect x="34" y="136" width="28" height="4" rx="2" fill="#4ade80" opacity="0.4"/><rect x="98" y="136" width="28" height="4" rx="2" fill="#4ade80" opacity="0.4"/>'
+        + '<rect x="20" y="98" width="120" height="68" rx="6" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>'
+        + '</svg></div>'
+        + '<div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:8px 12px;font-family:system-ui,sans-serif;color:#0f0f13;">'
+        + '<div style="font-size:1.15rem;font-weight:700;">Cash</div>'
+        + '<div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Earn cash to play some games!</div>'
+        + '<div style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: ' + (localStorage.getItem('efm_coins') || 'None') + '</div>'
+        + '<a href="games.html" style="margin-top:10px;padding:6px 14px;background:#228b22;color:#fff;border-radius:8px;font-size:0.8rem;font-weight:700;text-decoration:none;display:inline-block;">Play some Games</a>'
+        + '</div></div>';
+    } else {
+      card.innerHTML = '<div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">'
+        + '<div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">'
+        + '<svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">'
+        + '<path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>'
+        + '<circle cx="50" cy="83" r="10" fill="#e5e7eb"/>'
+        + '<rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>'
+        + '</svg></div>'
+        + '<div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;overflow:hidden;">'
+        + '<div style="flex:1"></div>'
+        + '<div style="font-size:1rem;font-weight:600;">Cash | Locked</div>'
+        + '<div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 50 coins to unlock cash!</div>'
+        + '<div style="flex:1"></div>'
+        + '</div></div>';
+    }
+  })();
+  </script>
 
-  <div style="position:absolute;top:20px;left:calc(69px + 84vh + 32px);">
-    <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">
-      <div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        <svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">
-          <path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>
-          <circle cx="50" cy="83" r="10" fill="#e5e7eb"/>
-          <rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>
-        </svg>
-      </div>
-      <div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;overflow:hidden;">
-        <div style="flex:1"></div>
-        <div style="font-size:1rem;font-weight:600;">Gold Pebbles | Locked</div>
-        <div style="font-size:0.75rem;text-align:center;margin-top:8px;">Earn 25 cash to unlock this item and play some games!</div>
-        <div style="flex:1"></div>
-      </div>
-    </div>
-  </div>
+  <div id="tickets-card" style="position:absolute;top:20px;left:calc(69px + 84vh + 32px);"></div>
+  <script>
+  (function() {
+    var mathCoins = +(localStorage.getItem('mathCoins') || 0);
+    var unlocked = mathCoins >= 50;
+    var card = document.getElementById('tickets-card');
+    if (unlocked) {
+      card.innerHTML = '<div style="position:relative;width:64vw;height:28vh;background:transparent;border:2.5px solid #0f0f13;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">'
+        + '<div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #0f0f13;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 18px 6px #f472b6, 0 0 40px 12px #ec489988;">'
+        + '<svg viewBox="0 0 160 205" style="width:100%;height:100%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">'
+        + '<defs><radialGradient id="ticket-glow" cx="80" cy="105" r="100" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#fce7f3" stop-opacity="0.9"/><stop offset="100%" stop-color="#f472b6" stop-opacity="0"/></radialGradient></defs>'
+        + '<circle cx="80" cy="105" r="110" fill="url(#ticket-glow)"/>'
+        + '<ellipse cx="80" cy="196" rx="68" ry="8" fill="rgba(0,0,0,0.12)"/>'
+        + '<g transform="rotate(-8,80,120)"><rect x="16" y="110" width="116" height="56" rx="6" fill="#7c3aed"/><rect x="20" y="114" width="108" height="48" rx="4" fill="#8b5cf6"/><circle cx="20" cy="138" r="8" fill="#1a0a2e"/><circle cx="140" cy="138" r="8" fill="#1a0a2e"/><line x1="20" y1="138" x2="140" y2="138" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/><text x="80" y="143" text-anchor="middle" font-size="11" font-weight="900" fill="#ede9fe" font-family="sans-serif">ADMIT ONE</text></g>'
+        + '<g transform="rotate(8,80,120)"><rect x="18" y="106" width="116" height="56" rx="6" fill="#be185d"/><rect x="22" y="110" width="108" height="48" rx="4" fill="#ec4899"/><circle cx="22" cy="134" r="8" fill="#1a0010"/><circle cx="142" cy="134" r="8" fill="#1a0010"/><line x1="22" y1="134" x2="142" y2="134" stroke="#fbcfe8" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/><text x="80" y="139" text-anchor="middle" font-size="11" font-weight="900" fill="#fdf2f8" font-family="sans-serif">ADMIT ONE</text></g>'
+        + '<rect x="20" y="100" width="120" height="58" rx="7" fill="#6d28d9"/><rect x="25" y="105" width="110" height="48" rx="5" fill="#7c3aed"/>'
+        + '<circle cx="25" cy="129" r="9" fill="#0f0520"/><circle cx="135" cy="129" r="9" fill="#0f0520"/>'
+        + '<line x1="25" y1="129" x2="135" y2="129" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="7,5" opacity="0.7"/>'
+        + '<text x="80" y="122" text-anchor="middle" font-size="8" font-weight="700" fill="#ddd6fe" font-family="sans-serif">★ EFM ★</text>'
+        + '<text x="80" y="135" text-anchor="middle" font-size="13" font-weight="900" fill="#ede9fe" font-family="sans-serif">TICKET</text>'
+        + '<text x="80" y="147" text-anchor="middle" font-size="7" fill="#c4b5fd" font-family="sans-serif">ADMIT ONE</text>'
+        + '</svg></div>'
+        + '<div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:8px 12px;font-family:system-ui,sans-serif;color:#0f0f13;">'
+        + '<div style="font-size:1.15rem;font-weight:700;">Tickets</div>'
+        + '<div style="font-size:0.75rem;color:#444;margin-top:6px;text-align:center;">Use tickets to access special events!</div>'
+        + '<div style="font-size:0.95rem;color:#000;margin-top:16px;">Amount: ' + (localStorage.getItem('efm_tickets') || '0') + '</div>'
+        + '<button onclick="(function(btn){var cash=+(localStorage.getItem(\'efm_coins\')||0);if(cash<50){btn.textContent=\'Not enough Cash!\';btn.style.background=\'#000\';btn.disabled=true;setTimeout(function(){btn.textContent=\'Buy one for 50 Cash\';btn.style.background=\'#7c3aed\';btn.disabled=false;},5000);return;}localStorage.setItem(\'efm_coins\',cash-50);var t=+(localStorage.getItem(\'efm_tickets\')||0)+1;localStorage.setItem(\'efm_tickets\',t);this.previousElementSibling.textContent=\'Amount: \'+t;})(this)" style="margin-top:10px;padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;">Buy one for 50 Cash</button>'
+        + '</div></div>';
+    } else {
+      card.innerHTML = '<div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;overflow:hidden;">'
+        + '<div style="width:50%;height:75%;flex-shrink:0;background:transparent;border:2.5px solid #9ca3af;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">'
+        + '<svg viewBox="0 0 100 130" style="width:65%;height:65%;transform:rotate(-90deg);" xmlns="http://www.w3.org/2000/svg">'
+        + '<path d="M28 62 L28 38 A22 22 0 0 1 72 38 L72 62" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<rect x="12" y="57" width="76" height="62" rx="10" fill="#9ca3af"/>'
+        + '<circle cx="50" cy="83" r="10" fill="#e5e7eb"/>'
+        + '<rect x="46" y="83" width="8" height="16" rx="4" fill="#e5e7eb"/>'
+        + '</svg></div>'
+        + '<div style="transform:rotate(-90deg);flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;font-family:system-ui,sans-serif;color:#6b7280;padding:8px;overflow:hidden;">'
+        + '<div style="flex:1"></div>'
+        + '<div style="font-size:1rem;font-weight:600;">Tickets | Locked</div>'
+        + '<div style="font-size:0.75rem;text-align:center;margin-top:8px;">Unlock cash to unlock tickets!</div>'
+        + '<div style="flex:1"></div>'
+        + '</div></div>';
+    }
+  })();
+  </script>
 
   <div id="card7" style="display:none;position:absolute;top:20px;left:calc(69px + 112vh + 48px);">
     <div style="position:relative;width:64vw;height:28vh;background:#d1d5db;border:2.5px solid #9ca3af;border-radius:18px;display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:8%;transform:rotate(90deg);transform-origin:top left;">
@@ -328,7 +330,7 @@
       var NS = 'http://www.w3.org/2000/svg';
 
       // 180 straight rays
-      [document.getElementById('shine-rays'), document.getElementById('shine-rays-2')].forEach(function(g) {
+      [document.getElementById('shine-rays')].forEach(function(g) {
         for (var angle = 0; angle < 360; angle += 2) {
           var rad = angle * Math.PI / 180;
           var dx = Math.sin(rad);
@@ -360,7 +362,7 @@
         return d + 'Z';
       }
 
-      [document.getElementById('corona-rings'), document.getElementById('corona-rings-2')].forEach(function(rings) {
+      [document.getElementById('corona-rings')].forEach(function(rings) {
         [
           {r: 38,  amp: 4, waves: 7,  op: 0.9, w: 3.5},
           {r: 60,  amp: 5, waves: 9,  op: 0.75, w: 3.0},

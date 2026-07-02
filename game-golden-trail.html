@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Golden Trail – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a12;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100dvh;
+      overflow: hidden;
+      color: #fff;
+      user-select: none;
+    }
+    #topbar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px 10px;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+    #back-btn {
+      background: rgba(255,255,255,0.1);
+      border: none; color: #fff; border-radius: 20px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer; white-space: nowrap;
+    }
+    #back-btn:hover { background: rgba(255,255,255,0.18); }
+    #title { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }
+    #score-box {
+      font-size: 13px; font-weight: 700; color: #ffd700;
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 20px; padding: 6px 14px;
+      white-space: nowrap;
+    }
+    #canvas-wrap {
+      flex: 1; width: 100%; display: flex;
+      align-items: center; justify-content: center;
+      padding: 0 12px 12px;
+    }
+    canvas {
+      display: block;
+      border-radius: 16px;
+      border: 1px solid rgba(255,215,0,0.15);
+      box-shadow: 0 0 40px rgba(255,215,0,0.08);
+      touch-action: none;
+    }
+
+    /* D-pad for mobile */
+    #dpad {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+    }
+    .dpad-row { display: flex; gap: 4px; }
+    .dpad-btn {
+      width: 54px; height: 54px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px; color: #fff;
+      font-size: 22px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      active-scale: 0.92;
+    }
+    .dpad-btn:active { background: rgba(255,215,0,0.25); }
+
+    #overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,10,18,0.88);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; z-index: 20;
+      backdrop-filter: blur(6px);
+    }
+    #overlay.hidden { display: none; }
+    #overlay-icon { font-size: 52px; }
+    #overlay-title { font-size: 26px; font-weight: 900; }
+    #overlay-sub { font-size: 15px; color: #aaa; text-align: center; max-width: 280px; line-height: 1.5; }
+    #overlay-btn {
+      background: #ffd700; color: #0a0a12;
+      border: none; border-radius: 22px;
+      padding: 13px 32px; font-size: 16px; font-weight: 900;
+      font-family: inherit; cursor: pointer; margin-top: 8px;
+    }
+    #overlay-btn:hover { background: #ffe84d; }
+  </style>
+</head>
+<body>
+
+  <div id="topbar">
+    <button id="back-btn" onclick="history.back()">← Back</button>
+    <div id="title">✨ Golden Trail</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="coins-disp" style="background:rgba(255,255,255,0.08);color:#facc15;border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;"><img src="coin.svg" style="width:16px;height:16px;"> <span id="coins-val">0</span></div>
+      <div id="score-box">0% covered</div>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+
+  <!-- Mobile D-pad -->
+  <div id="dpad">
+    <div class="dpad-row">
+      <button class="dpad-btn" id="btn-up">▲</button>
+    </div>
+    <div class="dpad-row">
+      <button class="dpad-btn" id="btn-left">◀</button>
+      <button class="dpad-btn" id="btn-down">▼</button>
+      <button class="dpad-btn" id="btn-right">▶</button>
+    </div>
+  </div>
+
+  <!-- Start / Win overlay -->
+  <div id="overlay">
+    <div id="overlay-icon">✨</div>
+    <div id="overlay-title">Golden Trail</div>
+    <div id="overlay-sub">Cover 80% of the board with your golden trail to win.<br>Use arrow keys or WASD to move.</div>
+    <button id="overlay-btn" onclick="startGame()">Play</button>
+  </div>
+
+  <script>
+    var canvas = document.getElementById('c');
+    var ctx    = canvas.getContext('2d');
+    var W, H, COLS, ROWS, CELL;
+    var player, particles, grid, covered, total;
+    var keys = {}, running = false, raf;
+    var WIN_PCT = 0.80;
+
+    function getCoins() { return parseInt(localStorage.getItem('efm_coins') || '0'); }
+    function setCoins(n) {
+      localStorage.setItem('efm_coins', n);
+      document.getElementById('coins-val').textContent = n;
+    }
+    setCoins(getCoins());
+
+    // ── Layout ──────────────────────────────────────────────────────────────
+    function resize() {
+      var wrap = document.getElementById('canvas-wrap');
+      var aw = wrap.clientWidth  - 24;
+      var ah = wrap.clientHeight - 24;
+      CELL = Math.max(12, Math.floor(Math.min(aw, ah) / 28));
+      COLS = Math.floor(aw / CELL);
+      ROWS = Math.floor(ah / CELL);
+      W = COLS * CELL;
+      H = ROWS * CELL;
+      canvas.width  = W;
+      canvas.height = H;
+      if (running) resetGame();
+    }
+
+    // ── Game state ───────────────────────────────────────────────────────────
+    function resetGame() {
+      grid    = new Uint8Array(COLS * ROWS);
+      covered = 0;
+      total   = COLS * ROWS;
+      particles = [];
+      player = {
+        x: Math.floor(COLS / 2) * CELL + CELL / 2,
+        y: Math.floor(ROWS / 2) * CELL + CELL / 2,
+        vx: 0, vy: 0,
+        speed: CELL * 7,
+        trail: [],
+        glow: 0
+      };
+      paintCell(player.x, player.y);
+      updateScore();
+    }
+
+    function startGame() {
+      document.getElementById('overlay').classList.add('hidden');
+      running = true;
+      resetGame();
+      var isMobile = window.matchMedia('(pointer:coarse)').matches;
+      if (isMobile) document.getElementById('dpad').style.display = 'flex';
+      last = null;
+      raf = requestAnimationFrame(loop);
+    }
+
+    // ── Grid painting ────────────────────────────────────────────────────────
+    function cellIdx(x, y) {
+      var col = Math.floor(x / CELL);
+      var row = Math.floor(y / CELL);
+      if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return -1;
+      return row * COLS + col;
+    }
+
+    function paintCell(x, y) {
+      var idx = cellIdx(x, y);
+      if (idx < 0) return;
+      if (!grid[idx]) { grid[idx] = 1; covered++; updateScore(); }
+    }
+
+    function updateScore() {
+      var pct = Math.round(covered / total * 100);
+      document.getElementById('score-box').textContent = pct + '% covered';
+    }
+
+    // ── Particles ─────────────────────────────────────────────────────────────
+    function spawnParticles(x, y) {
+      var n = 3 + Math.random() * 3 | 0;
+      for (var i = 0; i < n; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var spd   = 0.4 + Math.random() * 1.4;
+        particles.push({
+          x: x, y: y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          life: 1, size: 1.5 + Math.random() * 2.5,
+          hue: 42 + (Math.random() - 0.5) * 20
+        });
+      }
+    }
+
+    // ── Main loop ─────────────────────────────────────────────────────────────
+    var last = null;
+    function loop(ts) {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      var dt = last ? Math.min((ts - last) / 1000, 0.05) : 0;
+      last = ts;
+
+      // Input
+      player.vx = 0; player.vy = 0;
+      if (keys['ArrowLeft']  || keys['a'] || keys['A']) player.vx = -1;
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) player.vx =  1;
+      if (keys['ArrowUp']    || keys['w'] || keys['W']) player.vy = -1;
+      if (keys['ArrowDown']  || keys['s'] || keys['S']) player.vy =  1;
+      // Normalize diagonal
+      if (player.vx && player.vy) { player.vx *= 0.707; player.vy *= 0.707; }
+      var moving = player.vx !== 0 || player.vy !== 0;
+
+      if (moving) {
+        var nx = player.x + player.vx * player.speed * dt;
+        var ny = player.y + player.vy * player.speed * dt;
+        // Clamp to board
+        nx = Math.max(CELL * 0.5, Math.min(W - CELL * 0.5, nx));
+        ny = Math.max(CELL * 0.5, Math.min(H - CELL * 0.5, ny));
+        player.x = nx; player.y = ny;
+        paintCell(nx, ny);
+        spawnParticles(nx, ny);
+        player.glow = Math.min(1, player.glow + dt * 4);
+      } else {
+        player.glow = Math.max(0, player.glow - dt * 3);
+      }
+
+      // Update particles
+      for (var i = particles.length - 1; i >= 0; i--) {
+        var p = particles[i];
+        p.x    += p.vx;
+        p.y    += p.vy;
+        p.life -= dt * 2.2;
+        if (p.life <= 0) { particles.splice(i, 1); }
+      }
+
+      draw();
+
+      // Win check
+      if (covered / total >= WIN_PCT) {
+        running = false;
+        setTimeout(showWin, 200);
+      }
+    }
+
+    // ── Draw ──────────────────────────────────────────────────────────────────
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Background grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 0.5;
+      for (var c = 0; c <= COLS; c++) {
+        ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, H); ctx.stroke();
+      }
+      for (var r = 0; r <= ROWS; r++) {
+        ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(W, r * CELL); ctx.stroke();
+      }
+
+      // Trail cells
+      for (var idx = 0; idx < grid.length; idx++) {
+        if (!grid[idx]) continue;
+        var col = idx % COLS;
+        var row = (idx / COLS) | 0;
+        var cx  = col * CELL;
+        var cy  = row * CELL;
+        var grad = ctx.createRadialGradient(cx + CELL/2, cy + CELL/2, 0, cx + CELL/2, cy + CELL/2, CELL * 0.8);
+        grad.addColorStop(0, 'rgba(255,230,80,0.38)');
+        grad.addColorStop(1, 'rgba(255,180,0,0.10)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cx, cy, CELL, CELL);
+      }
+
+      // Particles
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        ctx.globalAlpha = p.life * 0.9;
+        ctx.fillStyle = 'hsl(' + p.hue + ',100%,68%)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Player glow
+      var glowR = CELL * (1.4 + player.glow * 0.6);
+      var pg = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, glowR);
+      pg.addColorStop(0, 'rgba(255,230,60,0.55)');
+      pg.addColorStop(0.4, 'rgba(255,180,0,0.2)');
+      pg.addColorStop(1, 'rgba(255,150,0,0)');
+      ctx.fillStyle = pg;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, glowR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Player orb
+      var r = CELL * 0.38;
+      var og = ctx.createRadialGradient(player.x - r*0.3, player.y - r*0.3, r*0.1, player.x, player.y, r);
+      og.addColorStop(0, '#fff9c4');
+      og.addColorStop(0.45, '#ffd700');
+      og.addColorStop(1, '#b8860b');
+      ctx.fillStyle = og;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Orb inner shine
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(player.x - r*0.28, player.y - r*0.28, r * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ── Win screen ────────────────────────────────────────────────────────────
+    function showWin() {
+      var mathCoins = +(localStorage.getItem('mathCoins') || 0);
+      var cashUnlocked = mathCoins >= 50;
+      if (cashUnlocked) {
+        setCoins(getCoins() + 5);
+      } else {
+        localStorage.setItem('mathCoins', mathCoins + 5);
+      }
+      var ol = document.getElementById('overlay');
+      document.getElementById('overlay-icon').textContent  = '🏆';
+      document.getElementById('overlay-title').textContent = 'You win!';
+      document.getElementById('overlay-sub').innerHTML   = 'You covered ' + Math.round(covered / total * 100) + '% of the board! +5 <img src="coin.svg" style="width:16px;height:16px;vertical-align:middle;">';
+      document.getElementById('overlay-btn').textContent   = 'Play again';
+      document.getElementById('overlay-btn').onclick       = function() { startGame(); };
+      ol.classList.remove('hidden');
+    }
+
+    // ── Keyboard ──────────────────────────────────────────────────────────────
+    document.addEventListener('keydown', function(e) {
+      keys[e.key] = true;
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    });
+    document.addEventListener('keyup', function(e) { keys[e.key] = false; });
+
+    // ── D-pad ─────────────────────────────────────────────────────────────────
+    function bindDpad(id, key) {
+      var el = document.getElementById(id);
+      el.addEventListener('pointerdown',  function(e) { e.preventDefault(); keys[key] = true; });
+      el.addEventListener('pointerup',    function(e) { e.preventDefault(); keys[key] = false; });
+      el.addEventListener('pointerleave', function(e) { keys[key] = false; });
+    }
+    bindDpad('btn-up',    'ArrowUp');
+    bindDpad('btn-down',  'ArrowDown');
+    bindDpad('btn-left',  'ArrowLeft');
+    bindDpad('btn-right', 'ArrowRight');
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    window.addEventListener('resize', resize);
+    resize();
+  </script>
+</body>
+</html>
