@@ -209,6 +209,7 @@ async def handler(websocket):
             # ── chat events ────────────────────────────────────────────
             elif kind == 'chat_join':
                 chat_clients.add(websocket)
+                check_daily_reset()
                 await websocket.send(json.dumps({'type': 'chat_history', 'messages': chat_history}))
 
             elif kind == 'chat':
