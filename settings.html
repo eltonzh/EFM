@@ -132,6 +132,20 @@
       transition: background 0.15s, border-color 0.15s;
     }
     .danger-btn:hover { background: #fdf0ef; border-color: #c0392b; }
+    .logout-btn {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: #fff;
+      color: #555;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .logout-btn:hover { background: #f5f5f5; border-color: #bbb; }
     .toast {
       position: fixed;
       bottom: 24px;
@@ -250,17 +264,35 @@
     <div class="card-code-wrap">
       <div class="bubble bubble-down" id="important-bubble" style="bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);">Important!</div>
       <div class="card">
-        <div class="card-title">Account Code</div>
+        <div class="card-title">Account Password</div>
         <div class="row">
-          <span class="row-label">Your code</span>
-          <span class="code-badge" id="val-code">——</span>
-          <div class="copy-wrap">
-            <div class="bubble bubble-copy" id="copy-bubble" style="bottom:calc(100% + 10px);right:0;">Copy this! ↓</div>
-            <button class="copy-btn" id="copy-btn">Copy</button>
+          <span class="row-label">Log Out</span>
+          <button class="logout-btn" id="logout-btn">Log Out</button>
+        </div>
+        <div class="row" id="pass-display-row">
+          <span class="row-label">Password</span>
+          <span class="code-badge" id="val-password" style="letter-spacing:0.18em;">••••••••</span>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <div class="copy-wrap">
+              <div class="bubble bubble-copy" id="copy-bubble" style="bottom:calc(100% + 10px);right:0;">Copy this! ↓</div>
+              <button class="copy-btn" id="copy-btn" style="min-width:54px;">Show</button>
+            </div>
+            <button id="edit-pass-btn" title="Change password" style="width:32px;height:32px;border:1.5px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;transition:border-color 0.15s;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="pass-edit-row" style="display:none;margin-top:10px;">
+          <input id="new-pass-input" type="password" placeholder="New password" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:0.92rem;box-sizing:border-box;outline:none;margin-bottom:8px;font-family:system-ui,sans-serif;">
+          <input id="new-pass-confirm" type="password" placeholder="Confirm new password" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:0.92rem;box-sizing:border-box;outline:none;margin-bottom:8px;font-family:system-ui,sans-serif;">
+          <div id="pass-edit-err" style="font-size:0.78rem;color:#c0392b;min-height:16px;margin-bottom:6px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button id="pass-save-btn" style="flex:1;padding:9px;background:#0f0f13;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">Save</button>
+            <button id="pass-cancel-btn" style="flex:1;padding:9px;background:#f0f0f0;color:#333;border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:system-ui,sans-serif;">Cancel</button>
           </div>
         </div>
         <p style="font-size:0.8rem;color:#aaa;margin-top:10px;line-height:1.5;">
-          Use this code to log in from any browser — Chrome, Safari, Edge, or any device.
+          Use your email and password to log in from any browser or device.
         </p>
       </div>
     </div>
@@ -274,6 +306,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="cursors.js"></script>
   <script>
     // Redirect to home if not set up yet
     if (!localStorage.getItem('efm_cursor_name')) {
@@ -291,12 +324,9 @@
       var name  = localStorage.getItem('efm_cursor_name')  || '—';
       var fv    = localStorage.getItem('efm_cursor_color')  || null;
       var sfv   = localStorage.getItem('efm_cursor_color2') || null;
-      var code  = localStorage.getItem('efm_account_code') || '——';
-
       document.getElementById('val-name').textContent = name;
       document.getElementById('val-fv').textContent   = fv  || '—';
       document.getElementById('val-sfv').textContent  = sfv || '—';
-      document.getElementById('val-code').textContent = code;
 
       var dotFV  = document.getElementById('dot-fv');
       var dotSFV = document.getElementById('dot-sfv');
@@ -317,23 +347,95 @@
     // Hide bubbles immediately if already copied before
     if (localStorage.getItem('efm_code_copied')) dismissBubbles();
 
+    var passwordVisible = false;
     document.getElementById('copy-btn').addEventListener('click', function () {
-      var code = document.getElementById('val-code').textContent;
-      if (code === '——') { showToast('No code yet — finish setup first.'); return; }
-      navigator.clipboard.writeText(code).then(function () {
-        showToast('Code copied!');
-      }).catch(function () {
-        showToast('Code: ' + code);
-      });
+      var pwd   = localStorage.getItem('efm_password') || '';
+      if (!pwd) { showToast('Log out and back in once to save your password here.'); return; }
+      passwordVisible = !passwordVisible;
+      document.getElementById('val-password').textContent = passwordVisible ? pwd : '••••••••';
+      this.textContent = passwordVisible ? 'Hide' : 'Show';
       dismissBubbles();
+      // Trigger browser password-save prompt on first reveal
+      if (passwordVisible) {
+        var emailVal = localStorage.getItem('efm_cursor_email') || '';
+        if (emailVal) {
+          var f = document.createElement('form');
+          f.method = 'post'; f.action = ''; f.style.display = 'none';
+          var fe = document.createElement('input');
+          fe.type = 'email'; fe.name = 'email'; fe.autocomplete = 'email'; fe.value = emailVal;
+          var fp = document.createElement('input');
+          fp.type = 'password'; fp.name = 'password'; fp.autocomplete = 'current-password'; fp.value = pwd;
+          var fs = document.createElement('button'); fs.type = 'submit';
+          f.appendChild(fe); f.appendChild(fp); f.appendChild(fs);
+          f.addEventListener('submit', function(e) { e.preventDefault(); });
+          document.body.appendChild(f);
+          try { f.requestSubmit(fs); } catch(e) { fs.click(); }
+          setTimeout(function() { document.body.removeChild(f); }, 500);
+        }
+      }
+    });
+
+    document.getElementById('edit-pass-btn').addEventListener('click', function () {
+      document.getElementById('pass-edit-row').style.display = 'block';
+      document.getElementById('new-pass-input').focus();
+    });
+    document.getElementById('pass-cancel-btn').addEventListener('click', function () {
+      document.getElementById('pass-edit-row').style.display = 'none';
+      document.getElementById('new-pass-input').value = '';
+      document.getElementById('new-pass-confirm').value = '';
+      document.getElementById('pass-edit-err').textContent = '';
+    });
+    document.getElementById('pass-save-btn').addEventListener('click', function () {
+      var np  = document.getElementById('new-pass-input').value;
+      var np2 = document.getElementById('new-pass-confirm').value;
+      var err = document.getElementById('pass-edit-err');
+      if (np.length < 6)  { err.textContent = 'Password must be at least 6 characters.'; return; }
+      if (np !== np2)     { err.textContent = 'Passwords don\'t match.'; return; }
+      var code  = localStorage.getItem('efm_account_code') || '';
+      var email = localStorage.getItem('efm_cursor_email') || '';
+      if (!code && !email) { err.textContent = 'Could not verify your account — try logging out and back in.'; return; }
+      err.textContent = '';
+      var btn = this; btn.disabled = true; btn.textContent = 'Saving…';
+      var RAILWAY_URL = 'efm.ai-taichi.com';
+      var WS_URL = window.location.hostname === 'localhost' ? 'ws://localhost:8080' : 'wss://' + RAILWAY_URL;
+      var ws = new WebSocket(WS_URL);
+      ws.onopen = function () { ws.send(JSON.stringify({type: 'change_password', code: code, new_password: np})); };
+      ws.onmessage = function (e) {
+        var d = JSON.parse(e.data);
+        ws.close();
+        if (d.type === 'change_password_ok') {
+          localStorage.setItem('efm_password', np);
+          showToast('Password updated!');
+          document.getElementById('pass-cancel-btn').click();
+        } else {
+          err.textContent = d.message || 'Something went wrong.';
+        }
+        btn.disabled = false; btn.textContent = 'Save';
+      };
+      ws.onerror = function () { err.textContent = 'Connection error — try again.'; btn.disabled = false; btn.textContent = 'Save'; };
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', function () {
+      if (!confirm('Log out? You can log back in with your account code.')) return;
+      localStorage.clear();
+      document.cookie = 'efm_device_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+      window.location.href = 'index.html';
     });
 
     document.getElementById('reset-btn').addEventListener('click', function () {
       if (!confirm('Delete your EFM account? This cannot be undone.')) return;
-      localStorage.clear();
-      // Wipe device ID cookie so the server can't restore the identity automatically
-      document.cookie = 'efm_device_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-      window.location.href = 'index.html';
+      var code     = localStorage.getItem('efm_account_code') || '';
+      var deviceId = localStorage.getItem('efm_cursor_id')    || '';
+      function finish() {
+        localStorage.clear();
+        document.cookie = 'efm_device_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+        window.location.href = 'index.html';
+      }
+      if (window.efmDeleteAccount) {
+        window.efmDeleteAccount(code, deviceId).then(finish).catch(finish);
+      } else {
+        finish();
+      }
     });
 
     loadInfo();

@@ -1,5 +1,5 @@
 (function() {
-  var RAILWAY_URL = 'acceptable-adaptation-production-565f.up.railway.app';
+  var RAILWAY_URL = 'efm.ai-taichi.com';
   var CHAT_WS = window.location.hostname === 'localhost'
     ? 'ws://localhost:8080'
     : 'wss://' + RAILWAY_URL;

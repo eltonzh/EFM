@@ -11,8 +11,7 @@ function efmGoBack() {
 }
 
 (function () {
-  // ← AFTER Railway deploy, replace RAILWAY_URL with your app's Railway domain
-  var RAILWAY_URL = 'acceptable-adaptation-production-565f.up.railway.app'; // e.g. "efm-production.up.railway.app"
+  var RAILWAY_URL = 'efm.ai-taichi.com';
   var WS_URL = window.location.hostname === 'localhost'
     ? 'ws://localhost:8080'
     : 'wss://' + RAILWAY_URL;
@@ -90,6 +89,26 @@ function efmGoBack() {
       8000
     );
   }
+
+  function loginAccount(email, password) {
+    return _identityWS(
+      function () { return {type: 'login', email: email, password: password}; },
+      function (d) {
+        if (d.type === 'login_ok')    return {ok: true,  name: d.name, fv: d.fv, sfv: d.sfv, code: d.code};
+        if (d.type === 'login_error') return {ok: false, message: d.message};
+      },
+      6000
+    );
+  }
+
+  function deleteAccount(code, deviceId) {
+    return _identityWS(
+      function () { return {type: 'delete_account', code: code || '', device_id: deviceId || ''}; },
+      function (d) { if (d.type === 'delete_account_ok') return true; },
+      5000
+    );
+  }
+  window.efmDeleteAccount = deleteAccount;
 
   function showCodeNotification(code) {
     if (!code) return;
@@ -355,9 +374,10 @@ function efmGoBack() {
             signupBtn.disabled = false; signupBtn.textContent = 'Create Account'; return;
           }
           localStorage.setItem('efm_cursor_name', name);
+          localStorage.setItem('efm_cursor_email', email);
+          localStorage.setItem('efm_password', pass);
           if (result.code) localStorage.setItem('efm_account_code', result.code);
           if (deviceId) saveIdentityToServer(deviceId, name, '', '');
-          showCodeNotification(result.code);
           overlay.remove();
           resolve(null);
         });
@@ -374,31 +394,27 @@ function efmGoBack() {
         '<div style="flex:1;height:1.5px;background:#0f0f13;"></div>'
       ].join('');
 
-      // ── Account code section ──
+      // ── Email + password login section ──
       var codeLabel = document.createElement('div');
       codeLabel.style.cssText = 'font-size:1rem;font-weight:700;color:#0f0f13;margin-bottom:10px;';
-      codeLabel.textContent = 'Log in with an account code...';
+      codeLabel.textContent = 'Log in...';
 
-      var codeInput = document.createElement('input');
-      codeInput.type = 'text';
-      codeInput.maxLength = 5;
-      codeInput.placeholder = 'Account code (e.g. EZ!@#)';
-      codeInput.style.cssText = [
-        'display:block;width:100%;padding:14px 16px;',
-        'border:1.5px solid #e0e0e0;border-radius:12px;',
-        'font-size:1rem;letter-spacing:0.12em;text-align:center;',
-        'text-transform:uppercase;box-sizing:border-box;outline:none;',
-        'font-family:system-ui,sans-serif;margin-bottom:10px;',
-        'color:#0f0f13;transition:border-color 0.15s;'
-      ].join('');
-      codeInput.addEventListener('focus', function () { codeInput.style.borderColor = '#0f0f13'; });
-      codeInput.addEventListener('blur',  function () { codeInput.style.borderColor = '#e0e0e0'; });
-      codeInput.addEventListener('input', function () {
-        codeInput.value = codeInput.value.replace(/[^a-zA-Z0-9!@#$%&*+]/g, '').toUpperCase();
-        var active = codeInput.value.length >= 5;
-        codeBtn.style.background  = active ? '#0f0f13' : '#ccc';
-        codeBtn.style.cursor      = active ? 'pointer' : 'default';
+      var loginEmailInput = makeInput('email', 'Email');
+      var loginPassWrap   = document.createElement('div');
+      loginPassWrap.style.cssText = 'position:relative;margin-bottom:10px;';
+      var loginPassInput  = makeInput('password', 'Password');
+      loginPassInput.style.marginBottom = '0';
+      loginPassInput.autocomplete = 'current-password';
+      var loginEyeBtn = document.createElement('button');
+      loginEyeBtn.type = 'button';
+      loginEyeBtn.style.cssText = 'position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#aaa;';
+      loginEyeBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+      loginEyeBtn.addEventListener('click', function () {
+        var show = loginPassInput.type === 'password';
+        loginPassInput.type = show ? 'text' : 'password';
       });
+      loginPassWrap.appendChild(loginPassInput);
+      loginPassWrap.appendChild(loginEyeBtn);
 
       var codeErr = document.createElement('div');
       codeErr.style.cssText = 'font-size:0.78rem;color:#c0392b;min-height:18px;margin-bottom:8px;';
@@ -406,37 +422,41 @@ function efmGoBack() {
       var codeBtn = document.createElement('button');
       codeBtn.style.cssText = [
         'display:block;width:100%;padding:14px 20px;',
-        'background:#ccc;color:#fff;border:none;border-radius:12px;',
-        'font-size:1rem;font-weight:700;cursor:default;',
+        'background:#0f0f13;color:#fff;border:none;border-radius:12px;',
+        'font-size:1rem;font-weight:700;cursor:pointer;',
         'font-family:system-ui,sans-serif;transition:background 0.15s;'
       ].join('');
-      codeBtn.textContent = 'Continue';
+      codeBtn.textContent = 'Log In';
 
       function submitCode() {
-        var code = codeInput.value.toUpperCase().trim();
-        if (code.length < 5) { codeErr.textContent = 'Enter your full code.'; return; }
+        var email = loginEmailInput.value.trim();
+        var pass  = loginPassInput.value;
+        if (!email || !pass) { codeErr.textContent = 'Please fill in both fields.'; return; }
         codeBtn.disabled = true;
-        codeBtn.textContent = 'Looking up…';
+        codeBtn.textContent = 'Logging in…';
         codeErr.textContent = '';
-        fetchIdentityByCode(code).then(function (rec) {
-          if (!rec || !rec.name) {
-            codeErr.textContent = 'Code not found — double-check and try again.';
+        loginAccount(email, pass).then(function (result) {
+          if (!result || !result.ok) {
+            codeErr.textContent = (result && result.message) || 'Login failed — try again.';
             codeBtn.disabled = false;
-            codeBtn.textContent = 'Continue';
+            codeBtn.textContent = 'Log In';
           } else {
-            localStorage.setItem('efm_cursor_name', rec.name);
-            if (rec.fv)   localStorage.setItem('efm_cursor_color',    rec.fv);
-            if (rec.sfv)  localStorage.setItem('efm_cursor_color2',   rec.sfv);
-            if (rec.code) localStorage.setItem('efm_account_code',    rec.code);
-            if (deviceId) saveIdentityToServer(deviceId, rec.name, rec.fv || '', rec.sfv || '');
+            localStorage.setItem('efm_cursor_name', result.name);
+            localStorage.setItem('efm_cursor_email', email);
+            localStorage.setItem('efm_password', pass);
+            if (result.fv)   localStorage.setItem('efm_cursor_color',  result.fv);
+            if (result.sfv)  localStorage.setItem('efm_cursor_color2', result.sfv);
+            if (result.code) localStorage.setItem('efm_account_code',  result.code);
+            if (deviceId) saveIdentityToServer(deviceId, result.name, result.fv || '', result.sfv || '');
             overlay.remove();
-            resolve({restored: true, name: rec.name, fv: rec.fv, sfv: rec.sfv});
+            resolve({restored: true, name: result.name, fv: result.fv, sfv: result.sfv});
           }
         });
       }
 
       codeBtn.addEventListener('click', submitCode);
-      codeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitCode(); });
+      loginPassInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitCode(); });
+      loginEmailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') loginPassInput.focus(); });
 
       wrap.appendChild(logo);
       wrap.appendChild(sub);
@@ -449,7 +469,8 @@ function efmGoBack() {
       wrap.appendChild(signupBtn);
       wrap.appendChild(orRow);
       wrap.appendChild(codeLabel);
-      wrap.appendChild(codeInput);
+      wrap.appendChild(loginEmailInput);
+      wrap.appendChild(loginPassWrap);
       wrap.appendChild(codeErr);
       wrap.appendChild(codeBtn);
       overlay.appendChild(wrap);
@@ -657,19 +678,22 @@ function efmGoBack() {
       identity.name  = name;
       identity.color = color;
       // Save to server, show code notification
-      saveIdentityToServer(deviceId, name, color, color2).then(showCodeNotification);
+      saveIdentityToServer(deviceId, name, color, color2);
     }
 
     function runFullSetup() {
       showWelcomeScreen(deviceId).then(function (restored) {
         if (restored) {
-          // Restored via account code
-          identity.name  = restored.name;
-          identity.color = restored.fv || identity.color;
-          window.dispatchEvent(new CustomEvent('efm_color_ready'));
-          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
-          if (onIndex) startCursors(identity);
-          return;
+          identity.name = restored.name;
+          if (restored.fv) {
+            // Colors already on file — restore silently
+            identity.color = restored.fv;
+            window.dispatchEvent(new CustomEvent('efm_color_ready'));
+            window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+            if (onIndex) startCursors(identity);
+            return;
+          }
+          // Logged in but no colors saved yet — fall through to color prompts
         }
         // Name already saved by welcome screen; go straight to colors
         identity.name = localStorage.getItem('efm_cursor_name') || identity.name;
@@ -713,20 +737,42 @@ function efmGoBack() {
       // Already set up locally
       continueWithIdentity();
     } else if (onIndex) {
-      // Try server lookup first; if found, unlock silently; if not, wait for Go!
-      fetchIdentityFromServer(deviceId).then(function (rec) {
-        if (rec && rec.name) {
-          localStorage.setItem('efm_cursor_name', rec.name);
-          if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
-          if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
-          identity.name  = rec.name;
-          identity.color = rec.fv || identity.color;
-          window.dispatchEvent(new CustomEvent('efm_setup_complete'));
-          startCursors(identity);
-        } else {
-          window.efmBeginSetup = runFullSetup;
-        }
-      });
+      if (localStorage.getItem('efm_reset')) {
+        localStorage.removeItem('efm_reset');
+        // Skip the account form — just re-collect name + colors
+        window.efmBeginSetup = function () {
+          var tempColor = '#888';
+          showNamePrompt(tempColor).then(function (name) {
+            identity.name = name;
+            return showColorPrompt(name);
+          }).then(function (color) {
+            identity.color = color;
+            localStorage.setItem('efm_cursor_color', color);
+            window.dispatchEvent(new CustomEvent('efm_color_ready'));
+            return showColorPrompt(identity.name, 'Pick another color');
+          }).then(function (color2) {
+            localStorage.setItem('efm_cursor_color2', color2);
+            afterSetup(identity.name, identity.color, color2);
+            window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+            startCursors(identity);
+          });
+        };
+      } else {
+        // Try server lookup first; if found, unlock silently; if not, wait for Go!
+        fetchIdentityFromServer(deviceId).then(function (rec) {
+          if (rec && rec.name) {
+            localStorage.setItem('efm_cursor_name', rec.name);
+            if (rec.fv)  localStorage.setItem('efm_cursor_color',  rec.fv);
+            if (rec.sfv) localStorage.setItem('efm_cursor_color2', rec.sfv);
+            identity.name  = rec.name;
+            identity.color = rec.fv || identity.color;
+            window.dispatchEvent(new CustomEvent('efm_setup_complete'));
+            startCursors(identity);
+          } else {
+            window.efmBeginSetup = runFullSetup;
+          }
+        });
+      }
     } else {
       // Non-index page, no local identity — try server, then setup if needed
       fetchIdentityFromServer(deviceId).then(function (rec) {
