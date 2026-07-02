@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exponential Mountaineer – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .topbar {
+      width: 100%; max-width: 700px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 20px 0;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.1); color: #fff; border: none;
+      border-radius: 20px; padding: 8px 16px; font-size: 13px;
+      font-family: inherit; font-weight: 600; cursor: pointer;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.18); }
+    .title-area { text-align: right; }
+    .game-title { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }
+    .game-sub { font-size: 12px; color: #888; }
+
+    /* Stats bar */
+    .stats-bar {
+      width: 100%; max-width: 700px;
+      display: flex; gap: 12px; padding: 16px 20px;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 13px; font-weight: 700; color: #ccc;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .stat-pill span { color: #fff; }
+
+    /* Mountain canvas area */
+    .mountain-wrap {
+      width: 100%; max-width: 700px;
+      padding: 0 20px;
+      position: relative;
+    }
+    canvas#mountain-canvas {
+      width: 100%; border-radius: 20px;
+      display: block;
+    }
+
+    /* Question area */
+    .q-area {
+      width: 100%; max-width: 700px;
+      padding: 20px 20px 32px;
+    }
+    .q-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 24px;
+    }
+    .q-text {
+      font-size: 32px; font-weight: 900;
+      text-align: center; margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+    .q-text sup { font-size: 18px; vertical-align: super; }
+    .choices {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .choice {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 14px; padding: 16px;
+      font-size: 22px; font-weight: 800;
+      font-family: inherit; color: #fff;
+      cursor: pointer; text-align: center;
+      transition: background 0.12s, border-color 0.12s, transform 0.1s;
+    }
+    .choice:hover { background: rgba(255,255,255,0.14); transform: scale(1.03); }
+    .choice.correct { background: rgba(74,222,128,0.2); border-color: #4ade80; color: #4ade80; }
+    .choice.wrong   { background: rgba(248,113,113,0.2); border-color: #f87171; color: #f87171; }
+    .feedback {
+      text-align: center; font-size: 14px; font-weight: 600;
+      min-height: 22px; margin-top: 14px; color: #aaa;
+    }
+    .feedback.good { color: #4ade80; }
+    .feedback.bad  { color: #f87171; }
+
+    /* Streak badge */
+    .streak-badge {
+      position: absolute; top: 12px; right: 32px;
+      background: #f59e0b; color: #fff;
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 13px; font-weight: 800;
+      display: none;
+    }
+
+    /* Win / Game over screen */
+    .end-screen {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center; justify-content: center;
+      z-index: 50; flex-direction: column; gap: 16px;
+      text-align: center; padding: 24px;
+    }
+    .end-screen.show { display: flex; }
+    .end-emoji { font-size: 72px; }
+    .end-title { font-size: 32px; font-weight: 900; }
+    .end-sub { font-size: 16px; color: #aaa; }
+    .end-btn {
+      background: #fff; color: #0d1117;
+      border: none; border-radius: 24px;
+      padding: 14px 32px; font-size: 16px;
+      font-weight: 800; font-family: inherit;
+      cursor: pointer; margin-top: 8px;
+    }
+    .end-btn:hover { background: #e5e5e5; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <div class="title-area">
+      <div class="game-title">Exponential Mountaineer</div>
+      <div class="game-sub">Climb to the summit</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill">Height <span id="stat-height">0%</span></div>
+    <div class="stat-pill">Score <span id="stat-score">0</span></div>
+    <div class="stat-pill">Streak <span id="stat-streak">🔥 0</span></div>
+    <div class="stat-pill" id="timer-pill">⏱ <span id="stat-timer">10:00</span></div>
+  </div>
+
+  <div class="mountain-wrap">
+    <canvas id="mountain-canvas" width="660" height="300"></canvas>
+    <div class="streak-badge" id="streak-badge">🔥 Streak!</div>
+  </div>
+
+  <div class="q-area">
+    <div class="q-card">
+      <div class="q-text" id="q-text"></div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <div class="end-screen" id="win-screen">
+    <div class="end-emoji">🏔️</div>
+    <div class="end-title">Summit reached!</div>
+    <div class="end-sub" id="win-sub"></div>
+    <div style="font-size:20px;font-weight:900;color:#facc15;margin-bottom:16px;">+25 🪙 coins!</div>
+    <button class="end-btn" onclick="resetGame()">Play again</button>
+    <button class="end-btn" style="background:rgba(255,255,255,0.12);color:#fff;margin-top:0;" onclick="history.back()">Back to Games</button>
+  </div>
+
+  <div class="end-screen" id="lose-screen">
+    <div class="end-emoji">⌛</div>
+    <div class="end-title">Time's up!</div>
+    <div class="end-sub">You ran out of time — keep practicing!</div>
+    <div style="font-size:20px;font-weight:900;color:#facc15;margin-bottom:16px;">+5 🪙 coins for trying</div>
+    <button class="end-btn" onclick="resetGame()">Try again</button>
+    <button class="end-btn" style="background:rgba(255,255,255,0.12);color:#fff;margin-top:0;" onclick="history.back()">Back to Games</button>
+  </div>
+
+  <script>
+    var progress = 0, score = 0, streak = 0, locked = false;
+    var timerInterval = null, timerSec = 600;
+
+    function getCoins() { return +(localStorage.getItem('mathCoins') || 0); }
+    function setCoins(n) { localStorage.setItem('mathCoins', Math.max(0, n)); }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerSec = 600;
+      updateTimerDisplay();
+      timerInterval = setInterval(function() {
+        timerSec--;
+        updateTimerDisplay();
+        if (timerSec <= 0) { clearInterval(timerInterval); timesUp(); }
+      }, 1000);
+    }
+
+    function stopTimer() { clearInterval(timerInterval); }
+
+    function updateTimerDisplay() {
+      var m = Math.floor(timerSec / 60), s = timerSec % 60;
+      var el = document.getElementById('stat-timer');
+      el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      var pill = document.getElementById('timer-pill');
+      pill.style.color = timerSec <= 60 ? '#f87171' : '';
+    }
+
+    function timesUp() {
+      locked = true;
+      setCoins(getCoins() + 5);
+      document.getElementById('lose-screen').classList.add('show');
+    }
+
+    var questions = [
+      {b:2,e:3,a:8},{b:3,e:2,a:9},{b:5,e:2,a:25},{b:2,e:4,a:16},
+      {b:4,e:2,a:16},{b:2,e:5,a:32},{b:3,e:3,a:27},{b:10,e:2,a:100},
+      {b:6,e:2,a:36},{b:2,e:6,a:64},{b:4,e:3,a:64},{b:5,e:3,a:125},
+      {b:7,e:2,a:49},{b:3,e:4,a:81},{b:2,e:7,a:128},{b:9,e:2,a:81},
+      {b:8,e:2,a:64},{b:2,e:8,a:256},{b:6,e:3,a:216},{b:11,e:2,a:121}
+    ];
+    var pool = [], qi = 0;
+
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length-1; i > 0; i--) {
+        var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t;
+      }
+      return a;
+    }
+
+    function wrongsFor(correct) {
+      var w = [];
+      var deltas = [-correct+1, -20,-15,-10,-8,-5,-3,-2,-1,1,2,3,5,8,10,15,20,correct,correct*2];
+      deltas = shuffle(deltas);
+      for (var i=0;i<deltas.length && w.length<3;i++) {
+        var v = correct + deltas[i];
+        if (v > 0 && v !== correct && w.indexOf(v)===-1) w.push(v);
+      }
+      return w;
+    }
+
+    // Canvas mountain drawing
+    var canvas = document.getElementById('mountain-canvas');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+
+    // Climber path along mountain slope
+    function climberPos(pct) {
+      var peakX = W/2, peakY = 28;
+      var leftX = 30, rightX = W-30, baseY = H-20;
+      var leftMidX = (peakX+leftX)/2, leftMidY = (peakY+baseY)/2;
+      if (pct <= 0) return {x: leftX+20, y: baseY-6};
+      if (pct >= 1) return {x: peakX, y: peakY-18};
+      var t = pct;
+      var x = (1-t)*(1-t)*leftX + 2*(1-t)*t*leftMidX + t*t*peakX;
+      var y = (1-t)*(1-t)*baseY + 2*(1-t)*t*leftMidY + t*t*peakY;
+      return {x: Math.round(x), y: Math.round(y)};
+    }
+
+    function drawMountain() {
+      ctx.clearRect(0,0,W,H);
+
+      // Sky gradient
+      var sky = ctx.createLinearGradient(0,0,0,H);
+      sky.addColorStop(0,'#1e293b');
+      sky.addColorStop(1,'#0f172a');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0,0,W,H);
+
+      // Stars
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      var stars = [[60,30],[120,55],[200,20],[350,40],[480,15],[580,45],[620,25],[80,70],[430,60]];
+      stars.forEach(function(s){ ctx.beginPath(); ctx.arc(s[0],s[1],1.2,0,Math.PI*2); ctx.fill(); });
+
+      // Mountain body
+      ctx.beginPath();
+      ctx.moveTo(30, H-20);
+      ctx.lineTo(W/2, 28);
+      ctx.lineTo(W-30, H-20);
+      ctx.closePath();
+      var mGrad = ctx.createLinearGradient(W/2,28,W/2,H-20);
+      mGrad.addColorStop(0,'#475569');
+      mGrad.addColorStop(1,'#1e293b');
+      ctx.fillStyle = mGrad;
+      ctx.fill();
+
+      // Snow cap
+      ctx.beginPath();
+      ctx.moveTo(W/2, 28);
+      ctx.lineTo(W/2-52, 105);
+      ctx.lineTo(W/2+52, 105);
+      ctx.closePath();
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fill();
+
+      // Ground
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, H-20, W, 20);
+
+      // Progress trail (glowing dots up the slope)
+      var steps = 12;
+      for (var i=0; i<=steps; i++) {
+        var pct = i/steps;
+        if (pct > progress/100) break;
+        var pos = climberPos(pct);
+        var alpha = 0.3 + 0.7*(i/steps);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(250,204,21,'+alpha+')';
+        ctx.fill();
+      }
+
+      // Climber
+      var cp = climberPos(progress/100);
+      ctx.font = '22px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🧗', cp.x, cp.y);
+
+      // Summit flag
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(W/2, 14, 2, 14);
+      ctx.beginPath();
+      ctx.moveTo(W/2+2, 14);
+      ctx.lineTo(W/2+14, 18);
+      ctx.lineTo(W/2+2, 24);
+      ctx.closePath();
+      ctx.fillStyle = '#facc15';
+      ctx.fill();
+
+      // Height bar on right
+      var barX = W-14, barH = H-40, barTop = 20;
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.beginPath();
+      ctx.roundRect(barX-6, barTop, 10, barH, 5);
+      ctx.fill();
+      var filled = barH * (progress/100);
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.roundRect(barX-6, barTop+barH-filled, 10, filled, 5);
+      ctx.fill();
+    }
+
+    function updateStats() {
+      document.getElementById('stat-height').textContent = Math.round(progress) + '%';
+      document.getElementById('stat-score').textContent = score;
+      document.getElementById('stat-streak').textContent = '🔥 ' + streak;
+      var badge = document.getElementById('streak-badge');
+      if (streak >= 3) {
+        badge.textContent = '🔥 x' + streak + ' Streak!';
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function loadQuestion() {
+      if (qi >= pool.length) { pool = shuffle(questions); qi = 0; }
+      var q = pool[qi++];
+      var qText = document.getElementById('q-text');
+      qText.innerHTML = q.b + '<sup>' + q.e + '</sup> = ?';
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
+      var wrongs = wrongsFor(q.a);
+      var opts = shuffle([q.a].concat(wrongs));
+      var box = document.getElementById('choices');
+      box.innerHTML = '';
+      opts.forEach(function(opt) {
+        var btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = opt;
+        btn.onclick = (function(b, v){ return function(){ answer(b, v, q.a); }; })(btn, opt);
+        box.appendChild(btn);
+      });
+      locked = false;
+    }
+
+    function answer(btn, chosen, correct) {
+      if (locked) return;
+      locked = true;
+      var btns = document.querySelectorAll('.choice');
+      var fb = document.getElementById('feedback');
+      if (chosen === correct) {
+        btn.classList.add('correct');
+        streak++;
+        var bonus = streak >= 3 ? (streak-2)*5 : 0;
+        score += 10 + bonus;
+        progress = Math.min(100, progress + 8 + (streak >= 3 ? 4 : 0));
+        fb.textContent = streak >= 3 ? '+' + (10+bonus) + ' pts — Streak bonus!' : '✓ Correct!';
+        fb.className = 'feedback good';
+      } else {
+        btn.classList.add('wrong');
+        btns.forEach(function(b){ if (+b.textContent === correct) b.classList.add('correct'); });
+        streak = 0;
+        progress = Math.max(0, progress - 6);
+        fb.textContent = correct + ' is the answer.';
+        fb.className = 'feedback bad';
+      }
+      drawMountain();
+      updateStats();
+      if (progress >= 100) {
+        stopTimer();
+        setCoins(getCoins() + 25);
+        setTimeout(function(){
+          document.getElementById('win-sub').textContent = 'Score: ' + score + ' pts';
+          document.getElementById('win-screen').classList.add('show');
+        }, 700);
+        return;
+      }
+      setTimeout(loadQuestion, 1100);
+    }
+
+    function resetGame() {
+      progress = 0; score = 0; streak = 0; qi = 0; locked = false;
+      pool = shuffle(questions);
+      document.getElementById('win-screen').classList.remove('show');
+      document.getElementById('lose-screen').classList.remove('show');
+      drawMountain();
+      updateStats();
+      loadQuestion();
+      startTimer();
+    }
+
+    pool = shuffle(questions);
+    drawMountain();
+    updateStats();
+    loadQuestion();
+    startTimer();
+  </script>
+</body>
+</html>
