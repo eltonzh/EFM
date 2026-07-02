@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games – EFM (Elton's Fun Math)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #e8e8e8;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+    }
+    .topbar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .back-btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .back-btn:hover { background: #444; }
+    h1 { font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h1>🎮 Games</h1>
+    <div style="width:80px;"></div>
+  </div>
+</body>
+</html>

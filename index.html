@@ -163,6 +163,17 @@
   <a id="nav-notebook" href="notebook.html" style="position:fixed;top:20px;left:24px;z-index:10;">
     <button style="padding:8px 20px;font-size:0.9rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.05em;">Notebook</button>
   </a>
+  <a id="nav-games" href="games.html" style="position:fixed;top:58px;left:24px;z-index:10;">
+    <button style="padding:0;width:36px;height:36px;background:#0f0f13;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="12" rx="4"/>
+        <line x1="8" y1="11" x2="8" y2="15"/>
+        <line x1="6" y1="13" x2="10" y2="13"/>
+        <circle cx="16" cy="11.5" r="1" fill="#fff" stroke="none"/>
+        <circle cx="18.5" cy="13.5" r="1" fill="#fff" stroke="none"/>
+      </svg>
+    </button>
+  </a>
   <a id="nav-about" href="about.html" style="position:fixed;top:20px;right:24px;z-index:10;">
     <button style="padding:8px 20px;font-size:0.9rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.05em;">About</button>
   </a>
@@ -171,7 +182,16 @@
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
+    <span id="settings-badge" style="display:none;position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:#e53e3e;border-radius:50%;font-size:10px;font-weight:900;color:#fff;align-items:center;justify-content:center;line-height:1;font-family:system-ui,sans-serif;">!</span>
   </a>
+  <script>
+    (function(){
+      if (!localStorage.getItem('efm_code_copied')) {
+        var b = document.getElementById('settings-badge');
+        if (b) b.style.display = 'flex';
+      }
+    })();
+  </script>
   <p style="position:fixed;margin-top: -600px; text-align: center; font-family:system-ui,sans-serif;font-size:2.5rem;color:#2a2a38;font-weight:500;z-index:10;">Welcome to</p>
 
   <div style="text-align:center;margin-top:calc(5vh - 4cm);position:fixed;z-index:2;width:100%;display:flex;align-items:center;justify-content:center;">
@@ -219,7 +239,7 @@
 
 
   <script>
-    var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-about','nav-reset','nav-chat','nav-inventory'];
+    var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-about','nav-reset','nav-chat','nav-inventory','nav-settings'];
 
     function applyLockedState() {
       LOCKABLE_IDS.forEach(function(id) {
@@ -273,6 +293,7 @@
       document.getElementById('_rp_cancel').addEventListener('click', function() { overlay.remove(); });
       document.getElementById('_rp_confirm').addEventListener('click', function() {
         ['efm_started','p4sc','p4f1','p4f2','mathCoins','p4progress','efm_cursor_name','efm_cursor_color','efm_cursor_color2'].forEach(function(k){ localStorage.removeItem(k); });
+        localStorage.setItem('efm_reset', '1');
         window.location.reload();
       });
     }
