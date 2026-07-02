@@ -327,6 +327,61 @@ async def handler(websocket):
                 record    = identity_store['by_device'].get(device_id) if device_id else None
                 await websocket.send(json.dumps({'type': 'identity_data', 'identity': record, 'from_code': True}))
 
+            elif kind == 'login':
+                email    = str(data.get('email',    '')).lower().strip()[:120]
+                password = str(data.get('password', ''))[:200]
+                if not email or not password:
+                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'Please fill in all fields.'}))
+                    continue
+                if email not in accounts:
+                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'No account found with that email.'}))
+                    continue
+                pw_hash = hashlib.sha256(password.encode()).hexdigest()
+                if accounts[email]['password_hash'] != pw_hash:
+                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'Incorrect password.'}))
+                    continue
+                record = identity_store['by_device'].get('email:' + email, {})
+                name   = record.get('name') or accounts[email].get('name', '')
+                code   = record.get('code') or accounts[email].get('code', '')
+                await websocket.send(json.dumps({'type': 'login_ok', 'name': name, 'fv': record.get('fv', ''), 'sfv': record.get('sfv', ''), 'code': code}))
+
+            elif kind == 'change_password':
+                code         = str(data.get('code', '')).upper().strip()[:8]
+                new_password = str(data.get('new_password', ''))[:200]
+                if not code or not new_password or len(new_password) < 6:
+                    await websocket.send(json.dumps({'type': 'change_password_error', 'message': 'Invalid request.'}))
+                    continue
+                linked = identity_store['by_code'].get(code)
+                if not linked or not linked.startswith('email:'):
+                    await websocket.send(json.dumps({'type': 'change_password_error', 'message': 'Account not found.'}))
+                    continue
+                email = linked[len('email:'):]
+                if email not in accounts:
+                    await websocket.send(json.dumps({'type': 'change_password_error', 'message': 'Account not found.'}))
+                    continue
+                accounts[email]['password_hash'] = hashlib.sha256(new_password.encode()).hexdigest()
+                save_accounts()
+                await websocket.send(json.dumps({'type': 'change_password_ok'}))
+
+            elif kind == 'delete_account':
+                code      = str(data.get('code', '')).upper().strip()[:8]
+                device_id = str(data.get('device_id', ''))[:64].strip()
+                # Remove by code
+                linked_device = identity_store['by_code'].pop(code, None)
+                if linked_device:
+                    identity_store['by_device'].pop(linked_device, None)
+                    # If email-linked, remove from accounts too
+                    if linked_device.startswith('email:'):
+                        email = linked_device[len('email:'):]
+                        accounts.pop(email, None)
+                        save_accounts()
+                # Also remove bare device_id entry if present
+                if device_id:
+                    identity_store['by_device'].pop(device_id, None)
+                    identity_store['by_code'] = {k: v for k, v in identity_store['by_code'].items() if v != device_id}
+                save_identities_file()
+                await websocket.send(json.dumps({'type': 'delete_account_ok'}))
+
             elif kind == 'ask_chatgpt':
                 user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
                 if not user_text:

@@ -24,7 +24,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
     .back-btn {
       background: #222;
@@ -39,6 +39,110 @@
     }
     .back-btn:hover { background: #444; }
     h1 { font-size: 28px; font-weight: 800; color: #1a1a1a; }
+    .content { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 36px; }
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .section-label h2 { font-size: 18px; font-weight: 800; color: #1a1a1a; }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .empty-state {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      color: #aaa;
+      font-size: 14px;
+      border: 2px dashed #ddd;
+    }
+    .locked-section {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .lock-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(200,200,200,0.55);
+      backdrop-filter: blur(3px);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 2;
+    }
+    .lock-icon { font-size: 36px; }
+    .lock-msg { font-size: 14px; color: #444; font-weight: 600; text-align: center; }
+    .unlock-btn {
+      background: #0f0f13;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .unlock-btn:hover { background: #333; }
+    .unlock-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* Modal */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #1a1a1a; }
+    .modal-sub { font-size: 14px; color: #777; margin-bottom: 20px; }
+    .q-display { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 18px; color: #1a1a1a; }
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .c-btn {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      color: #1a1a1a;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .c-btn:hover { background: #eee; }
+    .c-btn.correct { background: #dcfce7; border-color: #16a34a; color: #166534; }
+    .c-btn.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+    .progress-bar-bg { background: #e5e7eb; border-radius: 99px; height: 6px; margin-bottom: 16px; }
+    .progress-bar    { background: #0f0f13; border-radius: 99px; height: 6px; transition: width 0.3s; }
+    .modal-feedback  { text-align: center; font-size: 14px; min-height: 18px; color: #555; margin-bottom: 4px; }
+    .result-area { text-align: center; }
+    .result-area .big { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    .result-area .sub { font-size: 15px; color: #666; margin-bottom: 18px; }
+    .result-area .res-btn {
+      background: #0f0f13; color: #fff; border: none; border-radius: 20px;
+      padding: 10px 24px; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -47,5 +151,172 @@
     <h1>🎮 Games</h1>
     <div style="width:80px;"></div>
   </div>
+
+  <div class="content">
+    <div>
+      <div class="section-label"><h2>Beginner</h2></div>
+      <div class="games-grid">
+        <div class="empty-state">Games coming soon</div>
+      </div>
+    </div>
+
+    <div class="locked-section" id="intermediate-section">
+      <div class="section-label"><h2>Intermediate</h2></div>
+      <div class="games-grid">
+        <div class="empty-state">Games coming soon</div>
+      </div>
+      <div class="lock-overlay" id="intermediate-lock">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-msg">Pass the Beginner test<br>to unlock Intermediate</div>
+        <button class="unlock-btn" onclick="openTest()">Take the test</button>
+      </div>
+    </div>
+
+    <div class="locked-section" id="advanced-section">
+      <div class="section-label"><h2>Advanced</h2></div>
+      <div class="games-grid">
+        <div class="empty-state">Games coming soon</div>
+      </div>
+      <div class="lock-overlay" id="advanced-lock">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-msg" id="advanced-lock-msg">Unlock Intermediate first</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test modal -->
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal">
+      <h2>Beginner Test</h2>
+      <div class="modal-sub">10 questions · +, −, ×, ÷ under 100 · Need 7/10 to pass</div>
+      <div class="progress-bar-bg"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+      <div id="test-body">
+        <div class="q-display" id="q-display"></div>
+        <div class="choices-grid" id="choices-grid"></div>
+        <div class="modal-feedback" id="modal-feedback"></div>
+      </div>
+      <div class="result-area" id="result-area" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    var PASS_SCORE = 7;
+    var TOTAL = 10;
+    var questions = [], qi = 0, score = 0, answered = false;
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    function makeQuestion() {
+      var ops = ['+', '-', '×', '÷'];
+      var op = ops[rand(0, 3)];
+      var a, b, ans;
+      if (op === '+') {
+        a = rand(1, 90); b = rand(1, 99 - a);
+        ans = a + b;
+      } else if (op === '-') {
+        a = rand(2, 99); b = rand(1, a - 1);
+        ans = a - b;
+      } else if (op === '×') {
+        a = rand(2, 12); b = rand(2, 9);
+        ans = a * b;
+      } else {
+        ans = rand(2, 12); b = rand(2, 9);
+        a = ans * b;
+      }
+      var choices = [ans];
+      while (choices.length < 4) {
+        var wrong = ans + rand(-15, 15);
+        if (wrong !== ans && wrong > 0 && choices.indexOf(wrong) === -1) choices.push(wrong);
+      }
+      choices.sort(function(x, y) { return Math.random() - 0.5; });
+      return { text: a + ' ' + op + ' ' + b + ' = ?', ans: ans, choices: choices };
+    }
+
+    function buildQuestions() {
+      questions = [];
+      for (var i = 0; i < TOTAL; i++) questions.push(makeQuestion());
+    }
+
+    function openTest() {
+      buildQuestions();
+      qi = 0; score = 0;
+      document.getElementById('result-area').style.display = 'none';
+      document.getElementById('test-body').style.display = 'block';
+      document.getElementById('modal-bg').classList.add('open');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      var q = questions[qi];
+      document.getElementById('q-display').textContent = q.text;
+      document.getElementById('prog-bar').style.width = (qi / TOTAL * 100) + '%';
+      document.getElementById('modal-feedback').textContent = '';
+      var grid = document.getElementById('choices-grid');
+      grid.innerHTML = '';
+      q.choices.forEach(function(c) {
+        var btn = document.createElement('button');
+        btn.className = 'c-btn';
+        btn.textContent = c;
+        btn.onclick = function() { pick(btn, c, q.ans); };
+        grid.appendChild(btn);
+      });
+    }
+
+    function pick(btn, chosen, correct) {
+      if (answered) return;
+      answered = true;
+      var btns = document.querySelectorAll('.c-btn');
+      if (chosen === correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('modal-feedback').textContent = 'Correct!';
+      } else {
+        btn.classList.add('wrong');
+        btns.forEach(function(b) { if (parseInt(b.textContent) === correct) b.classList.add('correct'); });
+        document.getElementById('modal-feedback').textContent = 'The answer was ' + correct;
+      }
+      setTimeout(function() {
+        qi++;
+        if (qi >= TOTAL) { showResult(); } else { showQuestion(); }
+      }, 900);
+    }
+
+    function showResult() {
+      document.getElementById('prog-bar').style.width = '100%';
+      document.getElementById('test-body').style.display = 'none';
+      var passed = score >= PASS_SCORE;
+      var ra = document.getElementById('result-area');
+      ra.style.display = 'block';
+      if (passed) {
+        ra.innerHTML = '<div class="big">🎉 ' + score + '/' + TOTAL + '</div>' +
+          '<div class="sub">You passed! Intermediate is now unlocked.</div>' +
+          '<button class="res-btn" onclick="closeTest(true)">Let\'s go!</button>';
+      } else {
+        ra.innerHTML = '<div class="big" style="color:#dc2626;">' + score + '/' + TOTAL + '</div>' +
+          '<div class="sub">Need ' + PASS_SCORE + '/10 to pass. Give it another try!</div>' +
+          '<button class="res-btn" onclick="openTest()">Try again</button>' +
+          '<button class="res-btn" style="background:#e5e7eb;color:#333;margin-left:10px;" onclick="closeTest(false)">Close</button>';
+      }
+    }
+
+    function closeTest(passed) {
+      document.getElementById('modal-bg').classList.remove('open');
+      if (passed) {
+        localStorage.setItem('efm_games_intermediate_unlocked', '1');
+        checkUnlocks();
+      }
+    }
+
+    function checkUnlocks() {
+      if (localStorage.getItem('efm_games_intermediate_unlocked')) {
+        document.getElementById('intermediate-lock').style.display = 'none';
+        var advMsg = document.getElementById('advanced-lock-msg');
+        advMsg.textContent = 'Complete Intermediate games to unlock';
+      }
+    }
+
+    checkUnlocks();
+  </script>
 </body>
 </html>
