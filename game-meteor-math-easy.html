@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteor Math – EFM</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#080b14; min-height:100vh; font-family:system-ui,sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px; }
+    .topbar { width:100%; max-width:700px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .back-btn { background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:20px; padding:8px 16px; font-size:13px; font-family:inherit; font-weight:600; cursor:pointer; }
+    .back-btn:hover { background:rgba(255,255,255,0.18); }
+    .coins-disp { background:rgba(255,255,255,0.08); color:#facc15; border-radius:20px; padding:6px 14px; font-size:14px; font-weight:800; }
+    .shell { width:100%; max-width:700px; background:#0d1220; border-radius:20px; overflow:hidden; border:1.5px solid #1e293b; }
+    .hud { background:#0f172a; display:flex; justify-content:space-between; align-items:center; padding:12px 20px; gap:14px; }
+    .hud-score { text-align:center; }
+    .hud-score .val { font-size:22px; font-weight:900; color:#facc15; }
+    .hud-score .lbl { font-size:10px; font-weight:800; color:#64748b; letter-spacing:.08em; }
+    .city-hp-wrap { flex:1; display:flex; flex-direction:column; gap:4px; }
+    .city-hp-label { font-size:10px; font-weight:800; color:#94a3b8; letter-spacing:.06em; display:flex; justify-content:space-between; }
+    .city-hp-bg { height:8px; background:#1e293b; border-radius:99px; overflow:hidden; }
+    .city-hp-bar { height:8px; border-radius:99px; background:#4ade80; transition:width .3s,background .3s; }
+    .progress-wrap { flex:1; display:flex; flex-direction:column; gap:4px; }
+    .progress-label { font-size:10px; font-weight:800; color:#94a3b8; letter-spacing:.06em; display:flex; justify-content:space-between; }
+    .progress-bg { height:8px; background:#1e293b; border-radius:99px; overflow:hidden; }
+    .progress-bar { height:8px; border-radius:99px; background:#818cf8; transition:width .3s; }
+    .stk { font-size:12px; font-weight:800; color:#f97316; min-width:72px; text-align:right; white-space:nowrap; }
+    canvas { width:100%; display:block; }
+    .qbar { background:#1e293b; padding:10px 16px; text-align:center; }
+    .qtext { font-size:32px; font-weight:900; color:#f1f5f9; letter-spacing:-1px; }
+    .btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px; background:#f8fafc; }
+    .ab { border-radius:14px; padding:18px 10px; font-size:24px; font-weight:900; font-family:inherit; cursor:pointer; border:3px solid #e2e8f0; background:#fff; color:#0f172a; transition:transform .1s,background .1s,border-color .1s; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .ab:hover { background:#f0f9ff; border-color:#7dd3fc; transform:scale(1.05); }
+    .ab.correct { background:#dcfce7; border-color:#16a34a; color:#166534; }
+    .ab.wrong   { background:#fee2e2; border-color:#dc2626; color:#991b1b; }
+    .end-screen { display:none; width:100%; max-width:700px; background:#0f172a; border-radius:20px; border:1.5px solid #1e293b; text-align:center; padding:48px 28px; margin-top:16px; }
+    .end-screen.show { display:block; }
+    .end-emoji { font-size:64px; margin-bottom:14px; }
+    .end-title { font-size:28px; font-weight:900; color:#f1f5f9; margin-bottom:8px; }
+    .end-sub { font-size:15px; color:#64748b; margin-bottom:8px; }
+    .end-cash { font-size:20px; font-weight:900; margin-bottom:28px; }
+    .end-cash.win { color:#4ade80; }
+    .end-cash.lose { color:#f87171; }
+    .end-btn { background:#facc15; color:#0f172a; border:none; border-radius:22px; padding:14px 32px; font-size:16px; font-weight:900; font-family:inherit; cursor:pointer; margin:5px; }
+    .end-btn.sec { background:#1e293b; color:#94a3b8; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <div class="coins-disp">🪙 <span id="coins-disp">0</span></div>
+  </div>
+
+  <div class="shell" id="shell">
+    <div class="hud">
+      <div class="hud-score">
+        <div class="val" id="sc">0</div>
+        <div class="lbl">SCORE</div>
+      </div>
+      <div class="city-hp-wrap">
+        <div class="city-hp-label"><span>🏙 CITY HP</span><span id="hp-num">15/15</span></div>
+        <div class="city-hp-bg"><div class="city-hp-bar" id="hp-bar" style="width:100%"></div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>✅ CORRECT</span><span id="correct-num">0/15</span></div>
+        <div class="progress-bg"><div class="progress-bar" id="correct-bar" style="width:0%"></div></div>
+      </div>
+      <div class="stk" id="stk"></div>
+    </div>
+    <canvas id="gc" width="680" height="260"></canvas>
+    <div class="qbar"><div class="qtext" id="qt"></div></div>
+    <div class="btn-grid" id="btns"></div>
+  </div>
+
+  <div class="end-screen" id="end-screen">
+    <div class="end-emoji" id="end-emoji"></div>
+    <div class="end-title" id="end-title"></div>
+    <div class="end-sub" id="end-sub"></div>
+    <div class="end-cash" id="end-cash"></div>
+    <button class="end-btn" onclick="startGame()">Play Again</button>
+    <button class="end-btn sec" onclick="history.back()">Back to Games</button>
+  </div>
+
+  <script>
+    var cv=document.getElementById('gc'),cx=cv.getContext('2d'),W=cv.width,H=cv.height;
+    var MAX_HP=15, WIN_CORRECT=15;
+    var hp,correct,score,level,streak,cc,locked,on,raf,curQ;
+
+    function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+    function sh(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=0|Math.random()*(i+1);var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+    function makeQ(){
+      var ops=['+','-','×','÷'],op=ops[rnd(0,3)],a,b,ans;
+      if(op==='+'){a=rnd(2,40);b=rnd(2,40);ans=a+b;}
+      else if(op==='-'){a=rnd(10,60);b=rnd(2,a-1);ans=a-b;}
+      else if(op==='×'){a=rnd(2,9);b=rnd(2,9);ans=a*b;}
+      else{ans=rnd(2,9);b=rnd(2,9);a=ans*b;}
+      return {label:a+' '+op+' '+b,a:ans};
+    }
+
+    var stars=[];for(var i=0;i<90;i++)stars.push({x:Math.random()*W,y:Math.random()*(H-60),r:Math.random()*1.5+.3,ph:Math.random()*6.28,sp:.01+Math.random()*.04});
+    var blds=(function(){var a=[],x=0;while(x<W){var w=22+Math.random()*38,h=32+Math.random()*90,ws=[];for(var wy=5;wy<h-7;wy+=10)for(var wx=3;wx<w-3;wx+=7)if(Math.random()>.32)ws.push({x:wx,y:wy,l:Math.random()>.28});a.push({x:x,w:w,h:h,ws:ws});x+=w+1+Math.random()*4;}return a;})();
+
+    var met={x:340,y:-50,size:30,speed:1,trail:[]};
+    var parts=[],shakeF=0,flashC='',flashA=0,lvupF=0;
+
+    function getCoins(){return +(localStorage.getItem('mathCoins')||0);}
+    function setCoins(n){localStorage.setItem('mathCoins',Math.max(0,n));document.getElementById('coins-disp').textContent=Math.max(0,n);}
+
+    function updateHPBar(){
+      var pct=Math.max(0,hp/MAX_HP)*100;
+      var bar=document.getElementById('hp-bar');
+      bar.style.width=pct+'%';
+      bar.style.background=pct>60?'#4ade80':pct>30?'#facc15':'#ef4444';
+      document.getElementById('hp-num').textContent=Math.max(0,hp)+'/'+MAX_HP;
+    }
+    function updateCorrectBar(){
+      var pct=Math.min(correct/WIN_CORRECT,1)*100;
+      document.getElementById('correct-bar').style.width=pct+'%';
+      document.getElementById('correct-num').textContent=correct+'/'+WIN_CORRECT;
+    }
+
+    function renderButtons(){
+      var w=[],ds=sh([-curQ.a+1,-15,-10,-7,-5,-4,-3,-2,-1,1,2,3,4,5,7,10,15,curQ.a+curQ.a]);
+      for(var i=0;i<ds.length&&w.length<3;i++){var v=curQ.a+ds[i];if(v>0&&v!==curQ.a&&w.indexOf(v)===-1)w.push(v);}
+      var opts=sh([curQ.a].concat(w));
+      var bg=document.getElementById('btns');bg.innerHTML='';
+      opts.forEach(function(opt){
+        var b=document.createElement('button');b.className='ab';b.textContent=opt;
+        b.onclick=(function(btn,v){return function(){pick(btn,v);};})(b,opt);
+        bg.appendChild(b);
+      });
+      locked=false;
+    }
+
+    function spawn(){
+      curQ=makeQ();
+      document.getElementById('qt').textContent=curQ.label+' = ?';
+      met.x=80+Math.random()*520;met.y=-50;met.trail=[];
+      met.speed=.38+(level-1)*.03;
+      renderButtons();
+    }
+
+    function boom(x,y,col,n){for(var i=0;i<(n||18);i++){var a=Math.random()*6.28,sp=Math.random()*5+1;parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.5,r:Math.random()*4+2,life:1,col:col});}}
+
+    function pick(btn,v){
+      if(locked||!on)return;locked=true;
+      document.querySelectorAll('.ab').forEach(function(b){b.disabled=true;});
+      if(v===curQ.a){
+        btn.classList.add('correct');streak++;
+        var bonus=streak>=5?20:streak>=3?10:0;
+        score+=10+bonus;correct++;cc++;
+        boom(met.x,met.y,'#4ade80',22);
+        flashC='rgba(74,222,128,.12)';flashA=.5;
+        met.y=H+100;
+        if(cc%5===0)lvupF=80;
+        if(cc%5===0&&level<6)level++;
+        updateCorrectBar();
+        document.getElementById('sc').textContent=score;
+        document.getElementById('stk').textContent=streak>=3?'🔥 x'+streak:'';
+        if(correct>=WIN_CORRECT){setTimeout(function(){endGame(true);},600);return;}
+        setTimeout(spawn,900);
+      } else {
+        btn.classList.add('wrong');
+        document.querySelectorAll('.ab').forEach(function(b){if(+b.textContent===curQ.a)b.classList.add('correct');});
+        streak=0;
+        flashC='rgba(239,68,68,.18)';flashA=.6;
+        shakeF=10;
+        document.getElementById('stk').textContent='';
+        setTimeout(renderButtons,700);
+      }
+    }
+
+    function hitGround(){
+      if(locked)return;locked=true;
+      streak=0;hp--;
+      boom(met.x,H-50,'#f97316',28);
+      flashC='rgba(239,68,68,.28)';flashA=.8;shakeF=14;met.y=H+100;
+      updateHPBar();
+      document.getElementById('stk').textContent='';
+      if(hp<=0){setTimeout(function(){endGame(false);},500);return;}
+      setTimeout(spawn,900);
+    }
+
+    function endGame(won){
+      on=false;cancelAnimationFrame(raf);
+      document.getElementById('shell').style.display='none';
+      var es=document.getElementById('end-screen');es.classList.add('show');
+      var coins=getCoins();
+      if(won){
+        setCoins(coins+10);
+        document.getElementById('end-emoji').textContent='🎉';
+        document.getElementById('end-title').textContent='City saved!';
+        document.getElementById('end-sub').textContent='You blasted all 15 meteors! Score: '+score+' pts';
+        document.getElementById('end-cash').className='end-cash win';
+        document.getElementById('end-cash').textContent='+10 🪙 coins added!';
+      } else {
+        setCoins(coins-5);
+        document.getElementById('end-emoji').textContent='💥';
+        document.getElementById('end-title').textContent='City destroyed!';
+        document.getElementById('end-sub').textContent='The meteors won this time. Score: '+score+' pts';
+        document.getElementById('end-cash').className='end-cash lose';
+        document.getElementById('end-cash').textContent='-5 🪙 coins deducted';
+      }
+    }
+
+    function startGame(){
+      hp=MAX_HP;correct=0;score=0;level=1;streak=0;cc=0;locked=false;on=true;
+      parts=[];shakeF=0;flashA=0;lvupF=0;
+      document.getElementById('shell').style.display='block';
+      document.getElementById('end-screen').classList.remove('show');
+      document.getElementById('sc').textContent=0;
+      document.getElementById('stk').textContent='';
+      document.getElementById('coins-disp').textContent=getCoins();
+      updateHPBar();updateCorrectBar();spawn();
+      cancelAnimationFrame(raf);loop();
+    }
+
+    function loop(){
+      if(!on)return;
+      stars.forEach(function(s){s.ph+=s.sp;});
+      met.trail.push({x:met.x,y:met.y});
+      if(met.trail.length>16)met.trail.shift();
+      met.y+=met.speed;
+      parts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.1;p.life-=.035;});
+      parts=parts.filter(function(p){return p.life>0;});
+      if(lvupF>0)lvupF--;
+
+      cx.save();
+      if(shakeF>0){cx.translate((Math.random()-.5)*9,(Math.random()-.5)*9);shakeF--;}
+      cx.fillStyle='#080b14';cx.fillRect(0,0,W,H);
+      stars.forEach(function(s){var b=(.45+.55*Math.sin(s.ph)).toFixed(2);cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.28);cx.fillStyle='rgba(255,255,255,'+b+')';cx.fill();});
+
+      var gy=H-50,dmg=1-hp/MAX_HP;
+      blds.forEach(function(b){
+        var topY=gy-b.h,bH=b.h;
+        if(dmg>0){var rubble=Math.floor(dmg*b.h*.65);topY+=rubble;bH-=rubble;}
+        if(bH<=2)return;
+        cx.fillStyle='#0d1520';cx.fillRect(b.x,topY,b.w,bH);
+        b.ws.forEach(function(w){
+          if(gy-b.h+w.y>topY){cx.fillStyle=w.l?'rgba(255,235,80,.55)':'rgba(40,60,100,.2)';cx.fillRect(b.x+w.x,topY+w.y,3,5);}
+        });
+      });
+      cx.fillStyle='#0a0f1a';cx.fillRect(0,gy,W,H-gy);
+      cx.fillStyle='#1e293b';cx.fillRect(0,gy,W,2);
+
+      if(met.y<H+40){
+        met.trail.forEach(function(t,idx){var f=idx/met.trail.length;cx.beginPath();cx.arc(t.x,t.y,met.size*f*.65,0,6.28);cx.fillStyle='rgba(251,146,60,'+(f*.32).toFixed(2)+')';cx.fill();});
+        var danger=Math.max(0,(met.y-H*.25)/(gy-met.size-H*.25));
+        cx.shadowColor=danger>.5?'#ef4444':'#f97316';cx.shadowBlur=22;
+        cx.beginPath();cx.arc(met.x,met.y,met.size,0,6.28);cx.fillStyle=danger>.5?'#7f1d1d':'#92400e';cx.fill();
+        cx.shadowBlur=0;
+        cx.beginPath();cx.arc(met.x-8,met.y-7,10,0,6.28);cx.fillStyle='#78350f';cx.fill();
+        cx.beginPath();cx.arc(met.x+7,met.y+5,6,0,6.28);cx.fillStyle='#b45309';cx.fill();
+        if(curQ){cx.fillStyle='#fff';cx.textAlign='center';cx.textBaseline='middle';cx.font='bold 12px system-ui';cx.fillText(curQ.label,met.x,met.y-2);cx.fillText('=?',met.x,met.y+11);}
+        if(met.y>=gy-met.size-2&&!locked)hitGround();
+      }
+
+      parts.forEach(function(p){cx.globalAlpha=Math.max(0,p.life);cx.beginPath();cx.arc(p.x,p.y,Math.max(.1,p.r*p.life),0,6.28);cx.fillStyle=p.col;cx.fill();});
+      cx.globalAlpha=1;
+      if(flashA>0){cx.fillStyle=flashC;cx.globalAlpha=flashA;cx.fillRect(0,0,W,H);cx.globalAlpha=1;flashA=Math.max(0,flashA-.055);}
+      if(lvupF>0){cx.globalAlpha=Math.min(1,lvupF/18);cx.font='900 38px system-ui';cx.textAlign='center';cx.textBaseline='middle';cx.fillStyle='#facc15';cx.fillText('LEVEL UP!',W/2,H/2);cx.globalAlpha=1;}
+      cx.restore();
+      raf=requestAnimationFrame(loop);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
