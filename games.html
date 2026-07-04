@@ -235,13 +235,8 @@
         <h2>For Fun</h2>
         <div class="section-line"></div>
       </div>
-      <div class="games-grid">
-        <a class="game-card" href="game-golden-trail.html">
-          <div class="game-card-icon">✨</div>
-          <div class="game-card-name">Golden Trail</div>
-          <div class="game-card-desc">Move your glowing orb and paint the board gold</div>
-          <div class="game-card-play">Play →</div>
-        </a>
+      <div class="games-grid" id="forfun-grid">
+        <!-- filled by JS -->
       </div>
     </div>
 
@@ -361,6 +356,40 @@
       grid.appendChild(card);
     }
 
+    function renderForFun() {
+      var grid = document.getElementById('forfun-grid');
+      grid.innerHTML = '';
+      if (localStorage.getItem('efm_purchased_golden_trail')) {
+        var a = document.createElement('a');
+        a.className = 'game-card';
+        a.href = 'game-golden-trail.html';
+        a.innerHTML = '<div class="game-card-icon">✨</div>' +
+          '<div class="game-card-name">Golden Trail</div>' +
+          '<div class="game-card-desc">Move your glowing orb and paint the board gold</div>' +
+          '<div class="game-card-play">Play →</div>';
+        grid.appendChild(a);
+      } else {
+        var cash = getCash();
+        var card = document.createElement('div');
+        card.className = 'lock-card';
+        card.id = 'golden-trail-card';
+        card.innerHTML = '<div class="lock-card-icon">✨</div>' +
+          '<div class="lock-card-title">Golden Trail</div>' +
+          '<div class="lock-card-desc">Move your glowing orb and paint the board gold</div>' +
+          '<button class="buy-btn"' + (cash < 50 ? ' disabled title="Not enough cash"' : '') +
+          ' onclick="buyGoldenTrail()">Buy · 50 cash</button>';
+        grid.appendChild(card);
+      }
+    }
+
+    function buyGoldenTrail() {
+      var cash = getCash();
+      if (cash < 50) return;
+      setCash(cash - 50);
+      localStorage.setItem('efm_purchased_golden_trail', '1');
+      renderForFun();
+    }
+
     function openTest() {
       var opPool = shuffle(['+','+','+','+','-','-','-','-','×','×','×','×','÷','÷','÷']);
       questions = opPool.map(function(op) { return makeQuestion(op); });
@@ -443,6 +472,7 @@
 
     renderIntermediate();
     renderAdvanced();
+    renderForFun();
   </script>
 </body>
 </html>
