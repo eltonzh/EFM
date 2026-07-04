@@ -443,7 +443,11 @@ function showLesson(ch,i){
   const sec=ch.secs[i];
   lessonTitle.textContent=`${ch.num}.${i+1} — ${sec}`;
   lessonSub.textContent=`Chapter ${ch.num}: ${ch.title}`;
-  lessonBody.textContent=`This is where the lesson content for "${sec}" will appear. Students can read explanations, work through examples, and practice problems right here on the EFM website.`;
+  if(ch.num===1 && sec==='Why Start with Arithmetic?'){
+    lessonBody.innerHTML=`You've already learned about the basic operations of mathematics — addition, subtraction, multiplication, and division. And if you still haven't mastered all of them yet, that's OK! You can always click the link below.<br><br><a href="page-master-basics.html" style="font-weight:700;color:#0f0f13;font-size:1rem;">Master the basic operations below 100 →</a>`;
+  } else {
+    lessonBody.textContent=`This is where the lesson content for "${sec}" will appear. Students can read explanations, work through examples, and practice problems right here on the EFM website.`;
+  }
   topbarTitle.textContent=`Ch.${ch.num} › ${sec}`;
   topbarBadge.textContent=`Chapter ${ch.num}`;
   homeView.style.display='none';
