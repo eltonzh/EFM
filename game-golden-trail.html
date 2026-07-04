@@ -395,10 +395,12 @@
     }
 
     function showTimeUp() {
+      var mc = +(localStorage.getItem('mathCoins') || 0);
+      localStorage.setItem('mathCoins', Math.max(0, mc - 100));
       var ol = document.getElementById('overlay');
       document.getElementById('overlay-icon').textContent  = '⏰';
       document.getElementById('overlay-title').textContent = 'Time\'s up!';
-      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% — need 80% to win. Try again!';
+      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% — need 80% to win. −100 coins. Try again!';
       document.getElementById('overlay-btn').textContent   = 'Try again';
       document.getElementById('overlay-btn').onclick       = function() { startGame(); };
       ol.classList.remove('hidden');
