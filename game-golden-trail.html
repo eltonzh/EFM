@@ -110,6 +110,7 @@
     <div id="title">✨ Golden Trail</div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="coins-disp" style="background:rgba(255,255,255,0.08);color:#facc15;border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;"><img src="coin.svg" style="width:16px;height:16px;"> <span id="coins-val">0</span></div>
+      <div id="timer-box" style="background:rgba(255,255,255,0.08);color:#fff;border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;min-width:52px;text-align:center;">1:15</div>
       <div id="score-box">0% covered</div>
     </div>
   </div>
@@ -145,6 +146,16 @@
     var player, particles, grid, covered, total;
     var keys = {}, running = false, raf;
     var WIN_PCT = 0.80;
+    var TIMER_TOTAL = 135, timeLeft = 135, timerInterval = null;
+
+    function updateTimer() {
+      var m = Math.floor(timeLeft / 60);
+      var s = timeLeft % 60;
+      var el = document.getElementById('timer-box');
+      el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      el.style.color = timeLeft <= 10 ? '#f87171' : '#fff';
+      el.style.background = timeLeft <= 10 ? 'rgba(239,68,68,0.18)' : 'rgba(255,255,255,0.08)';
+    }
 
     function getCoins() { return parseInt(localStorage.getItem('efm_coins') || '0'); }
     function setCoins(n) {
@@ -189,6 +200,19 @@
     function startGame() {
       document.getElementById('overlay').classList.add('hidden');
       running = true;
+      timeLeft = TIMER_TOTAL;
+      updateTimer();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        if (!running) return;
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          running = false;
+          setTimeout(showTimeUp, 200);
+        }
+      }, 1000);
       resetGame();
       var isMobile = window.matchMedia('(pointer:coarse)').matches;
       if (isMobile) document.getElementById('dpad').style.display = 'flex';
@@ -302,11 +326,20 @@
         var row = (idx / COLS) | 0;
         var cx  = col * CELL;
         var cy  = row * CELL;
-        var grad = ctx.createRadialGradient(cx + CELL/2, cy + CELL/2, 0, cx + CELL/2, cy + CELL/2, CELL * 0.8);
-        grad.addColorStop(0, 'rgba(255,230,80,0.38)');
-        grad.addColorStop(1, 'rgba(255,180,0,0.10)');
+        // Base gold fill
+        ctx.fillStyle = 'rgba(255,200,0,0.72)';
+        ctx.fillRect(cx, cy, CELL, CELL);
+        // Bright radial shimmer
+        var grad = ctx.createRadialGradient(cx + CELL*0.35, cy + CELL*0.3, 0, cx + CELL/2, cy + CELL/2, CELL * 0.75);
+        grad.addColorStop(0, 'rgba(255,255,180,0.85)');
+        grad.addColorStop(0.45, 'rgba(255,215,0,0.55)');
+        grad.addColorStop(1, 'rgba(200,120,0,0.0)');
         ctx.fillStyle = grad;
         ctx.fillRect(cx, cy, CELL, CELL);
+        // Glowing border
+        ctx.strokeStyle = 'rgba(255,240,80,0.55)';
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(cx + 0.5, cy + 0.5, CELL - 1, CELL - 1);
       }
 
       // Particles
@@ -349,20 +382,24 @@
       ctx.fill();
     }
 
-    // ── Win screen ────────────────────────────────────────────────────────────
+    // ── Win / lose screens ───────────────────────────────────────────────────
     function showWin() {
-      var mathCoins = +(localStorage.getItem('mathCoins') || 0);
-      var cashUnlocked = mathCoins >= 50;
-      if (cashUnlocked) {
-        setCoins(getCoins() + 5);
-      } else {
-        localStorage.setItem('mathCoins', mathCoins + 5);
-      }
+      clearInterval(timerInterval);
       var ol = document.getElementById('overlay');
       document.getElementById('overlay-icon').textContent  = '🏆';
       document.getElementById('overlay-title').textContent = 'You win!';
-      document.getElementById('overlay-sub').innerHTML   = 'You covered ' + Math.round(covered / total * 100) + '% of the board! +5 <img src="coin.svg" style="width:16px;height:16px;vertical-align:middle;">';
+      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% of the board!';
       document.getElementById('overlay-btn').textContent   = 'Play again';
+      document.getElementById('overlay-btn').onclick       = function() { startGame(); };
+      ol.classList.remove('hidden');
+    }
+
+    function showTimeUp() {
+      var ol = document.getElementById('overlay');
+      document.getElementById('overlay-icon').textContent  = '⏰';
+      document.getElementById('overlay-title').textContent = 'Time\'s up!';
+      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% — need 80% to win. Try again!';
+      document.getElementById('overlay-btn').textContent   = 'Try again';
       document.getElementById('overlay-btn').onclick       = function() { startGame(); };
       ol.classList.remove('hidden');
     }
