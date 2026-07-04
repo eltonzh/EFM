@@ -174,6 +174,7 @@
       </svg>
     </button>
   </a>
+  <a id="nav-create" href="create.html" style="position:fixed;top:104px;left:24px;z-index:10;background:#0f0f13;color:#fff;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px 12px;gap:6px;text-decoration:none;font-size:0.75rem;font-weight:700;font-family:system-ui,sans-serif;letter-spacing:0.03em;white-space:nowrap;" title="Create">🛠️ Create</a>
   <a id="nav-about" href="about.html" style="position:fixed;top:20px;right:24px;z-index:10;">
     <button style="padding:8px 20px;font-size:0.9rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:0.05em;">About</button>
   </a>
@@ -184,6 +185,7 @@
     </svg>
     <span id="settings-badge" style="display:none;position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:#e53e3e;border-radius:50%;font-size:10px;font-weight:900;color:#fff;align-items:center;justify-content:center;line-height:1;font-family:system-ui,sans-serif;">!</span>
   </a>
+  <a id="nav-events" href="events.html" style="position:fixed;top:104px;right:24px;z-index:10;background:#0f0f13;color:#fff;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px 12px;gap:6px;text-decoration:none;font-size:0.75rem;font-weight:700;font-family:system-ui,sans-serif;letter-spacing:0.03em;white-space:nowrap;" title="Events">🎉 Events</a>
   <script>
     (function(){
       if (!localStorage.getItem('efm_code_copied')) {
@@ -239,7 +241,7 @@
 
 
   <script>
-    var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-about','nav-reset','nav-chat','nav-inventory','nav-settings'];
+    var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-games','nav-create','nav-about','nav-settings','nav-reset','nav-chat','nav-inventory','nav-events'];
 
     function applyLockedState() {
       LOCKABLE_IDS.forEach(function(id) {
