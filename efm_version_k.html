@@ -52,7 +52,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   z-index: 10;
   box-shadow: inset -4px 0 20px hsla(var(--fv-h),91%,60%,0.25), inset 0 0 40px hsla(var(--fv-h),76%,48%,0.15);
   overflow: hidden;
+  transition: width 0.25s ease;
 }
+.sidebar.collapsed { width: 0; }
 .logo {
   padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -154,6 +156,19 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   margin-left: 240px; min-height: 100vh;
   background: var(--sfv-light, #d6e8d6);
   display: flex; flex-direction: column;
+  transition: margin-left 0.25s ease;
+}
+.main.collapsed { margin-left: 0; }
+.hamburger {
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 4px; padding: 6px; border-radius: 6px;
+  transition: background 0.15s;
+}
+.hamburger:hover { background: rgba(var(--sfv-rgb),0.15); }
+.hamburger span {
+  display: block; width: 18px; height: 2px;
+  background: var(--sfv); border-radius: 2px;
 }
 .topbar {
   background: hsl(var(--fv-h),52%,24%); padding: 12px 24px;
@@ -308,6 +323,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
+      <button class="hamburger" id="sidebarToggle" title="Toggle sidebar">
+        <span></span><span></span><span></span>
+      </button>
       <a class="topbar-home" href="index.html">🏠 Home</a>
       <span class="topbar-divider">|</span>
       <span class="topbar-title" id="topbarTitle">Welcome</span>
@@ -411,6 +429,11 @@ const chapters = [
   { num:14, title:'Counting',                           secs:['Counting with Addition and Subtraction','The Multiplication Principle','Casework','Counting Pairs','Probability','Summary'] },
   { num:15, title:'Problem-Solving Strategies',         secs:['Find a Pattern','Make a List','Draw a Picture','Work Backwards'] },
 ];
+
+document.getElementById('sidebarToggle').addEventListener('click',()=>{
+  document.querySelector('.sidebar').classList.toggle('collapsed');
+  document.querySelector('.main').classList.toggle('collapsed');
+});
 
 const navScroll=document.getElementById('navScroll');
 const chapterCards=document.getElementById('chapterCards');
