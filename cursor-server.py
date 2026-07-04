@@ -1,4 +1,8 @@
 import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib
+try:
+    _TZ = zoneinfo.ZoneInfo('America/Los_Angeles')
+except Exception:
+    _TZ = datetime.timezone.utc
 from pathlib import Path
 import websockets
 from websockets import Response
@@ -76,20 +80,20 @@ def load_chat_history():
     if CHAT_FILE.exists():
         try:
             data = json.loads(CHAT_FILE.read_text())
-            if data.get('date') == datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat():
+            if data.get('date') == datetime.datetime.now(_TZ).date().isoformat():
                 return data.get('messages', [])
         except Exception:
             pass
     return []
 
 def save_chat_history():
-    CHAT_FILE.write_text(json.dumps({'date': datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat(), 'messages': chat_history}))
+    CHAT_FILE.write_text(json.dumps({'date': datetime.datetime.now(_TZ).date().isoformat(), 'messages': chat_history}))
 
 def check_daily_reset():
     if CHAT_FILE.exists():
         try:
             data = json.loads(CHAT_FILE.read_text())
-            if data.get('date') != datetime.datetime.now(zoneinfo.ZoneInfo('America/Los_Angeles')).date().isoformat():
+            if data.get('date') != datetime.datetime.now(_TZ).date().isoformat():
                 chat_history.clear()
                 save_chat_history()
         except Exception:
@@ -432,11 +436,23 @@ async def handler(websocket):
             release_color(color)
             await broadcast_cursors({'type': 'leave', 'id': cid})
 
+async def midnight_reset_loop():
+    tz = zoneinfo.ZoneInfo('America/Los_Angeles')
+    while True:
+        now = datetime.datetime.now(tz)
+        tomorrow = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        await asyncio.sleep((tomorrow - now).total_seconds())
+        chat_history.clear()
+        save_chat_history()
+        await broadcast_chat({'type': 'chat_reset'})
+        print('Chat history cleared at midnight')
+
 async def main():
     port = int(os.environ.get('PORT', 8080))
     host = '0.0.0.0'
     async with websockets.serve(handler, host, port, process_request=process_request):
         print(f'Cursor + chat server running on {host}:{port}')
+        asyncio.ensure_future(midnight_reset_loop())
         await asyncio.Future()
 
 asyncio.run(main())
