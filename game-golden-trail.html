@@ -396,7 +396,7 @@
 
     function showTimeUp() {
       var mc = +(localStorage.getItem('mathCoins') || 0);
-      localStorage.setItem('mathCoins', Math.max(0, mc - 100));
+      localStorage.setItem('mathCoins', mc - 100);
       var ol = document.getElementById('overlay');
       document.getElementById('overlay-icon').textContent  = '⏰';
       document.getElementById('overlay-title').textContent = 'Time\'s up!';
