@@ -54,12 +54,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   overflow: hidden;
   transition: width 0.25s ease;
 }
-.sidebar.collapsed { width: 0; }
+.sidebar.collapsed { width: 44px; }
 .logo {
-  padding: 16px;
+  padding: 12px 10px 12px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
   background: #000;
+  display: flex; align-items: center; justify-content: space-between;
 }
 .logo-name { font-size: 15px; font-weight: 600; color: #fff; text-shadow: none; }
 .logo-sub  { font-size: 11px; color: var(--sfv); margin-top: 3px; }
@@ -158,18 +159,29 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   display: flex; flex-direction: column;
   transition: margin-left 0.25s ease;
 }
-.main.collapsed { margin-left: 0; }
+.main.collapsed { margin-left: 44px; }
 .hamburger {
   background: none; border: none; cursor: pointer;
   display: flex; flex-direction: column; justify-content: center;
   gap: 4px; padding: 6px; border-radius: 6px;
+  flex-shrink: 0;
   transition: background 0.15s;
 }
-.hamburger:hover { background: rgba(var(--sfv-rgb),0.15); }
+.hamburger:hover { background: rgba(255,255,255,0.1); }
 .hamburger span {
-  display: block; width: 18px; height: 2px;
-  background: var(--sfv); border-radius: 2px;
+  display: block; width: 16px; height: 2px;
+  background: #fff; border-radius: 2px;
 }
+/* Collapsed sidebar — hide text, centre chapter badges */
+.sidebar.collapsed .logo-name,
+.sidebar.collapsed .logo-sub,
+.sidebar.collapsed .home-link,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .ch-label,
+.sidebar.collapsed .ch-arrow,
+.sidebar.collapsed .sec-list { display: none; }
+.sidebar.collapsed .ch-btn { padding: 5px 0; justify-content: center; }
+.sidebar.collapsed .ch-num { font-size: 9px; width: 20px; height: 20px; }
 .topbar {
   background: hsl(var(--fv-h),52%,24%); padding: 12px 24px;
   display: flex; align-items: center; justify-content: space-between;
@@ -308,8 +320,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">
-    <div class="logo-name">EFM</div>
-    <div class="logo-sub">Elton's Fun Math</div>
+    <div>
+      <div class="logo-name">EFM</div>
+      <div class="logo-sub">Elton's Fun Math</div>
+    </div>
+    <button class="hamburger" id="sidebarToggle" title="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
   </div>
   <a class="home-link" href="#" onclick="efmGoBack();return false;">
     <span class="home-link-icon">🏠</span>
@@ -323,9 +340,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="hamburger" id="sidebarToggle" title="Toggle sidebar">
-        <span></span><span></span><span></span>
-      </button>
       <a class="topbar-home" href="index.html">🏠 Home</a>
       <span class="topbar-divider">|</span>
       <span class="topbar-title" id="topbarTitle">Welcome</span>
