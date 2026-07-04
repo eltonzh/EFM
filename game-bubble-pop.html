@@ -126,16 +126,7 @@ setCoins(getCoins());
 
 // Challenge types
 var challenges = [
-  { text: 'EVEN NUMBERS',       sub: '…divisible by 2',          check: function(n){ return n % 2 === 0; } },
-  { text: 'ODD NUMBERS',        sub: '…not divisible by 2',       check: function(n){ return n % 2 !== 0; } },
-  { text: 'MULTIPLES OF 3',     sub: '…3, 6, 9, 12…',            check: function(n){ return n % 3 === 0; } },
-  { text: 'MULTIPLES OF 4',     sub: '…4, 8, 12, 16…',           check: function(n){ return n % 4 === 0; } },
-  { text: 'MULTIPLES OF 5',     sub: '…5, 10, 15, 20…',          check: function(n){ return n % 5 === 0; } },
-  { text: 'PERFECT SQUARES',    sub: '…1, 4, 9, 16, 25, 36…',   check: isPerfectSquare },
-  { text: 'PRIME NUMBERS',      sub: '…only divisible by 1 and themselves', check: isPrime },
-  { text: 'GREATER THAN 50',    sub: '…any number above 50',      check: function(n){ return n > 50; } },
-  { text: 'LESS THAN 30',       sub: '…any number below 30',      check: function(n){ return n < 30; } },
-  { text: 'DIVISIBLE BY 6',     sub: '…6, 12, 18, 24…',          check: function(n){ return n % 6 === 0; } },
+  { text: 'PRIME NUMBERS', sub: '…only divisible by 1 and themselves', check: isPrime },
 ];
 
 function isPrime(n) {
@@ -233,24 +224,25 @@ function flash(type) {
 function endGame(won) {
   on = false;
   cancelAnimationFrame(raf);
-  var coins = getCoins();
-  var delta, cashClass;
+  var ec = document.getElementById('end-cash');
   if (won) {
-    delta = 10 + (streak >= 5 ? 5 : 0);
-    cashClass = 'win';
+    var mc = +(localStorage.getItem('mathCoins') || 0);
+    localStorage.setItem('mathCoins', mc + 10000);
+    setCoins(getCoins() + 10000);
+    var tk = +(localStorage.getItem('efm_tickets') || 0);
+    localStorage.setItem('efm_tickets', tk + 10000);
+    ec.className = 'end-cash win';
+    ec.textContent = '+10,000 coins · cash · tickets!';
   } else {
-    delta = -5;
-    cashClass = 'lose';
+    setCoins(Math.max(0, getCoins() - 5));
+    ec.className = 'end-cash lose';
+    ec.innerHTML = '-5 <img src="coin.svg" class="coin-ico">';
   }
-  setCoins(Math.max(0, coins + delta));
   document.getElementById('end-emoji').textContent = won ? '🎉' : '💥';
   document.getElementById('end-title').textContent = won ? 'You Win!' : 'Game Over';
   document.getElementById('end-sub').textContent = won
     ? 'You popped ' + WIN_COUNT + ' correct bubbles!'
     : 'The bubbles got away…';
-  var ec = document.getElementById('end-cash');
-  ec.className = 'end-cash ' + cashClass;
-  ec.innerHTML = (won ? '+' : '') + delta + ' <img src="coin.svg" class="coin-ico">';
   document.getElementById('end-screen').classList.add('show');
 }
 
