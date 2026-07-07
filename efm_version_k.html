@@ -279,6 +279,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; }
   border-radius: 10px; padding: 20px;
   font-size: 13px; color: #374151; line-height: 1.9;
 }
+.lesson-body.plain {
+  background: none; border: none; border-radius: 0; padding: 4px 0;
+}
 .back-btn {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12px; color: hsl(var(--fv-h),52%,24%); background: hsl(var(--fv-h),94%,94%);
@@ -481,8 +484,10 @@ function showLesson(ch,i){
   lessonTitle.textContent=`${ch.num}.${i+1} — ${sec}`;
   lessonSub.textContent=`Chapter ${ch.num}: ${ch.title}`;
   if(ch.num===1 && sec==='Why Start with Arithmetic?'){
-    lessonBody.innerHTML=`You've already learned about the basic operations of mathematics — addition, subtraction, multiplication, and division. And if you still haven't mastered all of them yet, that's OK! You can always click the link below.<br><br><a href="page-master-basics.html" style="font-weight:700;color:#0f0f13;font-size:1rem;">Master the basic operations below 100 →</a>`;
+    lessonBody.classList.add('plain');
+    lessonBody.innerHTML=`<p style="margin-bottom:16px;">You've already learned about the basic operations of mathematics — addition, subtraction, multiplication, and division. And if you still haven't mastered all of them yet, that's OK! You can always click the link below.</p><p style="margin-bottom:16px;"><a href="page-master-basics.html" style="font-weight:700;color:#0f0f13;font-size:1rem;">Master the basic operations below 100 →</a></p><p style="margin-bottom:16px;">But if you already know about these things, why would we need an entire chapter based on arithmetic?</p><p>Well, you can think about this website as a book about prealgebra. Although some people are still arguing about what it means, we'll think about it as a bridge between arithmetic and algebra.</p>`;
   } else {
+    lessonBody.classList.remove('plain');
     lessonBody.textContent=`This is where the lesson content for "${sec}" will appear. Students can read explanations, work through examples, and practice problems right here on the EFM website.`;
   }
   topbarTitle.textContent=`Ch.${ch.num} › ${sec}`;
@@ -493,6 +498,7 @@ function showLesson(ch,i){
   const t=document.querySelector(`[data-ch="${ch.num}"][data-sec="${i}"]`);
   if(t)t.classList.add('active');
   updateNavBtns();
+  location.hash=`${ch.num}-${i}`;
 }
 
 backBtn.addEventListener('click',()=>{
@@ -502,6 +508,7 @@ backBtn.addEventListener('click',()=>{
   topbarBadge.textContent='15 Chapters';
   document.querySelectorAll('.sec-link').forEach(l=>l.classList.remove('active'));
   document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active'));
+  history.replaceState(null,'',location.pathname);
 });
 
 prevSecBtn.addEventListener('click',()=>{
@@ -534,6 +541,14 @@ chapters.forEach(ch=>{
     list.appendChild(a);
   });
   btn.addEventListener('click',()=>{
+    if(document.querySelector('.sidebar').classList.contains('collapsed')){
+      document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('active','open'));
+      document.querySelectorAll('.sec-list').forEach(l=>l.classList.remove('open'));
+      btn.classList.add('active','open');
+      list.classList.add('open');
+      showLesson(ch,0);
+      return;
+    }
     const isOpen=list.classList.contains('open');
     document.querySelectorAll('.sec-list').forEach(l=>l.classList.remove('open'));
     document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('open'));
@@ -547,6 +562,13 @@ chapters.forEach(ch=>{
   card.addEventListener('click',()=>{btn.click();navScroll.scrollTo({top:btn.offsetTop-40,behavior:'smooth'});});
   chapterCards.appendChild(card);
 });
+
+const _hash=location.hash.slice(1);
+if(_hash){
+  const [_cn,_si]=_hash.split('-').map(Number);
+  const _ch=chapters.find(c=>c.num===_cn);
+  if(_ch&&_si>=0&&_si<_ch.secs.length) showLesson(_ch,_si);
+}
 </script>
 <script src="cursors.js"></script>
 </body>
