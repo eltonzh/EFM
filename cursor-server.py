@@ -341,7 +341,7 @@ async def handler(websocket):
                     continue
                 user_list = [
                     {'email': e, 'name': a.get('name', ''), 'signed_up': a.get('signed_up', ''), 'code': a.get('code', '')}
-                    for e, a in accounts.items() if e != ADMIN_EMAIL
+                    for e, a in accounts.items()
                 ]
                 await websocket.send(json.dumps({'type': 'admin_accounts', 'accounts': user_list}))
 

@@ -44,7 +44,6 @@
             <th>#</th>
             <th>Name</th>
             <th>Email</th>
-            <th>Code</th>
             <th>Signed up</th>
           </tr>
         </thead>
@@ -94,7 +93,6 @@
           '<td style="color:#555">' + (i+1) + '</td>' +
           '<td style="font-weight:600">' + esc(u.name || '—') + '</td>' +
           '<td style="color:#a0c4ff">' + esc(u.email) + '</td>' +
-          '<td><span class="badge">' + esc(u.code || '—') + '</span></td>' +
           '<td style="color:#888">' + date + '</td>';
         tbody.appendChild(tr);
       });
