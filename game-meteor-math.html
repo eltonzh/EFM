@@ -98,7 +98,7 @@
     var stars=[];for(var i=0;i<90;i++)stars.push({x:Math.random()*W,y:Math.random()*(H-60),r:Math.random()*1.5+.3,ph:Math.random()*6.28,sp:.01+Math.random()*.04});
     var blds=(function(){var a=[],x=0;while(x<W){var w=22+Math.random()*38,h=32+Math.random()*90,ws=[];for(var wy=5;wy<h-7;wy+=10)for(var wx=3;wx<w-3;wx+=7)if(Math.random()>.32)ws.push({x:wx,y:wy,l:Math.random()>.28});a.push({x:x,w:w,h:h,ws:ws});x+=w+1+Math.random()*4;}return a;})();
 
-    var met={x:340,y:-50,size:30,speed:1,trail:[]};
+    var met={x:340,y:-50,size:30,speed:6.83,trail:[]};
     var parts=[],shakeF=0,flashC='',flashA=0,lvupF=0;
 
     function getCoins(){return +(localStorage.getItem('mathCoins')||0);}
@@ -135,7 +135,7 @@
       curQ=pool[qi++];
       document.getElementById('qt').innerHTML=curQ.b+'<sup>'+curQ.e+'</sup> = ?';
       met.x=80+Math.random()*520;met.y=-50;met.trail=[];
-      met.speed=.55+(level-1)*.04;
+      met.speed=6.83;
       renderButtons();
     }
 
@@ -160,12 +160,13 @@
         setTimeout(spawn,900);
       } else {
         btn.classList.add('wrong');
-        document.querySelectorAll('.ab').forEach(function(b){if(+b.textContent===curQ.a)b.classList.add('correct');});
         streak=0;
         flashC='rgba(239,68,68,.18)';flashA=.6;
         shakeF=10;
         document.getElementById('stk').textContent='';
-        setTimeout(renderButtons,700);
+        locked=false;
+        document.querySelectorAll('.ab').forEach(function(b){b.disabled=false;});
+        setTimeout(function(){ btn.classList.remove('wrong'); }, 500);
       }
     }
 
@@ -186,12 +187,20 @@
       var es=document.getElementById('end-screen');es.classList.add('show');
       var coins=getCoins();
       if(won){
-        setCoins(coins+10);
+        var cashUnlocked=+(localStorage.getItem('mathCoins')||0)>=50;
+        if(cashUnlocked){
+          var efmCoins=+(localStorage.getItem('efm_coins')||0);
+          localStorage.setItem('efm_coins',efmCoins+50);
+          document.getElementById('end-cash').className='end-cash win';
+          document.getElementById('end-cash').innerHTML='+50 cash added!';
+        } else {
+          setCoins(coins+25);
+          document.getElementById('end-cash').className='end-cash win';
+          document.getElementById('end-cash').innerHTML='+25 <img src="coin.svg" class="coin-ico"> coins added!';
+        }
         document.getElementById('end-emoji').textContent='🎉';
         document.getElementById('end-title').textContent='City saved!';
         document.getElementById('end-sub').textContent='You blasted all 15 meteors! Score: '+score+' pts';
-        document.getElementById('end-cash').className='end-cash win';
-        document.getElementById('end-cash').innerHTML='+10 <img src="coin.svg" class="coin-ico"> coins added!';
       } else {
         setCoins(coins-5);
         document.getElementById('end-emoji').textContent='💥';

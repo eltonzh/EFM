@@ -106,7 +106,7 @@
 <body>
 
   <div id="topbar">
-    <button id="back-btn" onclick="history.back()">← Back</button>
+    <button id="back-btn" onclick="if(running){setCoins(Math.max(0,getCoins()-100));}history.back()">← Back</button>
     <div id="title">✨ Golden Trail</div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="coins-disp" style="background:rgba(255,255,255,0.08);color:#facc15;border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;"><img src="coin.svg" style="width:16px;height:16px;"> <span id="coins-val">0</span></div>
@@ -160,6 +160,7 @@
     function getCoins() { return parseInt(localStorage.getItem('efm_coins') || '0'); }
     function setCoins(n) {
       localStorage.setItem('efm_coins', n);
+      localStorage.setItem('mathCoins', n);
       document.getElementById('coins-val').textContent = n;
     }
     setCoins(getCoins());
@@ -385,22 +386,22 @@
     // ── Win / lose screens ───────────────────────────────────────────────────
     function showWin() {
       clearInterval(timerInterval);
+      setCoins(getCoins() + 100000);
       var ol = document.getElementById('overlay');
       document.getElementById('overlay-icon').textContent  = '🏆';
       document.getElementById('overlay-title').textContent = 'You win!';
-      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% of the board!';
+      document.getElementById('overlay-sub').innerHTML     = 'You covered ' + Math.round(covered / total * 100) + '% of the board! +100,000 <img src="coin.svg" style="width:16px;height:16px;vertical-align:middle;">';
       document.getElementById('overlay-btn').textContent   = 'Play again';
       document.getElementById('overlay-btn').onclick       = function() { startGame(); };
       ol.classList.remove('hidden');
     }
 
     function showTimeUp() {
-      var mc = +(localStorage.getItem('mathCoins') || 0);
-      localStorage.setItem('mathCoins', mc - 100);
       var ol = document.getElementById('overlay');
       document.getElementById('overlay-icon').textContent  = '⏰';
       document.getElementById('overlay-title').textContent = 'Time\'s up!';
-      document.getElementById('overlay-sub').textContent   = 'You covered ' + Math.round(covered / total * 100) + '% — need 80% to win. −100 coins. Try again!';
+      setCoins(Math.max(0, getCoins() - 100));
+      document.getElementById('overlay-sub').innerHTML     = 'You covered ' + Math.round(covered / total * 100) + '% — need 80% to win. −100 <img src="coin.svg" style="width:16px;height:16px;vertical-align:middle;">';
       document.getElementById('overlay-btn').textContent   = 'Try again';
       document.getElementById('overlay-btn').onclick       = function() { startGame(); };
       ol.classList.remove('hidden');

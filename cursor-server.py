@@ -7,7 +7,6 @@ from pathlib import Path
 import websockets
 from websockets import Response
 from websockets.datastructures import Headers
-import anthropic
 import openai
 
 REPO_DIR = Path(__file__).parent.resolve()
@@ -74,7 +73,6 @@ MAX_TEXT_LEN      = 1000
 MAX_ID_LEN        = 64
 MAX_MSG_BYTES     = 65_536   # 64 KB hard cap per WebSocket message
 MAX_HISTORY_ITEMS = 6        # history items client may send for Claude context
-CLAUDE_RPM        = 5        # max ask_claude calls per connection per 60 s
 
 def load_chat_history():
     if CHAT_FILE.exists():
@@ -166,7 +164,6 @@ async def broadcast_chat(data):
 
 async def handler(websocket):
     color = None
-    claude_timestamps = []  # per-connection rate-limit window
     try:
         async for raw in websocket:
             # Drop oversized messages before parsing
@@ -230,62 +227,6 @@ async def handler(websocket):
                 save_chat_history()
                 await broadcast_chat({'type': 'chat', **msg})
 
-            elif kind == 'ask_claude':
-                # Per-connection rate limit: CLAUDE_RPM requests per 60 s
-                ts_now = time.monotonic()
-                claude_timestamps = [t for t in claude_timestamps if ts_now - t < 60]
-                if len(claude_timestamps) >= CLAUDE_RPM:
-                    await websocket.send(json.dumps({
-                        'type': 'claude_reply', 'name': 'Claude',
-                        'text': "You're asking too fast — wait a moment and try again.",
-                        'time': now_iso()
-                    }))
-                    continue
-                claude_timestamps.append(ts_now)
-
-                user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
-                if not user_text:
-                    continue
-
-                raw_history = data.get('history', [])
-                if not isinstance(raw_history, list):
-                    raw_history = []
-                raw_history = raw_history[-MAX_HISTORY_ITEMS:]  # cap depth
-
-                api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-                if not api_key:
-                    reply = "I can't respond right now — no API key is configured."
-                else:
-                    try:
-                        aclient = anthropic.AsyncAnthropic(api_key=api_key)
-                        messages = []
-                        for m in raw_history:
-                            if not isinstance(m, dict):
-                                continue
-                            role    = 'user' if m.get('who') == 'user' else 'assistant'
-                            content = str(m.get('text', ''))[:MAX_TEXT_LEN]
-                            messages.append({'role': role, 'content': content})
-                        # API requires messages to start with 'user' and alternate roles
-                        while messages and messages[0]['role'] != 'user':
-                            messages.pop(0)
-                        clean = []
-                        for msg in messages:
-                            if clean and clean[-1]['role'] == msg['role']:
-                                clean[-1] = msg
-                            else:
-                                clean.append(msg)
-                        clean.append({'role': 'user', 'content': user_text})
-                        response = await aclient.messages.create(
-                            model='claude-sonnet-4-6',
-                            max_tokens=250,
-                            system="You are Claude, a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never greet with 'Welcome to EFM' or re-introduce yourself — just answer directly.",
-                            messages=clean
-                        )
-                        reply = response.content[0].text
-                    except Exception as e:
-                        reply = f"Oops, something went wrong: {str(e)[:80]}"
-                await websocket.send(json.dumps({'type': 'claude_reply', 'name': 'Claude', 'text': reply, 'time': now_iso()}))
-
             elif kind == 'register':
                 email    = str(data.get('email',    '')).lower().strip()[:120]
                 password = str(data.get('password', ''))[:200]
@@ -301,7 +242,7 @@ async def handler(websocket):
                     continue
                 pw_hash = hashlib.sha256(password.encode()).hexdigest()
                 code    = generate_code(name)
-                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code}
+                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code, 'signed_up': now_iso()}
                 identity_store['by_code'][code]             = 'email:' + email
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
                 save_accounts()
@@ -387,45 +328,22 @@ async def handler(websocket):
                 save_identities_file()
                 await websocket.send(json.dumps({'type': 'delete_account_ok'}))
 
-            elif kind == 'ask_chatgpt':
-                user_text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
-                if not user_text:
+            elif kind == 'admin_get_accounts':
+                ADMIN_EMAIL = 'eltonzhang0328@gmail.com'
+                email    = str(data.get('email',    '')).lower().strip()[:120]
+                password = str(data.get('password', ''))[:200]
+                if email != ADMIN_EMAIL or email not in accounts:
+                    await websocket.send(json.dumps({'type': 'admin_error', 'message': 'Access denied.'}))
                     continue
-                raw_history = data.get('history', [])
-                if not isinstance(raw_history, list):
-                    raw_history = []
-                raw_history = raw_history[-MAX_HISTORY_ITEMS:]
-                api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-                if not api_key:
-                    reply = "I can't respond right now — no API key is configured."
-                else:
-                    try:
-                        aclient = anthropic.AsyncAnthropic(api_key=api_key)
-                        messages = []
-                        for m in raw_history:
-                            if not isinstance(m, dict):
-                                continue
-                            role = 'user' if m.get('who') == 'user' else 'assistant'
-                            messages.append({'role': role, 'content': str(m.get('text', ''))[:MAX_TEXT_LEN]})
-                        while messages and messages[0]['role'] != 'user':
-                            messages.pop(0)
-                        clean = []
-                        for msg in messages:
-                            if clean and clean[-1]['role'] == msg['role']:
-                                clean[-1] = msg
-                            else:
-                                clean.append(msg)
-                        clean.append({'role': 'user', 'content': user_text})
-                        response = await aclient.messages.create(
-                            model='claude-sonnet-4-6',
-                            max_tokens=250,
-                            system="You are a helpful AI in EFM (Elton's Fun Math). Be friendly, brief, and encouraging. Answer math questions clearly. Never re-introduce yourself — just answer directly.",
-                            messages=clean
-                        )
-                        reply = response.content[0].text
-                    except Exception as e:
-                        reply = f"Oops, something went wrong: {str(e)[:80]}"
-                await websocket.send(json.dumps({'type': 'gpt_reply', 'name': 'ChatGPT', 'text': reply, 'time': now_iso()}))
+                pw_hash = hashlib.sha256(password.encode()).hexdigest()
+                if accounts[email]['password_hash'] != pw_hash:
+                    await websocket.send(json.dumps({'type': 'admin_error', 'message': 'Wrong password.'}))
+                    continue
+                user_list = [
+                    {'email': e, 'name': a.get('name', ''), 'signed_up': a.get('signed_up', ''), 'code': a.get('code', '')}
+                    for e, a in accounts.items() if e != ADMIN_EMAIL
+                ]
+                await websocket.send(json.dumps({'type': 'admin_accounts', 'accounts': user_list}))
 
     except websockets.exceptions.ConnectionClosed:
         pass

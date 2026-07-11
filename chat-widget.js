@@ -63,6 +63,7 @@
     '#efm-chat-input:focus{border-color:#2a7a2a;background:#fff;}',
     '#efm-chat-send{background:#2a7a2a;color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:0.82rem;font-weight:600;font-family:system-ui,sans-serif;cursor:pointer;}',
     '#efm-chat-send:active{background:#1e5a1e;}',
+    '#efm-chat-countdown{font-size:0.7rem;color:rgba(255,255,255,0.7);text-align:center;padding:4px 8px;background:rgba(0,0,0,0.15);letter-spacing:0.04em;font-variant-numeric:tabular-nums;flex-shrink:0;}',
   ].join('');
   document.head.appendChild(style);
 
@@ -70,6 +71,7 @@
   widget.id = 'efm-chat-widget';
   widget.innerHTML = [
     '<div id="efm-chat-panel">',
+    '  <div id="efm-chat-countdown">🕛 Resets in --:--:--</div>',
     '  <div id="efm-chat-msgs"><div id="efm-chat-empty">No messages yet.<br>Say something!</div></div>',
     '  <div id="efm-chat-input-row">',
     '    <input id="efm-chat-input" type="text" placeholder="Message..." maxlength="500" autocomplete="off">',
@@ -163,6 +165,9 @@
         data.messages.slice(-50).forEach(renderMsg);
       } else if (data.type === 'chat') {
         renderMsg(data);
+      } else if (data.type === 'chat_reset') {
+        msgs.innerHTML = '<div id="efm-chat-empty">No messages yet.<br>Say something!</div>';
+        nameColorMap = {}; colorIdx = 0;
       }
     };
     ws.onclose = function() { setTimeout(connect, 3000); };
@@ -186,4 +191,22 @@
 
   document.getElementById('efm-chat-send').addEventListener('click', send);
   input.addEventListener('keydown', function(e) { if (e.key === 'Enter') send(); });
+
+  // ── Countdown clock ────────────────────────────────────────────────────────
+  var countdown = document.getElementById('efm-chat-countdown');
+  function updateCountdown() {
+    var now = new Date();
+    var midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    var sec = Math.floor((midnight - now) / 1000);
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    countdown.textContent = '🕛 Resets in ' +
+      String(h).padStart(2,'0') + ':' +
+      String(m).padStart(2,'0') + ':' +
+      String(s).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 })();

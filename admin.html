@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0f0f13; color: #fff; font-family: system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px; }
+    h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+    .sub { color: #888; font-size: 0.9rem; margin-bottom: 36px; }
+    .card { background: #1a1a22; border-radius: 14px; padding: 28px; width: 100%; max-width: 440px; margin-bottom: 24px; }
+    input { width: 100%; padding: 12px 14px; font-size: 0.95rem; background: #0f0f13; border: 1.5px solid #333; border-radius: 8px; color: #fff; outline: none; font-family: system-ui,sans-serif; margin-bottom: 12px; }
+    input:focus { border-color: #666; }
+    button { width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700; background: #fff; color: #0f0f13; border: none; border-radius: 8px; cursor: pointer; font-family: system-ui,sans-serif; }
+    button:hover { background: #ddd; }
+    #err { color: #f87171; font-size: 0.9rem; margin-bottom: 10px; min-height: 18px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th { text-align: left; padding: 10px 12px; color: #888; font-weight: 600; border-bottom: 1px solid #2a2a35; }
+    td { padding: 12px; border-bottom: 1px solid #1e1e28; vertical-align: top; }
+    tr:hover td { background: #1e1e28; }
+    .badge { display: inline-block; background: #2a2a35; border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; color: #aaa; }
+    #count { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <h1>EFM Admin</h1>
+  <p class="sub">Only accessible to the site owner</p>
+
+  <div class="card" id="login-card">
+    <input id="email" type="email" placeholder="Your email" value="eltonzhang0328@gmail.com">
+    <input id="pass" type="password" placeholder="Your password">
+    <p id="err"></p>
+    <button onclick="load()">View Accounts</button>
+  </div>
+
+  <div id="results" style="width:100%;max-width:700px;display:none;">
+    <p id="count"></p>
+    <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Code</th>
+            <th>Signed up</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
+
+    function load() {
+      var email = document.getElementById('email').value.trim();
+      var pass  = document.getElementById('pass').value;
+      document.getElementById('err').textContent = '';
+      if (!email || !pass) { document.getElementById('err').textContent = 'Fill in both fields.'; return; }
+
+      var ws = new WebSocket(WS_URL);
+      ws.onopen = function() {
+        ws.send(JSON.stringify({ type: 'admin_get_accounts', email: email, password: pass }));
+      };
+      ws.onmessage = function(e) {
+        var d = JSON.parse(e.data);
+        if (d.type === 'admin_error') {
+          document.getElementById('err').textContent = d.message;
+        } else if (d.type === 'admin_accounts') {
+          showAccounts(d.accounts);
+        }
+        ws.close();
+      };
+    }
+
+    function showAccounts(list) {
+      document.getElementById('login-card').style.display = 'none';
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('count').textContent = list.length + ' account' + (list.length === 1 ? '' : 's');
+      var tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center;padding:24px;">No accounts yet</td></tr>';
+        return;
+      }
+      list.forEach(function(u, i) {
+        var date = u.signed_up ? new Date(u.signed_up).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td style="color:#555">' + (i+1) + '</td>' +
+          '<td style="font-weight:600">' + esc(u.name || '—') + '</td>' +
+          '<td style="color:#a0c4ff">' + esc(u.email) + '</td>' +
+          '<td><span class="badge">' + esc(u.code || '—') + '</span></td>' +
+          '<td style="color:#888">' + date + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.addEventListener('keydown', function(e) { if (e.key === 'Enter') load(); });
+  </script>
+</body>
+</html>

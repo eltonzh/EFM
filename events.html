@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f0f4f8;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .content {
+      max-width: 560px;
+      width: 100%;
+      padding: 48px 24px 64px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 28px;
+      background: #0f0f13;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 9px 16px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f0f13;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .empty-state {
+      background: #fff;
+      border-radius: 14px;
+      padding: 48px 24px;
+      text-align: center;
+      color: #aaa;
+      font-size: 1rem;
+    }
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <a class="back-btn" href="index.html">&#8592; Back</a>
+    <h1>Events</h1>
+    <p class="subtitle">Special challenges and limited-time activities.</p>
+    <div class="empty-state">
+      <div class="icon">📅</div>
+      No events right now — check back soon!
+    </div>
+  </div>
+</body>
+</html>

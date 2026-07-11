@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png" id="favicon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hi! – EFM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #4a9e4a 0% 33%, #5a9fd4 33% 66%, #ffb347 66% 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+    }
+    .sym {
+      position: fixed;
+      color: rgba(0,0,0,0.10);
+      font-size: 2rem;
+      pointer-events: none;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .bubbl {
+      position: fixed;
+      border-radius: 50%;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 36px 36px;
+      max-width: 460px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .avatar {
+      width: 64px;
+      height: 64px;
+      background: #b0b0b0;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+    }
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #0f0f13;
+      margin-bottom: 10px;
+    }
+    .sub {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 14px 16px;
+      font-size: 1rem;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+    }
+    input:focus { border-color: #0f0f13; }
+    #first-name { flex: 1; }
+    #last-initial { width: 60px; flex-shrink: 0; }
+    button {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: #0f0f13;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+    }
+    button:hover { background: #2a2a3a; }
+  </style>
+</head>
+<body>
+
+  <!-- Background symbols -->
+  <span class="sym" style="top:5%;left:8%;">+</span>
+  <span class="sym" style="top:10%;left:80%;animation-delay:-.4s">π</span>
+  <span class="sym" style="top:20%;left:20%;animation-delay:-.8s">∑</span>
+  <span class="sym" style="top:30%;left:70%;animation-delay:-.3s">∞</span>
+  <span class="sym" style="top:50%;left:5%;animation-delay:-1s">α</span>
+  <span class="sym" style="top:60%;left:88%;animation-delay:-.6s">√</span>
+  <span class="sym" style="top:75%;left:15%;animation-delay:-1.2s">θ</span>
+  <span class="sym" style="top:85%;left:75%;animation-delay:-.2s">≠</span>
+  <span class="sym" style="top:40%;left:92%;animation-delay:-.9s">∂</span>
+  <span class="sym" style="top:90%;left:40%;animation-delay:-.5s">λ</span>
+
+  <!-- Background bubbles -->
+  <div class="bubbl" style="width:340px;height:340px;background:#e07050;top:10%;left:20%;transform:translate(-50%,-50%);"></div>
+  <div class="bubbl" style="width:280px;height:280px;background:#5ab05a;top:55%;left:55%;transform:translate(-50%,-50%);"></div>
+  <div class="bubbl" style="width:260px;height:260px;background:#9b6dc8;top:70%;left:25%;transform:translate(-50%,-50%);"></div>
+
+  <!-- EFM text behind modal -->
+  <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22vw;font-weight:900;color:#0f0f13;letter-spacing:-0.02em;user-select:none;pointer-events:none;z-index:1;">EFM</div>
+
+  <div class="modal">
+    <div class="avatar"></div>
+    <h1>What's your name?</h1>
+    <p class="sub">Enter the first name and last initial you<br>want to use for this website</p>
+    <div class="inputs">
+      <input id="first-name" type="text" placeholder="First name" autofocus>
+      <input id="last-initial" type="text" placeholder="A" maxlength="1">
+    </div>
+    <button onclick="saveName()">Next →</button>
+  </div>
+
+  <script>
+    function saveName() {
+      var first = document.getElementById('first-name').value.trim();
+      var last = document.getElementById('last-initial').value.trim().toUpperCase();
+      if (!first) { document.getElementById('first-name').focus(); return; }
+      localStorage.setItem('efm_user_name', first + (last ? ' ' + last + '.' : ''));
+      location.href = 'index.html';
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') saveName();
+    });
+  </script>
+<script src="cursors.js"></script>
+</body>
+</html>
