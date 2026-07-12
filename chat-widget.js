@@ -64,6 +64,12 @@
     '#efm-chat-send{background:#2a7a2a;color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:0.82rem;font-weight:600;font-family:system-ui,sans-serif;cursor:pointer;}',
     '#efm-chat-send:active{background:#1e5a1e;}',
     '#efm-chat-countdown{font-size:0.7rem;color:rgba(255,255,255,0.7);text-align:center;padding:4px 8px;background:rgba(0,0,0,0.15);letter-spacing:0.04em;font-variant-numeric:tabular-nums;flex-shrink:0;}',
+    '#efm-elton-btn{display:flex;justify-content:center;align-items:center;padding:8px 0 4px;background:#fff;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);}',
+    '#efm-elton-btn-inner{position:relative;display:inline-flex;cursor:pointer;border:none;background:none;padding:0;}',
+    '#efm-elton-btn-inner img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #2a7a2a;display:block;}',
+    '#efm-elton-bubble{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0f0f13;color:#fff;font-size:0.72rem;font-weight:600;font-family:system-ui,sans-serif;white-space:nowrap;padding:5px 10px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity 0.15s;}',
+    '#efm-elton-bubble::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#0f0f13;}',
+    '#efm-elton-btn-inner:hover #efm-elton-bubble{opacity:1;}',
   ].join('');
   document.head.appendChild(style);
 
@@ -72,6 +78,7 @@
   widget.innerHTML = [
     '<div id="efm-chat-panel">',
     '  <div id="efm-chat-countdown">🕛 Resets in --:--:--</div>',
+    '  <div id="efm-elton-btn"><button id="efm-elton-btn-inner"><img src="elton.jpg" alt="Elton"><span id="efm-elton-bubble">Talk to Elton</span></button></div>',
     '  <div id="efm-chat-msgs"><div id="efm-chat-empty">No messages yet.<br>Say something!</div></div>',
     '  <div id="efm-chat-input-row">',
     '    <input id="efm-chat-input" type="text" placeholder="Message..." maxlength="500" autocomplete="off">',
