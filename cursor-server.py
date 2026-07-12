@@ -7,7 +7,7 @@ from pathlib import Path
 import websockets
 from websockets import Response
 from websockets.datastructures import Headers
-import openai
+from openai import AsyncOpenAI
 
 REPO_DIR = Path(__file__).parent.resolve()
 CHAT_FILE     = REPO_DIR / 'chat_history.json'
@@ -72,7 +72,14 @@ MAX_NAME_LEN      = 40
 MAX_TEXT_LEN      = 1000
 MAX_ID_LEN        = 64
 MAX_MSG_BYTES     = 65_536   # 64 KB hard cap per WebSocket message
-MAX_HISTORY_ITEMS = 6        # history items client may send for Claude context
+MAX_HISTORY_ITEMS = 6        # history items client may send for Math Helper context
+
+LOCAL_LLM_BASE_URL        = os.environ.get('LOCAL_LLM_BASE_URL', 'http://127.0.0.1:8002/v1')
+LOCAL_LLM_API_KEY         = os.environ.get('LOCAL_LLM_API_KEY') or 'not-needed'
+LOCAL_LLM_MODEL           = os.environ.get('LOCAL_LLM_MODEL', '')
+LOCAL_LLM_TIMEOUT_SECONDS = float(os.environ.get('LOCAL_LLM_TIMEOUT_SECONDS', '45'))
+LOCAL_LLM_MAX_TOKENS      = int(os.environ.get('LOCAL_LLM_MAX_TOKENS', '400'))
+LOCAL_LLM_CONCURRENCY     = int(os.environ.get('LOCAL_LLM_CONCURRENCY', '1'))
 
 def load_chat_history():
     if CHAT_FILE.exists():
@@ -133,6 +140,18 @@ identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {
 accounts       = load_accounts()    # {email: {password_hash, name, fv, sfv, code}}
 MAX_HISTORY  = 500
 
+llm_client    = AsyncOpenAI(base_url=LOCAL_LLM_BASE_URL, api_key=LOCAL_LLM_API_KEY,
+                            timeout=LOCAL_LLM_TIMEOUT_SECONDS, max_retries=0)
+llm_semaphore = asyncio.Semaphore(LOCAL_LLM_CONCURRENCY)
+
+AI_TUTOR_SYSTEM_PROMPT = (
+    "You are Math Helper, a friendly, patient math tutor for elementary and middle-school kids on the "
+    "EFM math learning website. Explain ideas simply, be encouraging, and guide students step by step "
+    "rather than just handing over homework answers. Keep replies short (a few sentences, well under "
+    "150 words). This is a children's site — keep everything age-appropriate."
+)
+AI_TUTOR_FALLBACK_MESSAGE = "Oops, my brain took a little nap! Try asking me again in a moment."
+
 free_colors = list(COLORS)
 random.shuffle(free_colors)
 
@@ -161,6 +180,42 @@ async def broadcast_chat(data):
             await ws.send(msg)
         except Exception:
             pass
+
+async def handle_ai_chat(websocket, data, reply_type):
+    text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
+    if not text:
+        return
+    if not LOCAL_LLM_MODEL:
+        print(f'[{reply_type}] LOCAL_LLM_MODEL is not configured; skipping call')
+        await websocket.send(json.dumps({'type': reply_type, 'text': AI_TUTOR_FALLBACK_MESSAGE}))
+        return
+
+    raw_history = data.get('history')
+    history = raw_history if isinstance(raw_history, list) else []
+    messages = [{'role': 'system', 'content': AI_TUTOR_SYSTEM_PROMPT}]
+    for item in history[-MAX_HISTORY_ITEMS:]:
+        if not isinstance(item, dict):
+            continue
+        role = 'user' if item.get('who') == 'user' else 'assistant'
+        content = str(item.get('text', ''))[:MAX_TEXT_LEN].strip()
+        if content:
+            messages.append({'role': role, 'content': content})
+    messages.append({'role': 'user', 'content': text})
+
+    try:
+        async with llm_semaphore:
+            completion = await llm_client.chat.completions.create(
+                model=LOCAL_LLM_MODEL,
+                messages=messages,
+                max_tokens=LOCAL_LLM_MAX_TOKENS,
+                temperature=0.7,
+            )
+        reply_text = (completion.choices[0].message.content or '').strip() or AI_TUTOR_FALLBACK_MESSAGE
+    except Exception as e:
+        print(f'[{reply_type}] local LLM call failed: {type(e).__name__}: {e}')
+        reply_text = AI_TUTOR_FALLBACK_MESSAGE
+
+    await websocket.send(json.dumps({'type': reply_type, 'text': reply_text}))
 
 async def handler(websocket):
     color = None
@@ -226,6 +281,12 @@ async def handler(websocket):
                     chat_history.pop(0)
                 save_chat_history()
                 await broadcast_chat({'type': 'chat', **msg})
+
+            elif kind == 'ask_claude':
+                await handle_ai_chat(websocket, data, 'claude_reply')
+
+            elif kind == 'ask_chatgpt':
+                await handle_ai_chat(websocket, data, 'gpt_reply')
 
             elif kind == 'register':
                 email    = str(data.get('email',    '')).lower().strip()[:120]
