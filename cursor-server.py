@@ -247,7 +247,7 @@ async def handler(websocket):
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
                 save_accounts()
                 save_identities_file()
-                await websocket.send(json.dumps({'type': 'register_ok', 'code': code}))
+                await websocket.send(json.dumps({'type': 'register_ok', 'code': code, 'name': name}))
 
             elif kind == 'save_identity':
                 device_id = str(data.get('device_id', ''))[:64].strip()
