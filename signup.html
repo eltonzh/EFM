@@ -53,15 +53,15 @@
 
   <script>
     var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
-    var ws = null;
-    var wsReady = false;
+    var authWs = null;
+    var authWsReady = false;
     var pendingAction = null;
 
     function getWS() {
-      if (ws && ws.readyState === 1) return ws;
-      ws = new WebSocket(WS_URL);
-      ws.onopen = function() {
-        wsReady = true;
+      if (authWs && authWs.readyState === 1) return authWs;
+      authWs = new WebSocket(WS_URL);
+      authWs.onopen = function() {
+        authWsReady = true;
         if (pendingAction) { pendingAction(); pendingAction = null; }
       };
       ws.onmessage = function(e) {
@@ -94,7 +94,7 @@
       if (pass.length < 6) { document.getElementById('signup-err').textContent = 'Password must be at least 6 characters.'; return; }
       var sock = getWS();
       var msg = JSON.stringify({type:'register', email:email, name:name, password:pass});
-      if (wsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
+      if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
     }
 
     function doLogin() {
@@ -104,7 +104,7 @@
       if (!email || !pass) { document.getElementById('login-err').textContent = 'Please fill in all fields.'; return; }
       var sock = getWS();
       var msg = JSON.stringify({type:'login', email:email, password:pass});
-      if (wsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
+      if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
     }
 
     getWS();
