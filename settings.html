@@ -249,6 +249,10 @@
         <span class="row-value" id="val-name">—</span>
       </div>
       <div class="row">
+        <span class="row-label">Email</span>
+        <span class="row-value" id="val-email" style="color:#555;word-break:break-all;">—</span>
+      </div>
+      <div class="row">
         <span class="row-label">Favorite Color</span>
         <span class="row-value" id="val-fv">—</span>
         <div class="color-dot" id="dot-fv"></div>
@@ -322,9 +326,11 @@
 
     function loadInfo() {
       var name  = localStorage.getItem('efm_cursor_name')  || '—';
+      var email = localStorage.getItem('efm_cursor_email') || '—';
       var fv    = localStorage.getItem('efm_cursor_color')  || null;
       var sfv   = localStorage.getItem('efm_cursor_color2') || null;
-      document.getElementById('val-name').textContent = name;
+      document.getElementById('val-name').textContent  = name;
+      document.getElementById('val-email').textContent = email;
       document.getElementById('val-fv').textContent   = fv  || '—';
       document.getElementById('val-sfv').textContent  = sfv || '—';
 

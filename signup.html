@@ -69,12 +69,14 @@
         if (d.type === 'register_ok') {
           if (d.name) localStorage.setItem('efm_cursor_name', d.name);
           localStorage.setItem('efm_account_code', d.code);
+          localStorage.setItem('efm_cursor_email', document.getElementById('signup-email').value.trim());
           location.href = 'index.html';
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
         } else if (d.type === 'login_ok') {
           if (d.name) { localStorage.setItem('efm_user_name', d.name); localStorage.setItem('efm_cursor_name', d.name); }
           if (d.code) localStorage.setItem('efm_account_code', d.code);
+          localStorage.setItem('efm_cursor_email', document.getElementById('login-email').value.trim());
           location.href = 'index.html';
         } else if (d.type === 'login_error') {
           document.getElementById('login-err').textContent = d.message;
