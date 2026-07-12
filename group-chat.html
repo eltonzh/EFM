@@ -26,6 +26,7 @@
       gap: 18px;
       flex-shrink: 0;
       border-right: 1px solid rgba(255,255,255,0.06);
+      overflow: visible;
     }
     #side-bar img { width: 32px; opacity: 0.9; }
     #side-bar a {
@@ -40,6 +41,9 @@
       transition: background 0.12s;
     }
     #side-bar a:hover { background: rgba(255,255,255,0.12); }
+    #elton-sidebar-btn { overflow: visible; }
+    #elton-sidebar-bubble { opacity: 0; transition: opacity 0.15s; }
+    #elton-sidebar-btn:hover #elton-sidebar-bubble { opacity: 1; }
     #side-bar a.active { background: rgba(42,122,42,0.35); }
     #chat-main {
       flex: 1;
@@ -235,6 +239,10 @@
         <polyline points="12,6.5 12,12 15.5,14.5"/>
       </svg>
     </a>
+    <div id="elton-sidebar-btn" style="position:relative;display:flex;align-items:center;justify-content:center;cursor:default;">
+      <img src="elton.jpg" alt="Elton" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #2a7a2a;display:block;">
+      <div id="elton-sidebar-bubble" style="position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#fff;color:#0f0f13;font-size:0.75rem;font-weight:700;font-family:system-ui,sans-serif;white-space:nowrap;padding:6px 12px;border-radius:10px;pointer-events:none;transition:opacity 0.15s;box-shadow:0 2px 10px rgba(0,0,0,0.3);">Talk to Elton<div style="position:absolute;right:100%;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:#fff;"></div></div>
+    </div>
   </div>
 
   <div id="chat-main">
@@ -248,6 +256,7 @@
     <span>Resets Daily. Go to History if you want to see what's been up in the past month!</span>
     <button id="history-btn" onclick="window.location.href='chat-history.html'">Go to Chat History</button>
   </div>
+
 
 
   <div id="msgs">
@@ -432,6 +441,7 @@
           merged.forEach(renderMessage);
         } else if (data.type === 'chat') {
           renderMessage(data);
+        }
       };
       chatWs.onclose = function() { setTimeout(connectChat, 3000); };
     }
@@ -463,6 +473,25 @@
     });
 
     connectChat();
+
+    (function() {
+      var wrap = document.getElementById('elton-btn-wrap');
+      var bubble = document.getElementById('elton-bubble');
+      if (wrap && bubble) {
+        wrap.addEventListener('mouseenter', function() { bubble.style.opacity = '1'; });
+        wrap.addEventListener('mouseleave', function() { bubble.style.opacity = '0'; });
+      }
+      var sBtn = document.getElementById('elton-sidebar-btn');
+      var sBubble = document.getElementById('elton-sidebar-bubble');
+      if (sBtn && sBubble) {
+        sBtn.addEventListener('mouseenter', function() {
+          var r = sBtn.getBoundingClientRect();
+          sBubble.style.top = (r.top + r.height / 2 - 14) + 'px';
+          sBubble.style.opacity = '1';
+        });
+        sBtn.addEventListener('mouseleave', function() { sBubble.style.opacity = '0'; });
+      }
+    })();
 
   </script>
 
