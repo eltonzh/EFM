@@ -426,7 +426,7 @@
       try { chatWs = new WebSocket(CHAT_WS); } catch(e) { return; }
       chatWs.onopen = function() {
         myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
-        chatWs.send(JSON.stringify({ type: 'chat_join', name: myName, session_id: mySessionId }));
+        chatWs.send(JSON.stringify({ type: 'chat_join', name: myName, session_id: mySessionId, code: localStorage.getItem('efm_account_code') || '' }));
       };
       chatWs.onmessage = function(e) {
         var data = JSON.parse(e.data);

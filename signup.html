@@ -34,6 +34,16 @@
       <button onclick="doSignup()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; font-family:system-ui,sans-serif;">Sign up</button>
     </div>
 
+    <!-- Verification code section (shown after email is sent) -->
+    <div id="verify-section" style="display:none;">
+      <p style="font-weight:700; font-size:1.05rem; color:#0f0f13; margin-bottom:8px;">Check your email!</p>
+      <p id="verify-hint" style="color:#555; font-size:0.95rem; margin-bottom:18px;"></p>
+      <input id="verify-code" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="width:100%; padding:14px 16px; font-size:1.4rem; letter-spacing:0.3em; text-align:center; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
+      <p id="verify-err" style="color:#e53e3e; font-size:0.9rem; margin-bottom:10px; min-height:18px;"></p>
+      <button onclick="doVerify()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; font-family:system-ui,sans-serif;">Verify &amp; Create Account</button>
+      <button onclick="cancelVerify()" style="width:100%; padding:12px; font-size:0.95rem; font-weight:600; background:#fff; color:#555; border:1.5px solid #ddd; border-radius:10px; cursor:pointer; font-family:system-ui,sans-serif;">Back</button>
+    </div>
+
     <!-- Divider -->
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
       <div style="flex:1; height:1px; background:#ddd;"></div>
@@ -56,6 +66,7 @@
     var authWs = null;
     var authWsReady = false;
     var pendingAction = null;
+    var pendingEmail = '';
 
     function getWS() {
       if (authWs && authWs.readyState === 1) return authWs;
@@ -64,15 +75,24 @@
         authWsReady = true;
         if (pendingAction) { pendingAction(); pendingAction = null; }
       };
-      ws.onmessage = function(e) {
+      authWs.onmessage = function(e) {
         var d = JSON.parse(e.data);
-        if (d.type === 'register_ok') {
+        if (d.type === 'verification_sent') {
+          pendingEmail = d.email;
+          document.getElementById('signup-section').style.display = 'none';
+          document.getElementById('verify-section').style.display = '';
+          document.getElementById('verify-hint').textContent = 'We sent a 6-digit code to ' + d.email + '. Enter it below to finish creating your account.';
+          document.getElementById('verify-code').focus();
+        } else if (d.type === 'register_ok') {
           if (d.name) localStorage.setItem('efm_cursor_name', d.name);
           localStorage.setItem('efm_account_code', d.code);
-          localStorage.setItem('efm_cursor_email', document.getElementById('signup-email').value.trim());
+          localStorage.setItem('efm_cursor_email', pendingEmail || document.getElementById('signup-email').value.trim());
           location.href = 'index.html';
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
+          document.getElementById('verify-err').textContent = d.message;
+        } else if (d.type === 'verify_error') {
+          document.getElementById('verify-err').textContent = d.message;
         } else if (d.type === 'login_ok') {
           if (d.name) { localStorage.setItem('efm_user_name', d.name); localStorage.setItem('efm_cursor_name', d.name); }
           if (d.code) localStorage.setItem('efm_account_code', d.code);
@@ -84,7 +104,7 @@
           document.getElementById('login-err').textContent = d.message;
         }
       };
-      return ws;
+      return authWs;
     }
 
     function doSignup() {
@@ -98,8 +118,25 @@
       if (pass !== pass2) { document.getElementById('signup-err').textContent = 'Passwords do not match.'; return; }
       if (pass.length < 6) { document.getElementById('signup-err').textContent = 'Password must be at least 6 characters.'; return; }
       var sock = getWS();
-      var msg = JSON.stringify({type:'register', email:email, name:name, password:pass});
+      var msg = JSON.stringify({type:'send_verification', email:email, name:name, password:pass});
       if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
+    }
+
+    function doVerify() {
+      var code = document.getElementById('verify-code').value.trim();
+      document.getElementById('verify-err').textContent = '';
+      if (code.length !== 6) { document.getElementById('verify-err').textContent = 'Please enter the 6-digit code.'; return; }
+      var sock = getWS();
+      var msg = JSON.stringify({type:'verify_code', email:pendingEmail, code:code});
+      if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
+    }
+
+    function cancelVerify() {
+      pendingEmail = '';
+      document.getElementById('verify-section').style.display = 'none';
+      document.getElementById('verify-code').value = '';
+      document.getElementById('verify-err').textContent = '';
+      document.getElementById('signup-section').style.display = '';
     }
 
     function doLogin() {

@@ -1,4 +1,4 @@
-import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib
+import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib, urllib.request, urllib.error
 try:
     _TZ = zoneinfo.ZoneInfo('America/Los_Angeles')
 except Exception:
@@ -133,8 +133,46 @@ async def process_request(connection, request):
 # 36 colors evenly spread around the hue wheel — vibrant, all distinct
 COLORS = [f'hsl({h * 10}, 82%, 56%)' for h in range(36)]
 
+# Resend API key — loaded from env var or local resend.key file (gitignored)
+_resend_key_file = REPO_DIR / 'resend.key'
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY') or (_resend_key_file.read_text().strip() if _resend_key_file.exists() else '')
+
+pending_verifications = {}  # email -> {code, expires, name, password_hash}
+
+async def send_verification_email(to_email, code):
+    if not RESEND_API_KEY:
+        print('[email] RESEND_API_KEY not set')
+        return False
+    payload = json.dumps({
+        'from': 'EFM <onboarding@resend.dev>',
+        'to': [to_email],
+        'subject': f'Your EFM verification code: {code}',
+        'html': (
+            '<div style="font-family:system-ui,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;">'
+            '<h2 style="color:#0f0f13;margin-bottom:8px;">Welcome to EFM!</h2>'
+            '<p style="color:#555;margin-bottom:24px;">Enter this code on the sign-up page:</p>'
+            f'<div style="font-size:2.8rem;font-weight:800;letter-spacing:0.25em;color:#0f0f13;'
+            f'background:#f0f4f8;border-radius:12px;padding:18px;text-align:center;margin-bottom:24px;">{code}</div>'
+            '<p style="color:#aaa;font-size:0.85rem;">Expires in 10 minutes. If you didn\'t sign up for EFM, ignore this.</p>'
+            '</div>'
+        )
+    }).encode()
+    req = urllib.request.Request(
+        'https://api.resend.com/emails',
+        data=payload,
+        headers={'Authorization': f'Bearer {RESEND_API_KEY}', 'Content-Type': 'application/json'}
+    )
+    try:
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=10))
+        return True
+    except Exception as e:
+        print(f'[email] Resend error: {e}')
+        return False
+
 clients        = {}    # websocket -> {id, name, color}
 chat_clients   = set() # websockets that are in the chat room
+chat_names     = {}   # websocket -> display name for chat
 chat_history   = load_chat_history()
 identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {code: device_id}}
 accounts       = load_accounts()    # {email: {password_hash, name, fv, sfv, code}}
@@ -266,6 +304,24 @@ async def handler(websocket):
             elif kind == 'chat_join':
                 chat_clients.add(websocket)
                 session_id = str(data.get('session_id', ''))[:64]
+                raw_name  = str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                acct_code = str(data.get('code', ''))[:64].strip()
+                # Deduplicate: same code = same person (no suffix); different code, same name = add suffix
+                existing_names = {info['name'] for ws, info in chat_names.items() if ws is not websocket}
+                existing_codes = {info['code'] for ws, info in chat_names.items() if ws is not websocket and info['code']}
+                if acct_code and acct_code in existing_codes:
+                    # Same account reconnecting — evict old connection's name entry to give them their real name
+                    for ws, info in list(chat_names.items()):
+                        if info['code'] == acct_code and ws is not websocket:
+                            del chat_names[ws]
+                            existing_names.discard(info['name'])
+                display_name = raw_name
+                if display_name in existing_names:
+                    n = 2
+                    while f'{raw_name} {n}' in existing_names:
+                        n += 1
+                    display_name = f'{raw_name} {n}'
+                chat_names[websocket] = {'name': display_name, 'code': acct_code}
                 if websocket in clients:
                     clients[websocket]['session_id'] = session_id
                 check_daily_reset()
@@ -273,8 +329,7 @@ async def handler(websocket):
 
             elif kind == 'chat':
                 check_daily_reset()
-                # Use server-assigned name from join event to prevent impersonation/collisions
-                name = clients.get(websocket, {}).get('name') or str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                name = (chat_names.get(websocket) or {}).get('name') or str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
                 session_id = clients.get(websocket, {}).get('session_id', '')
                 text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
                 if not text:
@@ -292,6 +347,56 @@ async def handler(websocket):
 
             elif kind == 'ask_chatgpt':
                 await handle_ai_chat(websocket, data, 'gpt_reply')
+
+            elif kind == 'send_verification':
+                email    = str(data.get('email',    '')).lower().strip()[:120]
+                password = str(data.get('password', ''))[:200]
+                name     = str(data.get('name',     ''))[:MAX_NAME_LEN].strip()
+                if not email or '@' not in email or not password or not name:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'Please fill in all fields.'}))
+                    continue
+                if len(password) < 6:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'Password must be at least 6 characters.'}))
+                    continue
+                if email in accounts:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'That email is already registered.'}))
+                    continue
+                vcode   = str(random.randint(100000, 999999))
+                pw_hash = hashlib.sha256(password.encode()).hexdigest()
+                pending_verifications[email] = {'code': vcode, 'expires': time.time() + 600, 'name': name, 'password_hash': pw_hash}
+                ok = await send_verification_email(email, vcode)
+                if ok:
+                    await websocket.send(json.dumps({'type': 'verification_sent', 'email': email}))
+                else:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'Could not send verification email. Please try again.'}))
+
+            elif kind == 'verify_code':
+                email = str(data.get('email', '')).lower().strip()[:120]
+                vcode = str(data.get('code',  '')).strip()
+                pending = pending_verifications.get(email)
+                if not pending:
+                    await websocket.send(json.dumps({'type': 'verify_error', 'message': 'No pending verification. Please sign up again.'}))
+                    continue
+                if time.time() > pending['expires']:
+                    del pending_verifications[email]
+                    await websocket.send(json.dumps({'type': 'verify_error', 'message': 'Code expired. Please sign up again.'}))
+                    continue
+                if pending['code'] != vcode:
+                    await websocket.send(json.dumps({'type': 'verify_error', 'message': 'Incorrect code. Try again.'}))
+                    continue
+                name    = pending['name']
+                pw_hash = pending['password_hash']
+                del pending_verifications[email]
+                if email in accounts:
+                    await websocket.send(json.dumps({'type': 'register_error', 'message': 'That email is already registered.'}))
+                    continue
+                code = generate_code(name)
+                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code, 'signed_up': now_iso()}
+                identity_store['by_code'][code]              = 'email:' + email
+                identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
+                save_accounts()
+                save_identities_file()
+                await websocket.send(json.dumps({'type': 'register_ok', 'code': code, 'name': name}))
 
             elif kind == 'register':
                 email    = str(data.get('email',    '')).lower().strip()[:120]
@@ -415,6 +520,7 @@ async def handler(websocket):
         pass
     finally:
         chat_clients.discard(websocket)
+        chat_names.pop(websocket, None)
         if websocket in clients:
             cid = clients.pop(websocket)['id']
             release_color(color)
