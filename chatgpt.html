@@ -5,7 +5,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ask ChatGPT — EFM</title>
+  <title>Math Helper — EFM</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -124,12 +124,12 @@
 <body>
   <div id="top-bar">
     <a id="back-btn" href="group-chat.html">← Back</a>
-    <div id="top-title">✦ Ask ChatGPT</div>
+    <div id="top-title">✦ Math Helper</div>
     <button id="reset-btn" onclick="resetChat()">Reset</button>
   </div>
   <div id="msgs"></div>
   <div id="input-row">
-    <input id="chat-input" type="text" placeholder="Ask ChatGPT anything…" maxlength="500" autofocus>
+    <input id="chat-input" type="text" placeholder="Ask Math Helper anything…" maxlength="500" autofocus>
     <button id="send-btn" onclick="send()">Send</button>
   </div>
   <script>
@@ -212,7 +212,7 @@
     }
 
     if (!restoreHistory()) {
-      addBubble("Hi! I'm ChatGPT. Ask me anything about math or anything else!", 'ai');
+      addBubble("Hi! I'm Math Helper — here to help with this EFM math site. Ask me anything about math or the website!", 'ai');
     }
     connect();
   </script>
