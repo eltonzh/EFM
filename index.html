@@ -194,11 +194,11 @@
       }
     })();
   </script>
-  <p style="position:fixed;top:3vh;width:100%;text-align:center;font-family:system-ui,sans-serif;font-size:2.5rem;color:#2a2a38;font-weight:500;z-index:10;">Welcome to</p>
+  <p style="position:fixed;top:3vh;width:100%;text-align:center;font-family:system-ui,sans-serif;font-size:clamp(1rem,4vw,2.5rem);color:#2a2a38;font-weight:500;z-index:10;">Welcome to</p>
 
-  <div style="text-align:center;margin-top:calc(5vh - 4cm);position:fixed;z-index:2;width:100%;display:flex;align-items:center;justify-content:center;">
+  <div style="position:fixed;top:50%;transform:translateY(-50%);z-index:2;width:100%;display:flex;align-items:center;justify-content:center;margin-top:clamp(-4rem,-5vh,0px);">
     <img class="efm-logo-side" src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="display:none;height:7vw;width:auto;opacity:0.85;margin-right:1vw;">
-    <h1 id="efm-title" style="font-family:system-ui,sans-serif;font-size: 20vw;font-weight:800;color:#0f0f13;letter-spacing:0.1 em;">EFM</h1>
+    <h1 id="efm-title" style="font-family:system-ui,sans-serif;font-size:min(20vw,38vh);font-weight:800;color:#0f0f13;letter-spacing:0.05em;line-height:1;">EFM</h1>
     <img class="efm-logo-side" src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="display:none;height:7vw;width:auto;opacity:0.85;margin-left:1vw;">
   </div>
   <style>
@@ -211,7 +211,7 @@
 
   <div id="bottom-nav" style="position:fixed; bottom:8vh; left:50%; transform:translateX(-50%); width:80vw;">
     <div style="position:relative; display:inline-block; width:100%;">
-      <p style="text-align:center;font-family:system-ui,sans-serif;font-size:1.6rem;color:#2a2a38;letter-spacing:0.05em;margin-bottom:12px;">Elton's Fun Math</p>
+      <p style="text-align:center;font-family:system-ui,sans-serif;font-size:clamp(1.6rem,4.5vw,5rem);color:#2a2a38;letter-spacing:0.05em;margin-bottom:12px;">Elton's Fun Math</p>
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5cm;">
         <button id="nav-reset" style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#c0392b; color:#fff; border:none; border-radius:8px; cursor:pointer;" onclick="resetProgress()">Reset Progress</button>
         <a href="index.html"><img src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="height:32px; opacity:0.85;"></a>
