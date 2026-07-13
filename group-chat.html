@@ -274,6 +274,7 @@
 
   <script>
     var myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
+    var mySessionId = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     var chatWs;
 
     // All the named colors the user wants for other people's bubbles
@@ -372,7 +373,7 @@
     function renderMessage(msg) {
       var empty = document.getElementById('empty-state');
       if (empty) empty.remove();
-      var isOwn = msg._mine || msg.name === myName;
+      var isOwn = msg._mine || msg.session_id === mySessionId;
       var bgColor = isOwn
         ? (localStorage.getItem('efm_cursor_color') || '#2a7a2a')
         : getNameColor(msg.name);
@@ -425,7 +426,7 @@
       try { chatWs = new WebSocket(CHAT_WS); } catch(e) { return; }
       chatWs.onopen = function() {
         myName = sessionStorage.getItem('efm_display_name') || localStorage.getItem('efm_cursor_name') || 'Guest';
-        chatWs.send(JSON.stringify({ type: 'chat_join', name: myName }));
+        chatWs.send(JSON.stringify({ type: 'chat_join', name: myName, session_id: mySessionId }));
       };
       chatWs.onmessage = function(e) {
         var data = JSON.parse(e.data);
@@ -440,7 +441,7 @@
           msgsEl.innerHTML = '<div id="empty-state"><div class="big">💬</div><div>No messages yet today.</div><div>Say something!</div></div>';
           merged.forEach(renderMessage);
         } else if (data.type === 'chat') {
-          renderMessage(data);
+          if (data.session_id !== mySessionId) renderMessage(data);
         }
       };
       chatWs.onclose = function() { setTimeout(connectChat, 3000); };

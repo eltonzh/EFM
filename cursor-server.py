@@ -265,12 +265,17 @@ async def handler(websocket):
             # ── chat events ────────────────────────────────────────────
             elif kind == 'chat_join':
                 chat_clients.add(websocket)
+                session_id = str(data.get('session_id', ''))[:64]
+                if websocket in clients:
+                    clients[websocket]['session_id'] = session_id
                 check_daily_reset()
                 await websocket.send(json.dumps({'type': 'chat_history', 'messages': chat_history}))
 
             elif kind == 'chat':
                 check_daily_reset()
-                name = str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                # Use server-assigned name from join event to prevent impersonation/collisions
+                name = clients.get(websocket, {}).get('name') or str(data.get('name', 'Guest'))[:MAX_NAME_LEN].strip() or 'Guest'
+                session_id = clients.get(websocket, {}).get('session_id', '')
                 text = str(data.get('text', ''))[:MAX_TEXT_LEN].strip()
                 if not text:
                     continue
@@ -280,7 +285,7 @@ async def handler(websocket):
                 if len(chat_history) > MAX_HISTORY:
                     chat_history.pop(0)
                 save_chat_history()
-                await broadcast_chat({'type': 'chat', **msg})
+                await broadcast_chat({'type': 'chat', 'session_id': session_id, **msg})
 
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')

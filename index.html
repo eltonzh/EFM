@@ -194,38 +194,31 @@
       }
     })();
   </script>
-  <p style="position:fixed;top:3vh;width:100%;text-align:center;font-family:system-ui,sans-serif;font-size:clamp(1rem,4vw,2.5rem);color:#2a2a38;font-weight:500;z-index:10;">Welcome to</p>
-
-  <div style="position:fixed;top:50%;transform:translateY(-50%);z-index:2;width:100%;display:flex;align-items:center;justify-content:center;margin-top:clamp(-4rem,-5vh,0px);">
-    <img class="efm-logo-side" src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="display:none;height:7vw;width:auto;opacity:0.85;margin-right:1vw;">
-    <h1 id="efm-title" style="font-family:system-ui,sans-serif;font-size:min(20vw,38vh);font-weight:800;color:#0f0f13;letter-spacing:0.05em;line-height:1;">EFM</h1>
-    <img class="efm-logo-side" src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="display:none;height:7vw;width:auto;opacity:0.85;margin-left:1vw;">
-  </div>
   <style>
-    @media (min-width: 901px) {
-      #bottom-nav { bottom: calc(8vh - 0.5cm) !important; }
-      .efm-logo-side { display: block !important; }
-    }
+    .efm-logo-side { display: none; }
+    @media (min-width: 901px) { .efm-logo-side { display: block !important; } }
     .nav-lockable { opacity: 0.32; pointer-events: none; filter: grayscale(0.4); transition: opacity 0.3s; }
   </style>
 
-  <div id="bottom-nav" style="position:fixed; bottom:8vh; left:50%; transform:translateX(-50%); width:80vw;">
-    <div style="position:relative; display:inline-block; width:100%;">
-      <p style="text-align:center;font-family:system-ui,sans-serif;font-size:clamp(1.6rem,4.5vw,5rem);color:#2a2a38;letter-spacing:0.05em;margin-bottom:12px;">Elton's Fun Math</p>
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5cm;">
-        <button id="nav-reset" style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#c0392b; color:#fff; border:none; border-radius:8px; cursor:pointer;" onclick="resetProgress()">Reset Progress</button>
-        <a href="index.html"><img src="logo-transparent.png" alt="EFM – Elton's Fun Math logo" style="height:32px; opacity:0.85;"></a>
-        <a id="nav-chat" href="group-chat.html"><button style="padding:6px 16px; font-size:0.85rem; font-weight:600; font-family:system-ui,sans-serif; background:#2a7a2a; color:#fff; border:none; border-radius:8px; cursor:pointer;">EFM Group Chat</button></a>
-      </div>
-      <a id="cta-link" href="efm_version_k.html">
-        <button id="cta-btn" style="width:100%; margin-bottom: 10px; padding:15px 0;font-size:1.4rem;font-weight:700;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.05em;">Let's Get Started!</button>
-      </a>
-      <div style="text-align:center;">
-        <a id="nav-inventory" href="inventory.html">
-          <button style="padding:6px 20px; font-size:0.95rem; font-weight:600; font-family:system-ui,sans-serif; background:#0f0f13; color:#fff; border:none; border-radius:8px; cursor:pointer; letter-spacing:0.05em;">Your Inventory 💰</button>
-        </a>
-      </div>
+  <div id="main-content" style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;gap:clamp(4px,1.2vh,14px);">
+    <p style="font-family:system-ui,sans-serif;font-size:clamp(0.9rem,3.5vw,2rem);color:#2a2a38;font-weight:500;margin:0;pointer-events:none;user-select:none;">Welcome to</p>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <img class="efm-logo-side" src="logo-transparent.png" alt="EFM logo" style="height:min(7vw,4rem);opacity:0.85;margin-right:1vw;">
+      <h1 id="efm-title" style="font-family:system-ui,sans-serif;font-size:min(20vw,32vh);font-weight:800;color:#0f0f13;letter-spacing:0.05em;line-height:1;margin:0;">EFM</h1>
+      <img class="efm-logo-side" src="logo-transparent.png" alt="EFM logo" style="height:min(7vw,4rem);opacity:0.85;margin-left:1vw;">
     </div>
+    <p style="font-family:system-ui,sans-serif;font-size:clamp(0.85rem,3vw,1.5rem);color:#2a2a38;letter-spacing:0.05em;margin:0;pointer-events:none;user-select:none;">Elton's Fun Math</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;width:min(80vw,600px);">
+      <button id="nav-reset" style="padding:6px 16px;font-size:0.85rem;font-weight:600;font-family:system-ui,sans-serif;background:#c0392b;color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="resetProgress()">Reset Progress</button>
+      <a href="index.html"><img src="logo-transparent.png" alt="EFM logo" style="height:32px;opacity:0.85;"></a>
+      <a id="nav-chat" href="group-chat.html"><button style="padding:6px 16px;font-size:0.85rem;font-weight:600;font-family:system-ui,sans-serif;background:#2a7a2a;color:#fff;border:none;border-radius:8px;cursor:pointer;">EFM Group Chat</button></a>
+    </div>
+    <a id="cta-link" href="efm_version_k.html" style="width:min(80vw,600px);display:block;">
+      <button id="cta-btn" style="width:100%;padding:15px 0;font-size:1.4rem;font-weight:700;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.05em;">Let's Get Started!</button>
+    </a>
+    <a id="nav-inventory" href="inventory.html">
+      <button style="padding:6px 20px;font-size:0.95rem;font-weight:600;font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.05em;">Your Inventory 💰</button>
+    </a>
   </div>
 
 
