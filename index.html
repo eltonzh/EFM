@@ -278,12 +278,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       if (!localStorage.getItem('efm_cursor_name')) applyLockedState();
     });
-    window.addEventListener('efm_setup_complete', function () {
-      removeLockedState();
-      if (localStorage.getItem('efm_tutorial_step') === '0') {
-        location.href = 'tutorial-welcome.html';
-      }
-    });
+    window.addEventListener('efm_setup_complete', removeLockedState);
 
     function resetProgress() {
       var overlay = document.createElement('div');
