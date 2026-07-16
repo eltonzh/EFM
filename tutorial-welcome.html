@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome – EFM</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #4a9e4a 0% 33%, #5a9fd4 33% 66%, #ffb347 66% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 52px 44px;
+      text-align: center;
+      box-shadow: 0 12px 60px rgba(0,0,0,0.22);
+      max-width: 480px;
+      width: 90vw;
+    }
+    .greeting {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f0f13;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    .sub {
+      font-size: 1.05rem;
+      color: #555;
+      margin-bottom: 40px;
+      line-height: 1.65;
+    }
+    .btn {
+      display: inline-block;
+      padding: 16px 44px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: #0f0f13;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #2a2a38; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <p class="greeting"><span id="user-name"></span>!</p>
+    <p class="sub">Welcome to Elton's Fun Math!<br>Let's Get Started!</p>
+    <a href="index.html" class="btn" onclick="startTutorial()">Start Tutorial</a>
+  </div>
+  <script>
+    (function () {
+      if (localStorage.getItem('efm_tutorial_step') !== '0') {
+        location.href = 'index.html';
+        return;
+      }
+      var name = localStorage.getItem('efm_cursor_name') || localStorage.getItem('efm_user_name') || 'Friend';
+      document.getElementById('user-name').textContent = name;
+    })();
+    function startTutorial() {
+      localStorage.setItem('efm_tutorial_step', '1');
+    }
+  </script>
+</body>
+</html>

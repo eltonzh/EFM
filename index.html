@@ -201,13 +201,13 @@
   </style>
 
   <div id="main-content" style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;gap:clamp(4px,1.2vh,14px);">
-    <p style="font-family:system-ui,sans-serif;font-size:clamp(0.9rem,3.5vw,2rem);color:#2a2a38;font-weight:500;margin:0;pointer-events:none;user-select:none;">Welcome to</p>
+    <p id="efm-welcome" style="font-family:system-ui,sans-serif;font-size:clamp(0.9rem,3.5vw,2rem);color:#2a2a38;font-weight:500;margin:0;pointer-events:none;user-select:none;">Welcome to</p>
     <div style="display:flex;align-items:center;justify-content:center;">
       <img class="efm-logo-side" src="logo-transparent.png" alt="EFM logo" style="height:min(7vw,4rem);opacity:0.85;margin-right:1vw;">
       <h1 id="efm-title" style="font-family:system-ui,sans-serif;font-size:min(20vw,32vh);font-weight:800;color:#0f0f13;letter-spacing:0.05em;line-height:1;margin:0;">EFM</h1>
       <img class="efm-logo-side" src="logo-transparent.png" alt="EFM logo" style="height:min(7vw,4rem);opacity:0.85;margin-left:1vw;">
     </div>
-    <p style="font-family:system-ui,sans-serif;font-size:clamp(0.85rem,3vw,1.5rem);color:#2a2a38;letter-spacing:0.05em;margin:0;pointer-events:none;user-select:none;">Elton's Fun Math</p>
+    <p id="efm-subtitle" style="font-family:system-ui,sans-serif;font-size:clamp(1.6rem,4.5vw,5rem);color:#2a2a38;letter-spacing:0.05em;margin:0;pointer-events:none;user-select:none;">Elton's Fun Math</p>
     <div style="display:flex;align-items:center;justify-content:space-between;width:min(80vw,600px);">
       <button id="nav-reset" style="padding:6px 16px;font-size:0.85rem;font-weight:600;font-family:system-ui,sans-serif;background:#c0392b;color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="resetProgress()">Reset Progress</button>
       <a href="index.html"><img src="logo-transparent.png" alt="EFM logo" style="height:32px;opacity:0.85;"></a>
@@ -223,6 +223,26 @@
 
 
   <script>
+    (function() {
+      var dbg = document.createElement('div');
+      dbg.style.cssText = 'position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,0.75);color:#fff;padding:6px 10px;font-size:11px;font-family:monospace;border-radius:6px;z-index:99999;pointer-events:none;';
+      document.body.appendChild(dbg);
+      function updateTextSizes() {
+        var fs = (document.fullscreenElement != null) || (window.innerHeight >= screen.height - 100);
+        dbg.textContent = 'innerH=' + window.innerHeight + ' screenH=' + screen.height + ' dpr=' + window.devicePixelRatio + ' fs=' + fs;
+        var title    = document.getElementById('efm-title');
+        var welcome  = document.getElementById('efm-welcome');
+        var subtitle = document.getElementById('efm-subtitle');
+        if (title)    title.style.fontSize    = fs ? 'min(40vw,64vh)'           : 'min(20vw,32vh)';
+        if (welcome)  welcome.style.fontSize  = fs ? 'clamp(1.4rem,6vw,3.5rem)' : 'clamp(0.9rem,3.5vw,2rem)';
+        if (subtitle) subtitle.style.fontSize = fs ? 'clamp(2.4rem,7vw,8rem)'   : 'clamp(1.6rem,4.5vw,5rem)';
+      }
+      window.addEventListener('resize', updateTextSizes);
+      window.addEventListener('fullscreenchange', updateTextSizes);
+      document.addEventListener('DOMContentLoaded', updateTextSizes);
+      updateTextSizes();
+    })();
+
     var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-games','nav-create','nav-settings','nav-reset','nav-chat','nav-inventory','nav-events'];
 
     function applyLockedState() {
@@ -258,7 +278,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       if (!localStorage.getItem('efm_cursor_name')) applyLockedState();
     });
-    window.addEventListener('efm_setup_complete', removeLockedState);
+    window.addEventListener('efm_setup_complete', function () {
+      removeLockedState();
+      if (localStorage.getItem('efm_tutorial_step') === '0') {
+        location.href = 'tutorial-welcome.html';
+      }
+    });
 
     function resetProgress() {
       var overlay = document.createElement('div');
@@ -283,5 +308,6 @@
     }
   </script>
 <script src="cursors.js"></script>
+<script src="tutorial.js"></script>
 </body>
 </html>

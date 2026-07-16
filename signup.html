@@ -87,6 +87,7 @@
           if (d.name) localStorage.setItem('efm_cursor_name', d.name);
           localStorage.setItem('efm_account_code', d.code);
           localStorage.setItem('efm_cursor_email', pendingEmail || document.getElementById('signup-email').value.trim());
+          localStorage.setItem('efm_tutorial_step', '0');
           location.href = 'index.html';
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
