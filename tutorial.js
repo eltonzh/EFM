@@ -76,18 +76,20 @@
     var isIndex = page === 'index.html' || page === '';
 
     if (step === '1' && isIndex) {
+      var userName = localStorage.getItem('efm_cursor_name') || 'Friend';
       fullDim();
       var card = addEl(
         'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;' +
         'background:#fff;border-radius:16px;padding:32px 36px;' +
         'box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;' +
-        'font-family:system-ui,sans-serif;pointer-events:all;max-width:360px;width:90vw;'
+        'font-family:system-ui,sans-serif;pointer-events:all;max-width:380px;width:90vw;'
       );
       card.innerHTML =
-        '<p style="font-size:1.25rem;font-weight:700;color:#0f0f13;margin:0 0 20px;">Welcome to Tutorial!</p>' +
+        '<p style="font-size:1.7rem;font-weight:800;color:#0f0f13;margin:0 0 6px;">' + userName + '!</p>' +
+        '<p style="font-size:1rem;color:#444;margin:0 0 24px;line-height:1.55;">Welcome to Elton\'s Fun Math!<br>Let\'s Get Started!</p>' +
         '<button id="_tut_go" style="padding:12px 28px;font-size:1rem;font-weight:700;' +
         'font-family:system-ui,sans-serif;background:#0f0f13;color:#fff;border:none;' +
-        'border-radius:10px;cursor:pointer;">Let\'s Go ›</button>';
+        'border-radius:10px;cursor:pointer;">Start Tutorial</button>';
       document.getElementById('_tut_go').onclick = function () {
         localStorage.setItem('efm_tutorial_step', '2');
         init();
