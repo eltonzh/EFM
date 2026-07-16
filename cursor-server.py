@@ -451,7 +451,7 @@ async def handler(websocket):
                     await websocket.send(json.dumps({'type': 'login_error', 'message': 'Please fill in all fields.'}))
                     continue
                 if email not in accounts:
-                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'No account found with that email.'}))
+                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'No account found. Please try again.'}))
                     continue
                 pw_hash = hashlib.sha256(password.encode()).hexdigest()
                 if accounts[email]['password_hash'] != pw_hash:

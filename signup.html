@@ -91,6 +91,8 @@
           localStorage.setItem('efm_cursor_name', d.name || formName);
           localStorage.setItem('efm_account_code', d.code);
           localStorage.setItem('efm_cursor_email', pendingEmail || document.getElementById('signup-email').value.trim());
+          if (!localStorage.getItem('efm_cursor_color')) localStorage.setItem('efm_cursor_color', '#5a9fd4');
+          if (!localStorage.getItem('efm_cursor_color2')) localStorage.setItem('efm_cursor_color2', '#4a9e4a');
           localStorage.setItem('efm_tutorial_step', '1');
           location.href = 'index.html';
         } else if (d.type === 'register_error') {

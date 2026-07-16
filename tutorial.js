@@ -36,7 +36,8 @@
   function showBubble(r, text) {
     var bw = 260;
     var cx = (r.left + r.right) / 2;
-    var left = Math.min(window.innerWidth - bw - 10, Math.max(10, cx - bw / 2));
+    var vw = window.innerWidth || document.documentElement.clientWidth || 800;
+    var left = Math.max(10, Math.min(vw - bw - 10, cx - bw / 2));
     var top = r.bottom + 14;
     var bub = addEl(
       'position:fixed;z-index:10000;background:#fff;color:#0f0f13;' +
