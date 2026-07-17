@@ -218,6 +218,7 @@
     var authWs = null;
     var authWsReady = false;
     var pendingAction = null;
+    var savedPass = '';
 
     function getWS() {
       if (authWs && authWs.readyState === 1) return authWs;
@@ -245,6 +246,7 @@
           if (d.fv)  localStorage.setItem('efm_cursor_color',  d.fv);
           if (d.sfv) localStorage.setItem('efm_cursor_color2', d.sfv);
           localStorage.setItem('efm_cursor_email', document.getElementById('login-email').value.trim());
+          if (savedPass) { localStorage.setItem('efm_password', savedPass); savedPass = ''; }
           if (d.fv) { location.href = 'index.html'; } else { afterAuth(name || 'there'); }
         } else if (d.type === 'login_error') {
           document.getElementById('login-err').textContent = d.message;
@@ -274,6 +276,7 @@
       var pass  = document.getElementById('login-pass').value;
       document.getElementById('login-err').textContent = '';
       if (!email || !pass) { document.getElementById('login-err').textContent = 'Please fill in all fields.'; return; }
+      savedPass = pass;
       var sock = getWS();
       var msg = JSON.stringify({type:'login', email:email, password:pass});
       if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
