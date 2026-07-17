@@ -143,8 +143,10 @@ SITE_URL = 'https://efm.ai-taichi.com'
 
 async def send_signup_notification(name, user_email, approval_token):
     """Notify site owner of a new signup. Always sends to owner's email (Resend testing restriction)."""
+    approve_url = f'{SITE_URL}/signup.html?approve={approval_token}'
+    print(f'[signup] New account: {name} <{user_email}> — approve at: {approve_url}')
     if not RESEND_API_KEY:
-        print('[email] RESEND_API_KEY not set — skipping signup notification')
+        print('[email] RESEND_API_KEY not set — email skipped, use the URL above')
         return
     approve_url = f'{SITE_URL}/signup.html?approve={approval_token}'
     payload = json.dumps({
