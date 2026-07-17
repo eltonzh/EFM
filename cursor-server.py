@@ -163,7 +163,7 @@ async def send_signup_notification(name, user_email):
         headers={'Authorization': f'Bearer {RESEND_API_KEY}', 'Content-Type': 'application/json'}
     )
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=10))
         print(f'[email] Signup notification sent for {user_email}')
     except Exception as e:
@@ -417,7 +417,7 @@ async def handler(websocket):
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
                 save_accounts()
                 save_identities_file()
-                asyncio.ensure_future(send_signup_notification(name, email))
+                asyncio.create_task(send_signup_notification(name, email))
                 await websocket.send(json.dumps({'type': 'register_ok', 'code': code, 'name': name}))
 
             elif kind == 'save_identity':
