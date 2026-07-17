@@ -1,4 +1,4 @@
-import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib, urllib.request, urllib.error
+import asyncio, json, random, os, mimetypes, datetime, time, zoneinfo, hashlib, urllib.request, urllib.error, secrets
 try:
     _TZ = zoneinfo.ZoneInfo('America/Los_Angeles')
 except Exception:
@@ -139,21 +139,25 @@ RESEND_API_KEY = os.environ.get('RESEND_API_KEY') or (_resend_key_file.read_text
 
 pending_verifications = {}  # email -> {code, expires, name, password_hash}
 
-async def send_signup_notification(name, user_email):
+SITE_URL = 'https://efm.ai-taichi.com'
+
+async def send_signup_notification(name, user_email, approval_token):
     """Notify site owner of a new signup. Always sends to owner's email (Resend testing restriction)."""
     if not RESEND_API_KEY:
         print('[email] RESEND_API_KEY not set — skipping signup notification')
         return
+    approve_url = f'{SITE_URL}/signup.html?approve={approval_token}'
     payload = json.dumps({
         'from': 'EFM <onboarding@resend.dev>',
         'to': ['eltonzhang0328@gmail.com'],
-        'subject': 'EFM: New account signup',
+        'subject': f'EFM: New signup — {name}',
         'html': (
             '<div style="font-family:system-ui,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;">'
             '<h2 style="color:#0f0f13;margin-bottom:8px;">New EFM Signup</h2>'
-            f'<p style="color:#555;margin-bottom:8px;"><strong>Name:</strong> {name}</p>'
+            f'<p style="color:#555;margin-bottom:6px;"><strong>Name:</strong> {name}</p>'
             f'<p style="color:#555;margin-bottom:24px;"><strong>Email:</strong> {user_email}</p>'
-            '<p style="color:#888;font-size:0.9rem;">Account access pending. This may take a few days.</p>'
+            f'<a href="{approve_url}" style="display:inline-block;padding:12px 28px;background:#0f0f13;color:#fff;'
+            'text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem;">Accept Account</a>'
             '</div>'
         )
     }).encode()
@@ -410,14 +414,15 @@ async def handler(websocket):
                 if email in accounts:
                     await websocket.send(json.dumps({'type': 'register_error', 'message': 'That email is already registered. Use your account code to log in.'}))
                     continue
-                pw_hash = hashlib.sha256(password.encode()).hexdigest()
-                code    = generate_code(name)
-                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code, 'signed_up': now_iso()}
-                identity_store['by_code'][code]             = 'email:' + email
+                pw_hash        = hashlib.sha256(password.encode()).hexdigest()
+                code           = generate_code(name)
+                approval_token = secrets.token_urlsafe(32)
+                accounts[email] = {'password_hash': pw_hash, 'name': name, 'fv': '', 'sfv': '', 'code': code, 'signed_up': now_iso(), 'approved': False, 'approval_token': approval_token}
+                identity_store['by_code'][code]               = 'email:' + email
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
                 save_accounts()
                 save_identities_file()
-                asyncio.create_task(send_signup_notification(name, email))
+                asyncio.create_task(send_signup_notification(name, email, approval_token))
                 await websocket.send(json.dumps({'type': 'register_ok', 'code': code, 'name': name}))
 
             elif kind == 'save_identity':
@@ -457,10 +462,24 @@ async def handler(websocket):
                 if accounts[email]['password_hash'] != pw_hash:
                     await websocket.send(json.dumps({'type': 'login_error', 'message': 'Incorrect password.'}))
                     continue
+                if not accounts[email].get('approved', True):
+                    await websocket.send(json.dumps({'type': 'login_error', 'message': 'Your account is pending approval. Check back soon.'}))
+                    continue
                 record = identity_store['by_device'].get('email:' + email, {})
                 name   = record.get('name') or accounts[email].get('name', '')
                 code   = record.get('code') or accounts[email].get('code', '')
                 await websocket.send(json.dumps({'type': 'login_ok', 'name': name, 'fv': record.get('fv', ''), 'sfv': record.get('sfv', ''), 'code': code}))
+
+            elif kind == 'approve_account':
+                token = str(data.get('token', '')).strip()
+                target = next((e for e, a in accounts.items() if a.get('approval_token') == token), None)
+                if not target:
+                    await websocket.send(json.dumps({'type': 'approve_error', 'message': 'Invalid or already used approval link.'}))
+                    continue
+                accounts[target]['approved'] = True
+                accounts[target].pop('approval_token', None)
+                save_accounts()
+                await websocket.send(json.dumps({'type': 'approved_ok', 'name': accounts[target].get('name', '')}))
 
             elif kind == 'change_password':
                 code         = str(data.get('code', '')).upper().strip()[:8]

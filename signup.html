@@ -19,7 +19,7 @@
 </head>
 <body>
   <a href="index.html" style="position:fixed;top:12px;right:72px;z-index:100;"><img src="logo-transparent.png" style="height:40px;opacity:0.8;"></a>
-  <div style="width:66.67vw; margin: 80px auto 0; padding: 0 24px;">
+  <div id="form-container" style="width:66.67vw; margin: 80px auto 0; padding: 0 24px;">
     <h1 style="font-size:2.6rem; font-weight:800; color:#0f0f13; text-align:center; margin-bottom:4px;">EFM</h1>
     <p style="text-align:center; color:#555; font-size:1rem; margin-bottom:36px;">Elton's Fun Math</p>
 
@@ -152,6 +152,55 @@
       });
     }
 
+    function launchShootingStar() {
+      var overlay = document.getElementById('accept-overlay');
+      var card    = document.getElementById('accept-card');
+      if (!card) return;
+
+      // Phase 1: shrink card into a glowing gold dot (0.38s)
+      card.style.transition = 'transform 0.38s ease-in, border-radius 0.38s, background 0.38s 0.1s, box-shadow 0.38s, color 0.15s';
+      card.style.transformOrigin = 'center center';
+      card.style.transform  = 'scale(0.06)';
+      card.style.borderRadius = '50%';
+      card.style.background = '#FFD700';
+      card.style.boxShadow  = '0 0 40px 20px #FFD700, 0 0 80px 40px rgba(255,215,0,0.45)';
+      card.style.color = 'transparent';
+      overlay.style.transition = 'background 0.38s';
+      overlay.style.background = 'transparent';
+
+      setTimeout(function() {
+        // Phase 2: release a star from the card's position and shoot it to bottom-right
+        var rect = card.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top  + rect.height / 2;
+        card.style.display = 'none';
+
+        var star = document.createElement('div');
+        star.style.cssText = [
+          'position:fixed;',
+          'left:' + cx + 'px;top:' + cy + 'px;',
+          'width:18px;height:18px;margin:-9px 0 0 -9px;',
+          'border-radius:50%;',
+          'background:radial-gradient(circle, #fffbe6 20%, #FFD700 60%, transparent 100%);',
+          'box-shadow:0 0 14px 7px #FFD700, 0 0 28px 14px rgba(255,215,0,0.55),',
+          '-14px -14px 10px 4px rgba(255,255,180,0.65),',
+          '-28px -28px 7px 1px rgba(255,215,0,0.3);',
+          'z-index:1000000;pointer-events:none;',
+          'transition:transform 0.72s cubic-bezier(0.22,0,1,0.6), opacity 0.28s 0.48s ease-in;'
+        ].join('');
+        document.body.appendChild(star);
+
+        var dx = window.innerWidth  - cx + 60;
+        var dy = window.innerHeight - cy + 60;
+        requestAnimationFrame(function() { requestAnimationFrame(function() {
+          star.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(0.08)';
+          star.style.opacity   = '0';
+        }); });
+
+        setTimeout(function() { star.remove(); overlay.remove(); }, 900);
+      }, 400);
+    }
+
     function afterAuth(name) {
       var firstName = name.split(' ')[0];
       showColorPicker(firstName)
@@ -179,7 +228,12 @@
       };
       authWs.onmessage = function(e) {
         var d = JSON.parse(e.data);
-        if (d.type === 'register_ok') {
+        if (d.type === 'approved_ok') {
+          launchShootingStar();
+        } else if (d.type === 'approve_error') {
+          var card = document.getElementById('accept-card');
+          if (card) card.innerHTML = '<p style="color:#e53e3e;font-weight:700;font-size:1rem;">' + d.message + '</p>';
+        } else if (d.type === 'register_ok') {
           document.getElementById('signup-section').style.display = 'none';
           document.getElementById('pending-section').style.display = '';
         } else if (d.type === 'register_error') {
@@ -226,6 +280,31 @@
     }
 
     getWS();
+
+    // Approve mode: ?approve=TOKEN in URL (Elton clicks "Accept Account" in email)
+    (function() {
+      var token = new URLSearchParams(window.location.search).get('approve');
+      if (!token) return;
+
+      // Hide the normal form UI
+      document.getElementById('form-container').style.display = 'none';
+
+      // Build the "Account Accepted!" overlay
+      var overlay = document.createElement('div');
+      overlay.id = 'accept-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:99999;';
+      var card = document.createElement('div');
+      card.id = 'accept-card';
+      card.style.cssText = 'background:#fff;border-radius:14px;padding:44px 36px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.25);max-width:320px;width:90%;';
+      card.innerHTML = '<div style="font-size:3rem;margin-bottom:14px;">&#10003;</div><p style="font-size:1.4rem;font-weight:800;color:#0f0f13;margin:0;">Account Accepted!</p>';
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      // Send approval to server
+      var sock = getWS();
+      var msg  = JSON.stringify({type: 'approve_account', token: token});
+      if (authWsReady) { sock.send(msg); } else { pendingAction = function() { sock.send(msg); }; }
+    })();
   </script>
 
 </body>
