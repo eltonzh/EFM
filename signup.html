@@ -31,20 +31,27 @@
         <input id="signup-name" type="text" placeholder="Your name" style="flex:1; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; outline:none; font-family:system-ui,sans-serif;">
         <input id="signup-initial" type="text" maxlength="1" placeholder="Last Initial" style="width:130px; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; outline:none; font-family:system-ui,sans-serif;">
       </div>
-      <input id="signup-pass" type="password" placeholder="Password (min 6 chars)" style="width:100%; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
-      <input id="signup-pass2" type="password" placeholder="Confirm password" style="width:100%; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
+      <div style="position:relative;margin-bottom:12px;">
+        <input id="signup-pass" type="password" placeholder="Password (min 6 chars)" style="width:100%; padding:14px 48px 14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; outline:none; font-family:system-ui,sans-serif;">
+        <button type="button" onclick="togglePass('signup-pass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:#aaa;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div style="position:relative;margin-bottom:12px;">
+        <input id="signup-pass2" type="password" placeholder="Confirm password" style="width:100%; padding:14px 48px 14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; outline:none; font-family:system-ui,sans-serif;">
+        <button type="button" onclick="togglePass('signup-pass2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:#aaa;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <p id="signup-err" style="color:#e53e3e; font-size:0.9rem; margin-bottom:10px; min-height:18px;"></p>
       <button onclick="doSignup()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; font-family:system-ui,sans-serif;">Sign up</button>
     </div>
 
-    <!-- Verification code section (shown after email is sent) -->
-    <div id="verify-section" style="display:none;">
-      <p style="font-weight:700; font-size:1.05rem; color:#0f0f13; margin-bottom:8px;">We've sent an email to you in Gmail. Check your inbox immediately!</p>
-      <p id="verify-hint" style="color:#555; font-size:0.95rem; margin-bottom:18px;"></p>
-      <input id="verify-code" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code here" style="width:100%; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
-      <p id="verify-err" style="color:#e53e3e; font-size:0.9rem; margin-bottom:10px; min-height:18px;"></p>
-      <button onclick="doVerify()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; font-family:system-ui,sans-serif;">Verify &amp; Create Account</button>
-      <button onclick="cancelVerify()" style="width:100%; padding:12px; font-size:0.95rem; font-weight:600; background:#fff; color:#555; border:1.5px solid #ddd; border-radius:10px; cursor:pointer; font-family:system-ui,sans-serif;">Back</button>
+    <!-- Shown after successful signup -->
+    <div id="pending-section" style="display:none; text-align:center; padding:40px 0;">
+      <div style="font-size:2.5rem; margin-bottom:16px;">&#128337;</div>
+      <p style="font-weight:700; font-size:1.2rem; color:#0f0f13; margin-bottom:10px;">Account access pending.</p>
+      <p style="color:#555; font-size:1rem;">This may take a few days.</p>
     </div>
 
     <!-- Divider -->
@@ -58,18 +65,110 @@
     <div id="login-section">
       <p style="font-weight:700; font-size:1.05rem; color:#0f0f13; margin-bottom:18px;">Log in...</p>
       <input id="login-email" type="email" placeholder="Email" style="width:100%; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
-      <input id="login-pass" type="password" placeholder="Password" style="width:100%; padding:14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; margin-bottom:12px; outline:none; font-family:system-ui,sans-serif;">
+      <div style="position:relative;margin-bottom:12px;">
+        <input id="login-pass" type="password" placeholder="Password" style="width:100%; padding:14px 48px 14px 16px; font-size:1rem; border:1.5px solid #ddd; border-radius:10px; outline:none; font-family:system-ui,sans-serif;">
+        <button type="button" onclick="togglePass('login-pass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:#aaa;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <p id="login-err" style="color:#e53e3e; font-size:0.9rem; margin-bottom:10px; min-height:18px;"></p>
       <button onclick="doLogin()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; font-family:system-ui,sans-serif;">Log in</button>
     </div>
   </div>
 
   <script>
+    var EYE_ON  = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var EYE_OFF = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    function togglePass(id, btn) {
+      var inp = document.getElementById(id);
+      if (inp.type === 'password') { inp.type = 'text';     btn.innerHTML = EYE_OFF; }
+      else                         { inp.type = 'password'; btn.innerHTML = EYE_ON;  }
+    }
+
+    var SWATCH_COLORS = [
+      '#c0392b','#d35400','#c2185b','#8e44ad',
+      '#2980b9','#16a085','#27ae60','#2c3e50',
+      '#795548','#607d8b','#e67e22','#0f0f13',
+      '#DC143C','#FF2400','#9B111E','#800020','#800000',
+      '#FF007F','#FF6B6B','#FA8072','#FF00FF','#DD77FF',
+      '#DA70D6','#DE5D83',
+      '#FFBF00','#F4C430','#F28500','#FFCBA4','#FBCEB1',
+      '#FFD700','#FFDB58','#FFFF99','#FFF44F',
+      '#50C878','#808000','#BCB88A','#98FF98','#00A86B',
+      '#32CD32','#228B22','#008080','#7FFF00','#AACC00',
+      '#0F52BA','#4B0082','#0047AB','#001F5B','#007BA7',
+      '#40E0D0','#967BB6','#C8A2C8','#9966CC','#DDA0DD',
+      '#483C32','#704214','#A0522D','#CC7722','#36454F',
+      '#708090','#F5F5DC','#555D50','#F2F0E6',
+      '#3EB489','#9FE2BF','#ACE1AF','#B0E0E6','#87CEEB',
+      '#8A9A86','#8A9A5B','#93C572',
+      '#4CBB17','#4169E1','#7DF9FF',
+      '#000080','#191970','#355E3B','#01796F',
+      '#00FFFF','#7FFFD4','#00CCCC'
+    ];
+
+    function showColorPicker(firstName, subtitle) {
+      return new Promise(function(resolve) {
+        var selected = SWATCH_COLORS[4];
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999999;font-family:system-ui,sans-serif;';
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#fff;border-radius:14px;padding:28px 24px;box-shadow:0 8px 40px rgba(0,0,0,0.25);width:360px;text-align:center;max-height:90vh;overflow-y:auto;';
+        var preview = document.createElement('div');
+        preview.style.cssText = 'width:40px;height:40px;border-radius:50%;background:' + selected + ';margin:0 auto 14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.15s;';
+        var heading = document.createElement('div');
+        heading.style.cssText = 'font-size:1.05rem;font-weight:700;color:#111;margin-bottom:4px;';
+        heading.textContent = 'Hi ' + firstName + '!';
+        var sub = document.createElement('div');
+        sub.style.cssText = 'font-size:0.82rem;color:#888;margin-bottom:18px;';
+        sub.textContent = subtitle || 'Pick your favorite color';
+        var grid = document.createElement('div');
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:20px;justify-items:center;';
+        SWATCH_COLORS.forEach(function(c) {
+          var sw = document.createElement('button');
+          sw.style.cssText = 'width:26px;height:26px;border-radius:50%;background:' + c + ';border:3px solid ' + (c === selected ? '#fff' : 'transparent') + ';box-shadow:' + (c === selected ? '0 0 0 2px ' + c : 'none') + ';cursor:pointer;outline:none;padding:0;';
+          sw.addEventListener('mouseenter', function() { sw.style.transform = 'scale(1.15)'; });
+          sw.addEventListener('mouseleave', function() { sw.style.transform = ''; });
+          sw.addEventListener('click', function() {
+            selected = c;
+            preview.style.background = c;
+            grid.querySelectorAll('button').forEach(function(b) { b.style.border = '3px solid transparent'; b.style.boxShadow = 'none'; });
+            sw.style.border = '3px solid #fff';
+            sw.style.boxShadow = '0 0 0 2px ' + c;
+          });
+          grid.appendChild(sw);
+        });
+        var btn = document.createElement('button');
+        btn.style.cssText = 'width:100%;padding:11px;background:#0f0f13;color:#fff;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;letter-spacing:0.02em;font-family:system-ui,sans-serif;';
+        btn.textContent = 'Select';
+        btn.addEventListener('click', function() { overlay.remove(); resolve(selected); });
+        card.appendChild(preview);
+        card.appendChild(heading);
+        card.appendChild(sub);
+        card.appendChild(grid);
+        card.appendChild(btn);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+      });
+    }
+
+    function afterAuth(name) {
+      var firstName = name.split(' ')[0];
+      showColorPicker(firstName)
+        .then(function(c1) {
+          localStorage.setItem('efm_cursor_color', c1);
+          return showColorPicker(firstName, 'Pick another color');
+        })
+        .then(function(c2) {
+          localStorage.setItem('efm_cursor_color2', c2);
+          location.href = 'index.html';
+        });
+    }
+
     var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
     var authWs = null;
     var authWsReady = false;
     var pendingAction = null;
-    var pendingEmail = '';
 
     function getWS() {
       if (authWs && authWs.readyState === 1) return authWs;
@@ -80,33 +179,19 @@
       };
       authWs.onmessage = function(e) {
         var d = JSON.parse(e.data);
-        if (d.type === 'verification_sent') {
-          pendingEmail = d.email;
+        if (d.type === 'register_ok') {
           document.getElementById('signup-section').style.display = 'none';
-          document.getElementById('verify-section').style.display = '';
-          document.getElementById('verify-hint').textContent = 'We sent a 6-digit code to ' + d.email + '. Enter it below to finish creating your account.';
-          document.getElementById('verify-code').focus();
-        } else if (d.type === 'register_ok') {
-          var formName = document.getElementById('signup-name').value.trim();
-          localStorage.setItem('efm_cursor_name', d.name || formName);
-          localStorage.setItem('efm_account_code', d.code);
-          localStorage.setItem('efm_cursor_email', pendingEmail || document.getElementById('signup-email').value.trim());
-          if (!localStorage.getItem('efm_cursor_color')) localStorage.setItem('efm_cursor_color', '#5a9fd4');
-          if (!localStorage.getItem('efm_cursor_color2')) localStorage.setItem('efm_cursor_color2', '#4a9e4a');
-          localStorage.setItem('efm_tutorial_step', '1');
-          location.href = 'index.html';
+          document.getElementById('pending-section').style.display = '';
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
-          document.getElementById('verify-err').textContent = d.message;
-        } else if (d.type === 'verify_error') {
-          document.getElementById('verify-err').textContent = d.message;
         } else if (d.type === 'login_ok') {
-          if (d.name) { localStorage.setItem('efm_user_name', d.name); localStorage.setItem('efm_cursor_name', d.name); }
+          var name = d.name || '';
+          if (name) { localStorage.setItem('efm_user_name', name); localStorage.setItem('efm_cursor_name', name); }
           if (d.code) localStorage.setItem('efm_account_code', d.code);
           if (d.fv)  localStorage.setItem('efm_cursor_color',  d.fv);
           if (d.sfv) localStorage.setItem('efm_cursor_color2', d.sfv);
           localStorage.setItem('efm_cursor_email', document.getElementById('login-email').value.trim());
-          location.href = 'index.html';
+          if (d.fv) { location.href = 'index.html'; } else { afterAuth(name || 'there'); }
         } else if (d.type === 'login_error') {
           document.getElementById('login-err').textContent = d.message;
         }
@@ -121,30 +206,13 @@
       var pass  = document.getElementById('signup-pass').value;
       var pass2 = document.getElementById('signup-pass2').value;
       document.getElementById('signup-err').textContent = '';
-      if (!email || !name || !pass) { document.getElementById('signup-err').textContent = 'Please fill in all fields.'; return; }
+      if (!email || !name.trim() || !pass) { document.getElementById('signup-err').textContent = 'Please fill in all fields.'; return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('signup-err').textContent = 'Please enter a valid email address.'; return; }
       if (pass !== pass2) { document.getElementById('signup-err').textContent = 'Passwords do not match.'; return; }
       if (pass.length < 6) { document.getElementById('signup-err').textContent = 'Password must be at least 6 characters.'; return; }
       var sock = getWS();
-      var msg = JSON.stringify({type:'send_verification', email:email, name:name, password:pass});
+      var msg = JSON.stringify({type:'register', email:email, name:name, password:pass});
       if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
-    }
-
-    function doVerify() {
-      var code = document.getElementById('verify-code').value.trim();
-      document.getElementById('verify-err').textContent = '';
-      if (code.length !== 6) { document.getElementById('verify-err').textContent = 'Please enter the 6-digit code.'; return; }
-      var sock = getWS();
-      var msg = JSON.stringify({type:'verify_code', email:pendingEmail, code:code});
-      if (authWsReady) { sock.send(msg); } else { pendingAction = function(){ sock.send(msg); }; }
-    }
-
-    function cancelVerify() {
-      pendingEmail = '';
-      document.getElementById('verify-section').style.display = 'none';
-      document.getElementById('verify-code').value = '';
-      document.getElementById('verify-err').textContent = '';
-      document.getElementById('signup-section').style.display = '';
     }
 
     function doLogin() {

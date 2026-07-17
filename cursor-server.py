@@ -139,21 +139,21 @@ RESEND_API_KEY = os.environ.get('RESEND_API_KEY') or (_resend_key_file.read_text
 
 pending_verifications = {}  # email -> {code, expires, name, password_hash}
 
-async def send_verification_email(to_email, code):
+async def send_signup_notification(name, user_email):
+    """Notify site owner of a new signup. Always sends to owner's email (Resend testing restriction)."""
     if not RESEND_API_KEY:
-        print('[email] RESEND_API_KEY not set')
-        return False
+        print('[email] RESEND_API_KEY not set — skipping signup notification')
+        return
     payload = json.dumps({
         'from': 'EFM <onboarding@resend.dev>',
-        'to': [to_email],
-        'subject': f'Your EFM verification code: {code}',
+        'to': ['eltonzhang0328@gmail.com'],
+        'subject': 'EFM: New account signup',
         'html': (
             '<div style="font-family:system-ui,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;">'
-            '<h2 style="color:#0f0f13;margin-bottom:8px;">Welcome to EFM!</h2>'
-            '<p style="color:#555;margin-bottom:24px;">Enter this code on the sign-up page:</p>'
-            f'<div style="font-size:2.8rem;font-weight:800;letter-spacing:0.25em;color:#0f0f13;'
-            f'background:#f0f4f8;border-radius:12px;padding:18px;text-align:center;margin-bottom:24px;">{code}</div>'
-            '<p style="color:#aaa;font-size:0.85rem;">Expires in 10 minutes. If you didn\'t sign up for EFM, ignore this.</p>'
+            '<h2 style="color:#0f0f13;margin-bottom:8px;">New EFM Signup</h2>'
+            f'<p style="color:#555;margin-bottom:8px;"><strong>Name:</strong> {name}</p>'
+            f'<p style="color:#555;margin-bottom:24px;"><strong>Email:</strong> {user_email}</p>'
+            '<p style="color:#888;font-size:0.9rem;">Account access pending. This may take a few days.</p>'
             '</div>'
         )
     }).encode()
@@ -165,10 +165,9 @@ async def send_verification_email(to_email, code):
     try:
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=10))
-        return True
+        print(f'[email] Signup notification sent for {user_email}')
     except Exception as e:
-        print(f'[email] Resend error: {e}')
-        return False
+        print(f'[email] Signup notification error: {e}')
 
 clients        = {}    # websocket -> {id, name, color}
 chat_clients   = set() # websockets that are in the chat room
@@ -418,6 +417,7 @@ async def handler(websocket):
                 identity_store['by_device']['email:' + email] = {'name': name, 'fv': '', 'sfv': '', 'code': code}
                 save_accounts()
                 save_identities_file()
+                asyncio.ensure_future(send_signup_notification(name, email))
                 await websocket.send(json.dumps({'type': 'register_ok', 'code': code, 'name': name}))
 
             elif kind == 'save_identity':
