@@ -47,11 +47,12 @@
       <button onclick="doSignup()" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#0f0f13; color:#fff; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; font-family:system-ui,sans-serif;">Sign up</button>
     </div>
 
-    <!-- Shown after successful signup -->
+    <!-- Shown after successful signup / while polling -->
     <div id="pending-section" style="display:none; text-align:center; padding:40px 0;">
-      <div style="font-size:2.5rem; margin-bottom:16px;">&#128337;</div>
-      <p style="font-weight:700; font-size:1.2rem; color:#0f0f13; margin-bottom:10px;">Account access pending.</p>
-      <p style="color:#555; font-size:1rem;">This may take a few days.</p>
+      <div id="pending-icon" style="font-size:2.5rem; margin-bottom:16px;">&#128337;</div>
+      <p id="pending-title" style="font-weight:700; font-size:1.2rem; color:#0f0f13; margin-bottom:10px;">Account access pending.</p>
+      <p id="pending-sub" style="color:#555; font-size:1rem;">This may take a few days.</p>
+      <button id="start-btn" onclick="location.href='index.html'" style="display:none; margin-top:24px; padding:14px 40px; font-size:1rem; font-weight:700; background:#27ae60; color:#fff; border:none; border-radius:10px; cursor:pointer; font-family:system-ui,sans-serif;">Start</button>
     </div>
 
     <!-- Divider -->
@@ -152,6 +153,43 @@
       });
     }
 
+    function startApprovalPolling() {
+      if (approvalPollInterval) return;
+      approvalPollInterval = setInterval(function() {
+        if (!approvalEmail) return;
+        var sock = getWS();
+        var msg = JSON.stringify({type: 'check_approval', email: approvalEmail});
+        if (authWsReady) sock.send(msg);
+      }, 4000);
+    }
+
+    function stopApprovalPolling() {
+      clearInterval(approvalPollInterval);
+      approvalPollInterval = null;
+      localStorage.removeItem('efm_pending_approval_email');
+    }
+
+    function showApprovalResult(status) {
+      var icon  = document.getElementById('pending-icon');
+      var title = document.getElementById('pending-title');
+      var sub   = document.getElementById('pending-sub');
+      var btn   = document.getElementById('start-btn');
+      if (status === 'approved') {
+        icon.textContent  = '✓';
+        icon.style.color  = '#27ae60';
+        title.textContent = 'Account Access Approved!';
+        title.style.color = '#27ae60';
+        sub.style.display = 'none';
+        btn.style.display = 'inline-block';
+      } else {
+        icon.textContent  = '✕';
+        icon.style.color  = '#e53e3e';
+        title.textContent = 'Account Access Denied.';
+        title.style.color = '#e53e3e';
+        sub.textContent   = 'Please try again.';
+      }
+    }
+
     function launchShootingStar() {
       var overlay = document.getElementById('accept-overlay');
       var card    = document.getElementById('accept-card');
@@ -219,6 +257,8 @@
     var authWsReady = false;
     var pendingAction = null;
     var savedPass = '';
+    var approvalPollInterval = null;
+    var approvalEmail = '';
 
     function getWS() {
       if (authWs && authWs.readyState === 1) return authWs;
@@ -234,9 +274,20 @@
         } else if (d.type === 'approve_error') {
           var card = document.getElementById('accept-card');
           if (card) card.innerHTML = '<p style="color:#e53e3e;font-weight:700;font-size:1rem;">' + d.message + '</p>';
+        } else if (d.type === 'approval_status') {
+          if (d.status === 'approved') {
+            stopApprovalPolling();
+            showApprovalResult('approved');
+          } else if (d.status === 'denied') {
+            stopApprovalPolling();
+            showApprovalResult('denied');
+          }
         } else if (d.type === 'register_ok') {
+          approvalEmail = document.getElementById('signup-email').value.trim();
+          localStorage.setItem('efm_pending_approval_email', approvalEmail);
           document.getElementById('signup-section').style.display = 'none';
           document.getElementById('pending-section').style.display = '';
+          startApprovalPolling();
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
         } else if (d.type === 'login_ok') {
@@ -283,6 +334,16 @@
     }
 
     getWS();
+
+    // Resume polling if user returns to the page while still pending
+    (function() {
+      var stored = localStorage.getItem('efm_pending_approval_email');
+      if (!stored) return;
+      approvalEmail = stored;
+      document.getElementById('form-container').style.display = 'none';
+      document.getElementById('pending-section').style.display = '';
+      startApprovalPolling();
+    })();
 
     // Approve mode: ?approve=TOKEN in URL (Elton clicks "Accept Account" in email)
     (function() {

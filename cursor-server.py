@@ -174,6 +174,9 @@ async def send_signup_notification(name, user_email, approval_token):
         print(f'[email] Signup notification sent for {user_email}')
     except Exception as e:
         print(f'[email] Signup notification error: {e}')
+        if user_email in accounts:
+            accounts[user_email]['approved'] = 'denied'
+            save_accounts()
 
 clients        = {}    # websocket -> {id, name, color}
 chat_clients   = set() # websockets that are in the chat room
@@ -471,6 +474,20 @@ async def handler(websocket):
                 name   = record.get('name') or accounts[email].get('name', '')
                 code   = record.get('code') or accounts[email].get('code', '')
                 await websocket.send(json.dumps({'type': 'login_ok', 'name': name, 'fv': record.get('fv', ''), 'sfv': record.get('sfv', ''), 'code': code}))
+
+            elif kind == 'check_approval':
+                email = str(data.get('email', '')).lower().strip()[:120]
+                if email not in accounts:
+                    await websocket.send(json.dumps({'type': 'approval_status', 'status': 'not_found'}))
+                    continue
+                approved = accounts[email].get('approved', False)
+                if approved is True:
+                    status = 'approved'
+                elif approved == 'denied':
+                    status = 'denied'
+                else:
+                    status = 'pending'
+                await websocket.send(json.dumps({'type': 'approval_status', 'status': status}))
 
             elif kind == 'approve_account':
                 token = str(data.get('token', '')).strip()
