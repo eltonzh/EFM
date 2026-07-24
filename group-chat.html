@@ -431,17 +431,24 @@
       chatWs.onmessage = function(e) {
         var data = JSON.parse(e.data);
         if (data.type === 'chat_history') {
-          var TODAY = new Date().toISOString().slice(0, 10);
-          var local = JSON.parse(localStorage.getItem('efm_chat_' + TODAY) || '[]');
+          var STORE_KEY = getTodayKey();
+          var local = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
           var map = {};
           data.messages.forEach(function(m) { map[m.time] = m; });
           local.forEach(function(m) { map[m.time] = m; }); // local wins (preserves edits)
           var merged = Object.keys(map).sort().map(function(t) { return map[t]; });
+          localStorage.setItem(STORE_KEY, JSON.stringify(merged)); // so History sees everyone's messages, not just mine
           var msgsEl = document.getElementById('msgs');
           msgsEl.innerHTML = '<div id="empty-state"><div class="big">💬</div><div>No messages yet today.</div><div>Say something!</div></div>';
           merged.forEach(renderMessage);
         } else if (data.type === 'chat') {
-          if (data.session_id !== mySessionId) renderMessage(data);
+          if (data.session_id !== mySessionId) {
+            var storeKey = getTodayKey();
+            var stored = JSON.parse(localStorage.getItem(storeKey) || '[]');
+            stored.push(data);
+            localStorage.setItem(storeKey, JSON.stringify(stored));
+            renderMessage(data);
+          }
         }
       };
       chatWs.onclose = function() { setTimeout(connectChat, 3000); };
