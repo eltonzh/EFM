@@ -44,6 +44,9 @@
     #elton-sidebar-btn { overflow: visible; }
     #elton-sidebar-bubble { opacity: 0; transition: opacity 0.15s; }
     #elton-sidebar-btn:hover #elton-sidebar-bubble { opacity: 1; }
+    #math-helper-btn { overflow: visible; }
+    #math-helper-btn:hover #math-helper-bubble { opacity: 1; }
+    #math-helper-btn:hover { background: #1f4f1f !important; }
     #side-bar a.active { background: rgba(42,122,42,0.35); }
     #chat-main {
       flex: 1;
@@ -239,6 +242,25 @@
         <polyline points="12,6.5 12,12 15.5,14.5"/>
       </svg>
     </a>
+    <a href="/claude.html" title="Math Helper" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1a3a1a;text-decoration:none;flex-shrink:0;position:relative;" id="math-helper-btn">
+      <svg viewBox="0 0 36 36" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+        <!-- + top-left -->
+        <text x="4" y="13" font-size="9" fill="#7ecf7e" font-family="system-ui,sans-serif" font-weight="700">+</text>
+        <!-- − top-right -->
+        <text x="23" y="13" font-size="9" fill="#7ecf7e" font-family="system-ui,sans-serif" font-weight="700">−</text>
+        <!-- smiley face center -->
+        <circle cx="18" cy="18" r="6" fill="none" stroke="#7ecf7e" stroke-width="1.5"/>
+        <circle cx="15.5" cy="16.5" r="1" fill="#7ecf7e"/>
+        <circle cx="20.5" cy="16.5" r="1" fill="#7ecf7e"/>
+        <path d="M15 20 Q18 23 21 20" fill="none" stroke="#7ecf7e" stroke-width="1.4" stroke-linecap="round"/>
+        <!-- × bottom-left -->
+        <text x="4" y="31" font-size="9" fill="#7ecf7e" font-family="system-ui,sans-serif" font-weight="700">×</text>
+        <!-- ÷ bottom-right -->
+        <text x="23" y="31" font-size="9" fill="#7ecf7e" font-family="system-ui,sans-serif" font-weight="700">÷</text>
+      </svg>
+      <div style="position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#fff;color:#0f0f13;font-size:0.75rem;font-weight:700;font-family:system-ui,sans-serif;white-space:nowrap;padding:6px 12px;border-radius:10px;pointer-events:none;opacity:0;transition:opacity 0.15s;box-shadow:0 2px 10px rgba(0,0,0,0.3);" id="math-helper-bubble">Math Helper<div style="position:absolute;right:100%;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:#fff;"></div></div>
+    </a>
+
     <div id="elton-sidebar-btn" style="position:relative;display:flex;align-items:center;justify-content:center;cursor:default;">
       <img src="elton.jpg" alt="Elton" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #2a7a2a;display:block;">
       <div id="elton-sidebar-bubble" style="position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#fff;color:#0f0f13;font-size:0.75rem;font-weight:700;font-family:system-ui,sans-serif;white-space:nowrap;padding:6px 12px;border-radius:10px;pointer-events:none;transition:opacity 0.15s;box-shadow:0 2px 10px rgba(0,0,0,0.3);">Talk to Elton<div style="position:absolute;right:100%;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:#fff;"></div></div>
