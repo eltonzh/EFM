@@ -10,7 +10,8 @@ from websockets.datastructures import Headers
 from openai import AsyncOpenAI
 
 REPO_DIR = Path(__file__).parent.resolve()
-CHAT_FILE     = REPO_DIR / 'chat_history.json'
+CHAT_FILE        = REPO_DIR / 'chat_history.json'
+ELTON_CHAT_FILE  = REPO_DIR / 'elton_chat.json'
 IDENTITY_FILE = REPO_DIR / 'identities.json'
 
 # Unambiguous chars (no I, O, 0, 1)
@@ -80,6 +81,15 @@ LOCAL_LLM_MODEL           = os.environ.get('LOCAL_LLM_MODEL', '')
 LOCAL_LLM_TIMEOUT_SECONDS = float(os.environ.get('LOCAL_LLM_TIMEOUT_SECONDS', '45'))
 LOCAL_LLM_MAX_TOKENS      = int(os.environ.get('LOCAL_LLM_MAX_TOKENS', '400'))
 LOCAL_LLM_CONCURRENCY     = int(os.environ.get('LOCAL_LLM_CONCURRENCY', '1'))
+
+def load_elton_chat():
+    if ELTON_CHAT_FILE.exists():
+        try: return json.loads(ELTON_CHAT_FILE.read_text())
+        except Exception: pass
+    return []
+
+def save_elton_chat():
+    ELTON_CHAT_FILE.write_text(json.dumps(elton_chat_messages))
 
 def load_chat_history():
     if CHAT_FILE.exists():
@@ -179,9 +189,11 @@ async def send_signup_notification(name, user_email, approval_token):
             save_accounts()
 
 clients        = {}    # websocket -> {id, name, color}
-chat_clients   = set() # websockets that are in the chat room
-chat_names     = {}   # websocket -> display name for chat
-chat_history   = load_chat_history()
+chat_clients        = set() # websockets that are in the chat room
+chat_names          = {}   # websocket -> display name for chat
+chat_history        = load_chat_history()
+elton_chat_clients  = set() # websockets on the Talk-to-Elton page
+elton_chat_messages = load_elton_chat()
 identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {code: device_id}}
 accounts       = load_accounts()    # {email: {password_hash, name, fv, sfv, code}}
 MAX_HISTORY  = 500
@@ -349,6 +361,37 @@ async def handler(websocket):
                     chat_history.pop(0)
                 save_chat_history()
                 await broadcast_chat({'type': 'chat', 'session_id': session_id, **msg})
+
+            elif kind == 'elton_chat_join':
+                elton_chat_clients.add(websocket)
+                await websocket.send(json.dumps({'type': 'elton_chat_history', 'messages': elton_chat_messages[-100:]}))
+
+            elif kind == 'elton_chat_send':
+                name = str(data.get('name', 'Viewer'))[:MAX_NAME_LEN].strip()
+                text = str(data.get('text', ''))[:2000].strip()
+                if not text: continue
+                msg = {'name': name, 'text': text, 'time': now_iso()}
+                elton_chat_messages.append(msg)
+                if len(elton_chat_messages) > 500: elton_chat_messages.pop(0)
+                save_elton_chat()
+                dead = set()
+                for ws in elton_chat_clients:
+                    try: await ws.send(json.dumps({'type': 'elton_chat_message', **msg}))
+                    except Exception: dead.add(ws)
+                elton_chat_clients -= dead
+
+            elif kind == 'elton_reply':
+                text = str(data.get('text', ''))[:2000].strip()
+                if not text: continue
+                msg = {'name': 'Elton', 'text': text, 'time': now_iso()}
+                elton_chat_messages.append(msg)
+                if len(elton_chat_messages) > 500: elton_chat_messages.pop(0)
+                save_elton_chat()
+                dead = set()
+                for ws in elton_chat_clients:
+                    try: await ws.send(json.dumps({'type': 'elton_chat_message', **msg}))
+                    except Exception: dead.add(ws)
+                elton_chat_clients -= dead
 
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')
