@@ -192,7 +192,8 @@ clients        = {}    # websocket -> {id, name, color}
 chat_clients        = set() # websockets that are in the chat room
 chat_names          = {}   # websocket -> display name for chat
 chat_history        = load_chat_history()
-elton_chat_clients  = set() # websockets on the Talk-to-Elton page
+elton_viewer_ws     = {}   # name -> set of websockets (viewers)
+elton_admin_ws      = set() # admin websockets
 elton_chat_messages = load_elton_chat()
 identity_store = load_identities()  # {by_device: {device_id: {...}}, by_code: {code: device_id}}
 accounts       = load_accounts()    # {email: {password_hash, name, fv, sfv, code}}
@@ -363,8 +364,15 @@ async def handler(websocket):
                 await broadcast_chat({'type': 'chat', 'session_id': session_id, **msg})
 
             elif kind == 'elton_chat_join':
-                elton_chat_clients.add(websocket)
-                await websocket.send(json.dumps({'type': 'elton_chat_history', 'messages': elton_chat_messages[-100:]}))
+                viewer_name = str(data.get('name', '')).strip()
+                if viewer_name:
+                    elton_viewer_ws.setdefault(viewer_name, set()).add(websocket)
+                    user_history = [m for m in elton_chat_messages
+                                    if m.get('name') == viewer_name or m.get('target') == viewer_name]
+                    await websocket.send(json.dumps({'type': 'elton_chat_history', 'messages': user_history[-100:]}))
+                else:
+                    elton_admin_ws.add(websocket)
+                    await websocket.send(json.dumps({'type': 'elton_chat_history', 'messages': elton_chat_messages[-100:]}))
 
             elif kind == 'elton_chat_send':
                 name = str(data.get('name', 'Viewer'))[:MAX_NAME_LEN].strip()
@@ -375,23 +383,25 @@ async def handler(websocket):
                 if len(elton_chat_messages) > 500: elton_chat_messages.pop(0)
                 save_elton_chat()
                 dead = set()
-                for ws in elton_chat_clients:
+                for ws in elton_admin_ws:
                     try: await ws.send(json.dumps({'type': 'elton_chat_message', **msg}))
                     except Exception: dead.add(ws)
-                elton_chat_clients -= dead
+                elton_admin_ws -= dead
 
             elif kind == 'elton_reply':
                 text = str(data.get('text', ''))[:2000].strip()
-                if not text: continue
-                msg = {'name': 'Elton', 'text': text, 'time': now_iso()}
+                target_name = str(data.get('target_name', '')).strip()
+                if not text or not target_name: continue
+                msg = {'name': 'Elton', 'text': text, 'time': now_iso(), 'target': target_name}
                 elton_chat_messages.append(msg)
                 if len(elton_chat_messages) > 500: elton_chat_messages.pop(0)
                 save_elton_chat()
                 dead = set()
-                for ws in elton_chat_clients:
+                for ws in elton_viewer_ws.get(target_name, set()):
                     try: await ws.send(json.dumps({'type': 'elton_chat_message', **msg}))
                     except Exception: dead.add(ws)
-                elton_chat_clients -= dead
+                if target_name in elton_viewer_ws:
+                    elton_viewer_ws[target_name] -= dead
 
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')

@@ -34,11 +34,20 @@
     .cm-bubble.theirs { background: #23232d; color: #ddd; border-bottom-left-radius: 4px; }
     .cm-bubble.mine { background: #2a7a2a; color: #fff; border-bottom-right-radius: 4px; }
     .cm-empty { color: #444; font-size: 0.85rem; text-align: center; padding: 20px 0; }
+    .cm-reply-btn { width: auto; margin-top: 5px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; background: transparent; color: #555; border: 1px solid #333; border-radius: 6px; cursor: pointer; font-family: system-ui,sans-serif; transition: background 0.1s, color 0.1s; }
+    .cm-reply-btn:hover { background: #23232d; color: #aaa; }
+    .cm-row.selected .cm-bubble.theirs { outline: 2px solid #2a7a2a; }
+    .cm-row.selected .cm-reply-btn { background: #2a7a2a; color: #fff; border-color: #2a7a2a; }
+    #reply-target { font-size: 0.8rem; color: #2a7a2a; min-height: 20px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    #reply-target-clear { background: none; border: none; color: #555; cursor: pointer; font-size: 0.85rem; padding: 0; width: auto; font-family: system-ui,sans-serif; }
+    #reply-target-clear:hover { color: #f87171; background: none; }
     #reply-row { display: flex; gap: 8px; }
     #reply-input { flex: 1; padding: 11px 14px; font-size: 0.93rem; background: #1a1a22; border: 1.5px solid #2a2a35; border-radius: 10px; color: #fff; outline: none; font-family: system-ui,sans-serif; }
     #reply-input:focus { border-color: #2a7a2a; }
+    #reply-input:disabled { opacity: 0.35; cursor: not-allowed; }
     #reply-btn { width: auto; padding: 11px 20px; background: #2a7a2a; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-family: system-ui,sans-serif; white-space: nowrap; }
     #reply-btn:hover { background: #348a34; }
+    #reply-btn:disabled { opacity: 0.35; cursor: not-allowed; background: #2a7a2a; }
   </style>
 </head>
 <body>
@@ -55,9 +64,10 @@
   <div id="chat-panel">
     <h2>💬 Talk to Elton — incoming messages</h2>
     <div id="chat-msgs"><p class="cm-empty">No messages yet.</p></div>
+    <div id="reply-target"></div>
     <div id="reply-row">
-      <input id="reply-input" type="text" placeholder="Reply as Elton…">
-      <button id="reply-btn" onclick="sendReply()">Send</button>
+      <input id="reply-input" type="text" placeholder="Select a message to reply…" disabled>
+      <button id="reply-btn" onclick="sendReply()" disabled>Send</button>
     </div>
   </div>
 
@@ -81,6 +91,8 @@
   <script>
     var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
     var adminWs = null;
+    var selectedReplyName = null;
+    var selectedReplyRow = null;
 
     function load() {
       var email = document.getElementById('email').value.trim();
@@ -126,17 +138,55 @@
       bubble.textContent = text;
       row.appendChild(nameEl);
       row.appendChild(bubble);
+      if (!mine) {
+        var replyBtn = document.createElement('button');
+        replyBtn.className = 'cm-reply-btn';
+        replyBtn.textContent = 'Reply to ' + name;
+        replyBtn.onclick = function() { selectReply(name, row); };
+        row.appendChild(replyBtn);
+      }
       box.appendChild(row);
       box.scrollTop = box.scrollHeight;
+    }
+
+    function selectReply(name, row) {
+      if (selectedReplyRow) selectedReplyRow.classList.remove('selected');
+      selectedReplyName = name;
+      selectedReplyRow = row;
+      row.classList.add('selected');
+      var target = document.getElementById('reply-target');
+      target.innerHTML = 'Replying to <strong>' + esc(name) + '</strong>';
+      var clear = document.createElement('button');
+      clear.id = 'reply-target-clear';
+      clear.textContent = '✕';
+      clear.onclick = clearReply;
+      target.appendChild(clear);
+      var input = document.getElementById('reply-input');
+      input.disabled = false;
+      input.placeholder = 'Reply to ' + name + '…';
+      input.focus();
+      document.getElementById('reply-btn').disabled = false;
+    }
+
+    function clearReply() {
+      if (selectedReplyRow) selectedReplyRow.classList.remove('selected');
+      selectedReplyName = null;
+      selectedReplyRow = null;
+      document.getElementById('reply-target').innerHTML = '';
+      var input = document.getElementById('reply-input');
+      input.disabled = true;
+      input.placeholder = 'Select a message to reply…';
+      input.value = '';
+      document.getElementById('reply-btn').disabled = true;
     }
 
     function sendReply() {
       var input = document.getElementById('reply-input');
       var text = input.value.trim();
-      if (!text || !adminWs || adminWs.readyState !== 1) return;
-      adminWs.send(JSON.stringify({ type: 'elton_reply', text: text }));
+      if (!text || !selectedReplyName || !adminWs || adminWs.readyState !== 1) return;
+      adminWs.send(JSON.stringify({ type: 'elton_reply', text: text, target_name: selectedReplyName }));
       appendChatMsg('Elton', text);
-      input.value = '';
+      clearReply();
     }
 
     function showAccounts(list) {
