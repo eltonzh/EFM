@@ -86,8 +86,9 @@
       font-size: 0.65rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
     }
+    .msg-col { display: flex; flex-direction: column; max-width: calc(70% - 34px); min-width: 0; }
+    .msg-row.mine .msg-col { align-items: flex-end; }
     .bubble {
-      max-width: 70%;
       padding: 9px 14px;
       border-radius: 16px;
       font-size: 0.93rem;
@@ -220,7 +221,7 @@
       bubble.textContent = text;
 
       var col = document.createElement('div');
-      col.style.cssText = 'display:flex;flex-direction:column;' + (mine ? 'align-items:flex-end;' : '');
+      col.className = 'msg-col';
       col.appendChild(nameEl);
       col.appendChild(bubble);
 
