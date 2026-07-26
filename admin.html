@@ -22,6 +22,23 @@
     tr:hover td { background: #1e1e28; }
     .badge { display: inline-block; background: #2a2a35; border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; color: #aaa; }
     #count { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
+    #chat-panel { width: 100%; max-width: 700px; margin-bottom: 24px; display: none; }
+    #chat-panel h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; color: #fff; }
+    #chat-msgs { background: #1a1a22; border-radius: 14px; padding: 16px; min-height: 120px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    #chat-msgs::-webkit-scrollbar { width: 4px; }
+    #chat-msgs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+    .cm-row { display: flex; flex-direction: column; }
+    .cm-row.mine { align-items: flex-end; }
+    .cm-name { font-size: 0.7rem; color: #666; margin-bottom: 2px; }
+    .cm-bubble { max-width: 75%; padding: 8px 13px; border-radius: 14px; font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
+    .cm-bubble.theirs { background: #23232d; color: #ddd; border-bottom-left-radius: 4px; }
+    .cm-bubble.mine { background: #2a7a2a; color: #fff; border-bottom-right-radius: 4px; }
+    .cm-empty { color: #444; font-size: 0.85rem; text-align: center; padding: 20px 0; }
+    #reply-row { display: flex; gap: 8px; }
+    #reply-input { flex: 1; padding: 11px 14px; font-size: 0.93rem; background: #1a1a22; border: 1.5px solid #2a2a35; border-radius: 10px; color: #fff; outline: none; font-family: system-ui,sans-serif; }
+    #reply-input:focus { border-color: #2a7a2a; }
+    #reply-btn { width: auto; padding: 11px 20px; background: #2a7a2a; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-family: system-ui,sans-serif; white-space: nowrap; }
+    #reply-btn:hover { background: #348a34; }
   </style>
 </head>
 <body>
@@ -33,6 +50,15 @@
     <input id="pass" type="password" placeholder="Your password">
     <p id="err"></p>
     <button onclick="load()">View Accounts</button>
+  </div>
+
+  <div id="chat-panel">
+    <h2>💬 Talk to Elton — incoming messages</h2>
+    <div id="chat-msgs"><p class="cm-empty">No messages yet.</p></div>
+    <div id="reply-row">
+      <input id="reply-input" type="text" placeholder="Reply as Elton…">
+      <button id="reply-btn" onclick="sendReply()">Send</button>
+    </div>
   </div>
 
   <div id="results" style="width:100%;max-width:700px;display:none;">
@@ -54,6 +80,7 @@
 
   <script>
     var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
+    var adminWs = null;
 
     function load() {
       var email = document.getElementById('email').value.trim();
@@ -69,15 +96,52 @@
         var d = JSON.parse(e.data);
         if (d.type === 'admin_error') {
           document.getElementById('err').textContent = d.message;
+          ws.close();
         } else if (d.type === 'admin_accounts') {
           showAccounts(d.accounts);
+          adminWs = ws;
+          ws.send(JSON.stringify({ type: 'elton_chat_join' }));
+        } else if (d.type === 'elton_chat_history') {
+          var msgs = d.messages || [];
+          if (msgs.length) { document.getElementById('chat-msgs').innerHTML = ''; }
+          msgs.forEach(function(m) { appendChatMsg(m.name, m.text); });
+        } else if (d.type === 'elton_chat_message') {
+          appendChatMsg(d.name, d.text);
         }
-        ws.close();
       };
+    }
+
+    function appendChatMsg(name, text) {
+      var box = document.getElementById('chat-msgs');
+      var empty = box.querySelector('.cm-empty');
+      if (empty) empty.remove();
+      var mine = name === 'Elton';
+      var row = document.createElement('div');
+      row.className = 'cm-row' + (mine ? ' mine' : '');
+      var nameEl = document.createElement('div');
+      nameEl.className = 'cm-name';
+      nameEl.textContent = name;
+      var bubble = document.createElement('div');
+      bubble.className = 'cm-bubble ' + (mine ? 'mine' : 'theirs');
+      bubble.textContent = text;
+      row.appendChild(nameEl);
+      row.appendChild(bubble);
+      box.appendChild(row);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendReply() {
+      var input = document.getElementById('reply-input');
+      var text = input.value.trim();
+      if (!text || !adminWs || adminWs.readyState !== 1) return;
+      adminWs.send(JSON.stringify({ type: 'elton_reply', text: text }));
+      appendChatMsg('Elton', text);
+      input.value = '';
     }
 
     function showAccounts(list) {
       document.getElementById('login-card').style.display = 'none';
+      document.getElementById('chat-panel').style.display = 'block';
       document.getElementById('results').style.display = 'block';
       document.getElementById('count').textContent = list.length + ' account' + (list.length === 1 ? '' : 's');
       var tbody = document.getElementById('tbody');
@@ -102,7 +166,12 @@
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    document.addEventListener('keydown', function(e) { if (e.key === 'Enter') load(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        if (document.activeElement === document.getElementById('reply-input')) { sendReply(); }
+        else { load(); }
+      }
+    });
   </script>
 </body>
 </html>
