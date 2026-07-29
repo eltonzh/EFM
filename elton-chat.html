@@ -67,7 +67,8 @@
     #chat-header .back:hover { color: #fff; }
     #chat-header .avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #2a7a2a; flex-shrink: 0; }
     #chat-header .title { color: #fff; font-weight: 700; font-size: 1rem; }
-    #chat-header .online { width: 8px; height: 8px; border-radius: 50%; background: #2a7a2a; flex-shrink: 0; }
+    #chat-header .online { width: 8px; height: 8px; border-radius: 50%; background: #888; flex-shrink: 0; transition: background 0.3s; }
+    #chat-header .online.connected { background: #2a7a2a; }
     #msgs {
       flex: 1;
       overflow-y: auto;
@@ -196,8 +197,34 @@
     var myColor = localStorage.getItem('efm_cursor_color') || '#2a7a2a';
     var WS_URL  = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
 
-    var ws = new WebSocket(WS_URL);
+    var ws = null;
     var msgs = document.getElementById('msgs');
+    var dot = document.querySelector('#chat-header .online');
+
+    function connect() {
+      ws = new WebSocket(WS_URL);
+      ws.onopen = function() {
+        dot.classList.add('connected');
+        ws.send(JSON.stringify({type: 'elton_chat_join', name: myName}));
+      };
+      ws.onclose = ws.onerror = function() {
+        dot.classList.remove('connected');
+        setTimeout(connect, 3000);
+      };
+      ws.onmessage = onMessage;
+    }
+    connect();
+
+    function onMessage(e) {
+      var d = JSON.parse(e.data);
+      if (d.type === 'elton_chat_message') {
+        addMsg('Elton', d.text, false);
+      } else if (d.type === 'elton_chat_history') {
+        (d.messages || []).forEach(function(m) {
+          addMsg(m.name, m.text, m.name !== 'Elton');
+        });
+      }
+    }
 
     function addMsg(name, text, mine) {
       var row = document.createElement('div');
@@ -231,21 +258,6 @@
       msgs.appendChild(row);
       msgs.scrollTop = msgs.scrollHeight;
     }
-
-    ws.onmessage = function(e) {
-      var d = JSON.parse(e.data);
-      if (d.type === 'elton_chat_message') {
-        addMsg('Elton', d.text, false);
-      } else if (d.type === 'elton_chat_history') {
-        (d.messages || []).forEach(function(m) {
-          addMsg(m.name, m.text, m.name !== 'Elton');
-        });
-      }
-    };
-
-    ws.onopen = function() {
-      ws.send(JSON.stringify({type: 'elton_chat_join', name: myName}));
-    };
 
     function send() {
       var input = document.getElementById('msg-input');
