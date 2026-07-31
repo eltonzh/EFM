@@ -337,44 +337,75 @@
     function renderIntermediate() {
       var grid = document.getElementById('intermediate-grid');
       grid.innerHTML = '';
-      intermediateGames.forEach(function(g) {
-        var a = document.createElement('a');
-        a.className = 'game-card';
-        a.href = g.href;
-        a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
-          '<div class="game-card-name">' + g.name + '</div>' +
-          '<div class="game-card-desc">' + g.desc + '</div>' +
-          '<div class="game-card-play">Play →</div>';
-        grid.appendChild(a);
-      });
+      if (localStorage.getItem('efm_games_intermediate_unlocked')) {
+        intermediateGames.forEach(function(g) {
+          var a = document.createElement('a');
+          a.className = 'game-card';
+          a.href = g.href;
+          a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
+            '<div class="game-card-name">' + g.name + '</div>' +
+            '<div class="game-card-desc">' + g.desc + '</div>' +
+            '<div class="game-card-play">Play →</div>';
+          grid.appendChild(a);
+        });
+      } else {
+        var card = document.createElement('div');
+        card.className = 'lock-card';
+        card.innerHTML = '<div class="lock-card-icon">🔒</div>' +
+          '<div class="lock-card-title">Locked</div>' +
+          '<div class="lock-card-desc">Intermediate games are locked for now. Do some lessons to unlock games!</div>';
+        grid.appendChild(card);
+      }
     }
 
     function renderAdvanced() {
       var grid = document.getElementById('advanced-grid');
       grid.innerHTML = '';
-      advancedGames.forEach(function(g) {
-        var a = document.createElement('a');
-        a.className = 'game-card';
-        a.href = g.href;
-        a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
-          '<div class="game-card-name">' + g.name + '</div>' +
-          '<div class="game-card-desc">' + g.desc + '</div>' +
-          '<div class="game-card-play">Play →</div>';
-        grid.appendChild(a);
-      });
+      if (localStorage.getItem('efm_games_intermediate_unlocked')) {
+        advancedGames.forEach(function(g) {
+          var a = document.createElement('a');
+          a.className = 'game-card';
+          a.href = g.href;
+          a.innerHTML = '<div class="game-card-icon">' + g.icon + '</div>' +
+            '<div class="game-card-name">' + g.name + '</div>' +
+            '<div class="game-card-desc">' + g.desc + '</div>' +
+            '<div class="game-card-play">Play →</div>';
+          grid.appendChild(a);
+        });
+      } else {
+        var card = document.createElement('div');
+        card.className = 'lock-card';
+        card.innerHTML = '<div class="lock-card-icon">🔒</div>' +
+          '<div class="lock-card-title">Locked</div>' +
+          '<div class="lock-card-desc">Advanced games are locked for now. Do some lessons to unlock games!</div>';
+        grid.appendChild(card);
+      }
     }
 
     function renderForFun() {
       var grid = document.getElementById('forfun-grid');
       grid.innerHTML = '';
-      var a = document.createElement('a');
-      a.className = 'game-card';
-      a.href = 'game-golden-trail.html';
-      a.innerHTML = '<div class="game-card-icon">✨</div>' +
-        '<div class="game-card-name">Golden Trail</div>' +
-        '<div class="game-card-desc">Move your glowing orb and paint the board gold</div>' +
-        '<div class="game-card-play">Play →</div>';
-      grid.appendChild(a);
+      if (localStorage.getItem('efm_purchased_golden_trail')) {
+        var a = document.createElement('a');
+        a.className = 'game-card';
+        a.href = 'game-golden-trail.html';
+        a.innerHTML = '<div class="game-card-icon">✨</div>' +
+          '<div class="game-card-name">Golden Trail</div>' +
+          '<div class="game-card-desc">Move your glowing orb and paint the board gold</div>' +
+          '<div class="game-card-play">Play →</div>';
+        grid.appendChild(a);
+      } else {
+        var cash = getCash();
+        var card = document.createElement('div');
+        card.className = 'lock-card';
+        card.id = 'golden-trail-card';
+        card.innerHTML = '<div class="lock-card-icon">✨</div>' +
+          '<div class="lock-card-title">Golden Trail</div>' +
+          '<div class="lock-card-desc">Move your glowing orb and paint the board gold</div>' +
+          '<button class="buy-btn"' + (cash < 50 ? ' disabled title="Not enough cash"' : '') +
+          ' onclick="buyGoldenTrail()">Buy · 50 cash</button>';
+        grid.appendChild(card);
+      }
     }
 
     function buyGoldenTrail() {
