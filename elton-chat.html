@@ -220,6 +220,7 @@
       if (d.type === 'elton_chat_message') {
         addMsg('Elton', d.text, false);
       } else if (d.type === 'elton_chat_history') {
+        msgs.querySelectorAll('.msg-row').forEach(function(r) { r.remove(); });
         (d.messages || []).forEach(function(m) {
           addMsg(m.name, m.text, m.name !== 'Elton');
         });
