@@ -62,7 +62,10 @@
   </div>
 
   <div id="chat-panel">
-    <h2>💬 Talk to Elton — incoming messages</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <h2 style="margin-bottom:0;">💬 Talk to Elton — incoming messages</h2>
+      <button onclick="clearAllMsgs()" style="width:auto;padding:5px 14px;font-size:0.8rem;background:transparent;color:#555;border:1px solid #333;border-radius:7px;font-weight:600;">Clear All</button>
+    </div>
     <div id="chat-msgs"><p class="cm-empty">No messages yet.</p></div>
     <div id="reply-target"></div>
     <div id="reply-row">
@@ -166,6 +169,12 @@
       input.placeholder = 'Reply to ' + name + '…';
       input.focus();
       document.getElementById('reply-btn').disabled = false;
+    }
+
+    function clearAllMsgs() {
+      var box = document.getElementById('chat-msgs');
+      box.innerHTML = '<p class="cm-empty">No messages yet.</p>';
+      clearReply();
     }
 
     function clearReply() {
