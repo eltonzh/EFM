@@ -185,7 +185,7 @@
       var text = input.value.trim();
       if (!text || !selectedReplyName || !adminWs || adminWs.readyState !== 1) return;
       adminWs.send(JSON.stringify({ type: 'elton_reply', text: text, target_name: selectedReplyName }));
-      appendChatMsg('Elton', text);
+      if (selectedReplyRow) selectedReplyRow.remove();
       clearReply();
     }
 
