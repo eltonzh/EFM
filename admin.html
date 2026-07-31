@@ -77,6 +77,7 @@
   <div id="results" style="width:100%;max-width:700px;display:none;">
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:0;flex:1;">
+      <button onclick="filterAccounts(document.getElementById('search').value)" style="width:auto;padding:12px 20px;flex-shrink:0;">Search</button>
     </div>
     <p id="count"></p>
     <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
