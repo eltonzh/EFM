@@ -386,7 +386,7 @@ async def handler(websocket):
                 for ws in elton_admin_ws:
                     try: await ws.send(json.dumps({'type': 'elton_chat_message', **msg}))
                     except Exception: dead.add(ws)
-                elton_admin_ws -= dead
+                elton_admin_ws.difference_update(dead)
 
             elif kind == 'elton_reply':
                 text = str(data.get('text', ''))[:2000].strip()
