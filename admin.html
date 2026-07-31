@@ -20,6 +20,11 @@
     th { text-align: left; padding: 10px 12px; color: #888; font-weight: 600; border-bottom: 1px solid #2a2a35; }
     td { padding: 12px; border-bottom: 1px solid #1e1e28; vertical-align: top; }
     tr:hover td { background: #1e1e28; }
+    tr.selected td { background: #1a2a1a; }
+    tr.selected:hover td { background: #1f3020; }
+    #reply-account-btn:hover { background: #348a34 !important; }
+    #compose-send-btn:hover { background: #348a34 !important; }
+    #compose-close-btn:hover { background: #23232d !important; color: #fff !important; }
     .badge { display: inline-block; background: #2a2a35; border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; color: #aaa; }
     #count { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
     #chat-panel { width: 100%; max-width: 700px; margin-bottom: 24px; display: none; }
@@ -73,22 +78,32 @@
 
   <div id="results" style="width:100%;max-width:700px;display:none;">
     <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:0;flex:1;">
-      <button onclick="filterAccounts(document.getElementById('search').value)" style="width:auto;padding:12px 20px;flex-shrink:0;">Search</button>
+      <input id="search" type="text" placeholder="Search by name or email…" style="margin-bottom:0;flex:1;">
+      <button onclick="doSearch()" style="width:auto;padding:12px 20px;flex-shrink:0;">Search</button>
     </div>
-    <p id="count"></p>
-    <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Signed up</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+    <div id="table-section" style="display:none;">
+      <p id="count" style="color:#888;font-size:0.85rem;margin-bottom:12px;"></p>
+      <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px; margin-bottom:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Signed up</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <button id="reply-account-btn" onclick="openCompose()" style="display:none;width:auto;padding:10px 22px;background:#2a7a2a;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:12px;"></button>
+      <div id="compose-wrap" style="display:none;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="compose-input" type="text" placeholder="Type your message…" style="margin-bottom:0;flex:1;background:#1a1a22;border-color:#2a7a2a;">
+          <button id="compose-send-btn" onclick="sendDirect()" style="width:auto;padding:12px 20px;flex-shrink:0;background:#2a7a2a;color:#fff;">Send</button>
+          <button id="compose-close-btn" onclick="closeCompose()" style="width:auto;padding:12px 14px;flex-shrink:0;background:transparent;color:#888;border:1px solid #333;">✕</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -98,6 +113,7 @@
     var selectedReplyName = null;
     var selectedReplyRow = null;
     var allAccounts = [];
+    var selectedAccount = null;
 
     function load() {
       var email = document.getElementById('email').value.trim();
@@ -199,15 +215,18 @@
       document.getElementById('login-card').style.display = 'none';
       document.getElementById('chat-panel').style.display = 'block';
       document.getElementById('results').style.display = 'block';
-      renderAccounts(list);
     }
 
-    function filterAccounts(query) {
-      var q = query.trim().toLowerCase();
+    function doSearch() {
+      var q = document.getElementById('search').value.trim().toLowerCase();
       var filtered = q ? allAccounts.filter(function(u) {
         return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
       }) : allAccounts;
+      selectedAccount = null;
+      document.getElementById('reply-account-btn').style.display = 'none';
+      document.getElementById('compose-wrap').style.display = 'none';
       renderAccounts(filtered);
+      document.getElementById('table-section').style.display = 'block';
     }
 
     function renderAccounts(list) {
@@ -221,13 +240,51 @@
       list.forEach(function(u, i) {
         var date = u.signed_up ? new Date(u.signed_up).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
         var tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
         tr.innerHTML =
           '<td style="color:#555">' + (i+1) + '</td>' +
           '<td style="font-weight:600">' + esc(u.name || '—') + '</td>' +
           '<td style="color:#a0c4ff">' + esc(u.email) + '</td>' +
           '<td style="color:#888">' + date + '</td>';
+        tr.addEventListener('click', function() { selectAccount(u, tr); });
         tbody.appendChild(tr);
       });
+    }
+
+    function selectAccount(u, tr) {
+      var prev = document.querySelector('#tbody tr.selected');
+      if (prev) prev.classList.remove('selected');
+      tr.classList.add('selected');
+      selectedAccount = u;
+      var btn = document.getElementById('reply-account-btn');
+      btn.textContent = 'Reply to ' + (u.name || u.email || 'User');
+      btn.style.display = '';
+      document.getElementById('compose-wrap').style.display = 'none';
+    }
+
+    function openCompose() {
+      document.getElementById('reply-account-btn').style.display = 'none';
+      document.getElementById('compose-wrap').style.display = 'block';
+      var inp = document.getElementById('compose-input');
+      inp.value = '';
+      inp.focus();
+    }
+
+    function sendDirect() {
+      var inp = document.getElementById('compose-input');
+      var text = inp.value.trim();
+      if (!text || !selectedAccount || !adminWs || adminWs.readyState !== 1) return;
+      adminWs.send(JSON.stringify({ type: 'elton_reply', text: text, target_name: selectedAccount.name }));
+      closeCompose();
+    }
+
+    function closeCompose() {
+      document.getElementById('compose-wrap').style.display = 'none';
+      document.getElementById('table-section').style.display = 'none';
+      document.getElementById('reply-account-btn').style.display = 'none';
+      var prev = document.querySelector('#tbody tr.selected');
+      if (prev) prev.classList.remove('selected');
+      selectedAccount = null;
     }
 
     function esc(s) {
@@ -236,7 +293,10 @@
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
-        if (document.activeElement === document.getElementById('reply-input')) { sendReply(); }
+        var a = document.activeElement;
+        if (a === document.getElementById('reply-input')) { sendReply(); }
+        else if (a === document.getElementById('search')) { doSearch(); }
+        else if (a === document.getElementById('compose-input')) { sendDirect(); }
         else { load(); }
       }
     });
