@@ -191,6 +191,9 @@
     function clearAllMsgs() {
       document.getElementById('chat-msgs').innerHTML = '<p class="cm-empty">No messages yet.</p>';
       clearReply();
+      if (adminWs && adminWs.readyState === 1) {
+        adminWs.send(JSON.stringify({ type: 'elton_chat_clear' }));
+      }
     }
 
     function sendReply() {

@@ -403,6 +403,11 @@ async def handler(websocket):
                 if target_name in elton_viewer_ws:
                     elton_viewer_ws[target_name] -= dead
 
+            elif kind == 'elton_chat_clear':
+                if websocket in elton_admin_ws:
+                    elton_chat_messages.clear()
+                    save_elton_chat()
+
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')
 
