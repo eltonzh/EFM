@@ -62,10 +62,7 @@
   </div>
 
   <div id="chat-panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <h2 style="margin-bottom:0;">💬 Talk to Elton — incoming messages</h2>
-      <button onclick="clearAllMsgs()" style="width:auto;padding:5px 14px;font-size:0.8rem;background:transparent;color:#555;border:1px solid #333;border-radius:7px;font-weight:600;">Clear All</button>
-    </div>
+    <h2>💬 Talk to Elton — incoming messages</h2>
     <div id="chat-msgs"><p class="cm-empty">No messages yet.</p></div>
     <div id="reply-target"></div>
     <div id="reply-row">
@@ -75,6 +72,7 @@
   </div>
 
   <div id="results" style="width:100%;max-width:700px;display:none;">
+    <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:12px;">
     <p id="count"></p>
     <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
       <table>
@@ -96,6 +94,7 @@
     var adminWs = null;
     var selectedReplyName = null;
     var selectedReplyRow = null;
+    var allAccounts = [];
 
     function load() {
       var email = document.getElementById('email').value.trim();
@@ -171,12 +170,6 @@
       document.getElementById('reply-btn').disabled = false;
     }
 
-    function clearAllMsgs() {
-      var box = document.getElementById('chat-msgs');
-      box.innerHTML = '<p class="cm-empty">No messages yet.</p>';
-      clearReply();
-    }
-
     function clearReply() {
       if (selectedReplyRow) selectedReplyRow.classList.remove('selected');
       selectedReplyName = null;
@@ -199,14 +192,27 @@
     }
 
     function showAccounts(list) {
+      allAccounts = list;
       document.getElementById('login-card').style.display = 'none';
       document.getElementById('chat-panel').style.display = 'block';
       document.getElementById('results').style.display = 'block';
+      renderAccounts(list);
+    }
+
+    function filterAccounts(query) {
+      var q = query.trim().toLowerCase();
+      var filtered = q ? allAccounts.filter(function(u) {
+        return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+      }) : allAccounts;
+      renderAccounts(filtered);
+    }
+
+    function renderAccounts(list) {
       document.getElementById('count').textContent = list.length + ' account' + (list.length === 1 ? '' : 's');
       var tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center;padding:24px;">No accounts yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#555;text-align:center;padding:24px;">No accounts found</td></tr>';
         return;
       }
       list.forEach(function(u, i) {
