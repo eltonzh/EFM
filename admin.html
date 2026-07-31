@@ -75,6 +75,9 @@
   </div>
 
   <div id="results" style="width:100%;max-width:700px;display:none;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:0;flex:1;">
+    </div>
     <p id="count"></p>
     <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
       <table>
@@ -94,6 +97,7 @@
   <script>
     var WS_URL = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
     var adminWs = null;
+    var allAccounts = [];
     var selectedReplyName = null;
     var selectedReplyRow = null;
 
@@ -197,15 +201,28 @@
       clearReply();
     }
 
+    function filterAccounts(query) {
+      var q = query.trim().toLowerCase();
+      var filtered = q ? allAccounts.filter(function(u) {
+        return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+      }) : allAccounts;
+      renderTable(filtered);
+    }
+
     function showAccounts(list) {
+      allAccounts = list;
       document.getElementById('login-card').style.display = 'none';
       document.getElementById('chat-panel').style.display = 'block';
       document.getElementById('results').style.display = 'block';
+      renderTable(list);
+    }
+
+    function renderTable(list) {
       document.getElementById('count').textContent = list.length + ' account' + (list.length === 1 ? '' : 's');
       var tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color:#555;text-align:center;padding:24px;">No accounts yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#555;text-align:center;padding:24px;">No accounts found</td></tr>';
         return;
       }
       list.forEach(function(u, i) {
@@ -226,8 +243,9 @@
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
-        if (document.activeElement === document.getElementById('reply-input')) { sendReply(); }
-        else { load(); }
+        var a = document.activeElement;
+        if (a === document.getElementById('reply-input')) { sendReply(); }
+        else if (!adminWs) { load(); }
       }
     });
   </script>
