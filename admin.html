@@ -246,6 +246,7 @@
       if (e.key === 'Enter') {
         var a = document.activeElement;
         if (a === document.getElementById('reply-input')) { sendReply(); }
+        else if (a === document.getElementById('search')) { filterAccounts(a.value); }
         else if (!adminWs) { load(); }
       }
     });
