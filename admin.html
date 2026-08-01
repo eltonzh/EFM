@@ -164,20 +164,30 @@
         } else if (d.type === 'elton_chat_history') {
           var msgs = d.messages || [];
           if (msgs.length) { document.getElementById('chat-msgs').innerHTML = ''; }
-          msgs.forEach(function(m) { appendChatMsg(m.name, m.text); });
+          msgs.forEach(function(m) { appendChatMsg(m.name, m.text, m.target); });
         } else if (d.type === 'elton_chat_message') {
-          appendChatMsg(d.name, d.text);
+          appendChatMsg(d.name, d.text, d.target);
+        } else if (d.type === 'elton_chat_cleared') {
+          document.getElementById('chat-msgs').innerHTML = '<p class="cm-empty">No messages yet.</p>';
+          clearReply();
+        } else if (d.type === 'elton_chat_cleared_mine') {
+          var box = document.getElementById('chat-msgs');
+          box.querySelectorAll('.cm-row').forEach(function(r) {
+            if (r.dataset.name === d.name || r.dataset.target === d.name) r.remove();
+          });
         }
       };
     }
 
-    function appendChatMsg(name, text) {
+    function appendChatMsg(name, text, target) {
       var box = document.getElementById('chat-msgs');
       var empty = box.querySelector('.cm-empty');
       if (empty) empty.remove();
       var mine = name === 'Elton';
       var row = document.createElement('div');
       row.className = 'cm-row' + (mine ? ' mine' : '');
+      row.dataset.name = name;
+      if (target) row.dataset.target = target;
       var nameEl = document.createElement('div');
       nameEl.className = 'cm-name';
       nameEl.textContent = name;

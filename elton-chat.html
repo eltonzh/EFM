@@ -231,6 +231,12 @@
         (d.messages || []).forEach(function(m) {
           addMsg(m.name, m.text, m.name !== 'Elton');
         });
+      } else if (d.type === 'elton_chat_cleared') {
+        msgs.querySelectorAll('.msg-row').forEach(function(r) { r.remove(); });
+      } else if (d.type === 'elton_chat_cleared_mine') {
+        if (d.name === myName) {
+          msgs.querySelectorAll('.msg-row').forEach(function(r) { r.remove(); });
+        }
       }
     }
 

@@ -407,6 +407,18 @@ async def handler(websocket):
                 if websocket in elton_admin_ws:
                     elton_chat_messages.clear()
                     save_elton_chat()
+                    cleared = json.dumps({'type': 'elton_chat_cleared'})
+                    dead = set()
+                    for ws in elton_admin_ws:
+                        try: await ws.send(cleared)
+                        except Exception: dead.add(ws)
+                    elton_admin_ws.difference_update(dead)
+                    for vname, vsockets in list(elton_viewer_ws.items()):
+                        vdead = set()
+                        for ws in vsockets:
+                            try: await ws.send(cleared)
+                            except Exception: vdead.add(ws)
+                        elton_viewer_ws[vname] -= vdead
 
             elif kind == 'elton_chat_delete':
                 name      = str(data.get('name', '')).strip()
@@ -446,6 +458,18 @@ async def handler(websocket):
                         if not (m.get('name') == name or m.get('target') == name)
                     ]
                     save_elton_chat()
+                    cleared_mine = json.dumps({'type': 'elton_chat_cleared_mine', 'name': name})
+                    vdead = set()
+                    for ws in elton_viewer_ws.get(name, set()):
+                        try: await ws.send(cleared_mine)
+                        except Exception: vdead.add(ws)
+                    if name in elton_viewer_ws:
+                        elton_viewer_ws[name] -= vdead
+                    dead = set()
+                    for ws in elton_admin_ws:
+                        try: await ws.send(cleared_mine)
+                        except Exception: dead.add(ws)
+                    elton_admin_ws.difference_update(dead)
 
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')
