@@ -260,9 +260,9 @@
       col.appendChild(nameEl);
       col.appendChild(bubble);
 
+      var actions = document.createElement('div');
+      actions.className = 'msg-actions';
       if (mine) {
-        var actions = document.createElement('div');
-        actions.className = 'msg-actions';
         var editBtn = document.createElement('button');
         editBtn.className = 'msg-action';
         editBtn.textContent = 'Edit';
@@ -271,13 +271,21 @@
         delBtn.textContent = 'Delete';
         (function(b, d) {
           editBtn.onclick = function() { startEdit(b, d); };
-          delBtn.onclick  = function() { deleteMsg(row, d); };
+          delBtn.onclick  = function() { deleteMsg(row, d, false); };
         })(bubble, text);
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
         col.appendChild(actions);
         row.appendChild(col); row.appendChild(av);
       } else {
+        var delEltonBtn = document.createElement('button');
+        delEltonBtn.className = 'msg-action del';
+        delEltonBtn.textContent = 'Delete';
+        (function(d) {
+          delEltonBtn.onclick = function() { deleteMsg(row, d, true); };
+        })(text);
+        actions.appendChild(delEltonBtn);
+        col.appendChild(actions);
         row.appendChild(av); row.appendChild(col);
       }
 
@@ -295,10 +303,10 @@
       input.style.height = '';
     }
 
-    function deleteMsg(row, text) {
+    function deleteMsg(row, text, isElton) {
       row.remove();
       if (ws && ws.readyState === 1) {
-        ws.send(JSON.stringify({type: 'elton_chat_delete', name: myName, text: text}));
+        ws.send(JSON.stringify({type: 'elton_chat_delete', name: myName, text: text, is_elton: !!isElton}));
       }
     }
 

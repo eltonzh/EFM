@@ -409,15 +409,22 @@ async def handler(websocket):
                     save_elton_chat()
 
             elif kind == 'elton_chat_delete':
-                name     = str(data.get('name', '')).strip()
-                old_text = str(data.get('text', '')).strip()
+                name      = str(data.get('name', '')).strip()
+                old_text  = str(data.get('text', '')).strip()
+                is_elton  = bool(data.get('is_elton', False))
                 if not name or not old_text: continue
                 for i in range(len(elton_chat_messages) - 1, -1, -1):
                     m = elton_chat_messages[i]
-                    if m.get('name') == name and m.get('text') == old_text:
-                        elton_chat_messages.pop(i)
-                        save_elton_chat()
-                        break
+                    if is_elton:
+                        if m.get('name') == 'Elton' and m.get('text') == old_text and m.get('target') == name:
+                            elton_chat_messages.pop(i)
+                            save_elton_chat()
+                            break
+                    else:
+                        if m.get('name') == name and m.get('text') == old_text:
+                            elton_chat_messages.pop(i)
+                            save_elton_chat()
+                            break
 
             elif kind == 'elton_chat_edit':
                 name     = str(data.get('name', '')).strip()
