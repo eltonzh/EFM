@@ -20,6 +20,19 @@
     th { text-align: left; padding: 10px 12px; color: #888; font-weight: 600; border-bottom: 1px solid #2a2a35; }
     td { padding: 12px; border-bottom: 1px solid #1e1e28; vertical-align: top; }
     tr:hover td { background: #1e1e28; }
+    tr.acct-selected td { background: #1a2a1a; }
+    tr.acct-selected:hover td { background: #1f3020; }
+    tr { cursor: pointer; }
+    #acct-reply-btn { width:auto; padding:10px 22px; background:#2a7a2a; color:#fff; border:none; border-radius:8px; font-size:0.9rem; font-weight:700; cursor:pointer; margin-bottom:12px; display:none; }
+    #acct-reply-btn:hover { background:#348a34; }
+    #acct-compose { display:none; margin-bottom:12px; }
+    #acct-compose-row { display:flex; gap:8px; align-items:center; }
+    #acct-compose-input { flex:1; padding:11px 14px; font-size:0.93rem; background:#1a1a22; border:1.5px solid #2a7a2a; border-radius:10px; color:#fff; outline:none; font-family:system-ui,sans-serif; margin-bottom:0; }
+    #acct-compose-input:focus { border-color:#4ade80; }
+    #acct-send-btn { width:auto; padding:11px 20px; background:#2a7a2a; color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-family:system-ui,sans-serif; flex-shrink:0; }
+    #acct-send-btn:hover { background:#348a34; }
+    #acct-close-btn { width:auto; padding:11px 14px; background:transparent; color:#888; border:1px solid #333; border-radius:10px; cursor:pointer; font-family:system-ui,sans-serif; flex-shrink:0; }
+    #acct-close-btn:hover { background:#23232d; color:#fff; }
     .badge { display: inline-block; background: #2a2a35; border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; color: #aaa; }
     #count { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
     #chat-panel { width: 100%; max-width: 700px; margin-bottom: 24px; display: none; }
@@ -75,12 +88,9 @@
   </div>
 
   <div id="results" style="width:100%;max-width:700px;display:none;">
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:0;flex:1;">
-      <button onclick="filterAccounts(document.getElementById('search').value)" style="width:auto;padding:12px 20px;flex-shrink:0;">Search</button>
-    </div>
+    <input id="search" type="text" placeholder="Search by name or email…" oninput="filterAccounts(this.value)" style="margin-bottom:12px;">
     <p id="count"></p>
-    <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px;">
+    <div style="overflow-x:auto; background:#1a1a22; border-radius:14px; padding:8px; margin-bottom:12px;">
       <table>
         <thead>
           <tr>
@@ -93,6 +103,14 @@
         <tbody id="tbody"></tbody>
       </table>
     </div>
+    <button id="acct-reply-btn" onclick="openCompose()"></button>
+    <div id="acct-compose">
+      <div id="acct-compose-row">
+        <input id="acct-compose-input" type="text" placeholder="Type your message…">
+        <button id="acct-send-btn" onclick="sendDirect()">Send</button>
+        <button id="acct-close-btn" onclick="closeCompose()">✕</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -101,6 +119,7 @@
     var allAccounts = [];
     var selectedReplyName = null;
     var selectedReplyRow = null;
+    var selectedAccount = null;
 
     function load() {
       var email = document.getElementById('email').value.trim();
@@ -225,6 +244,9 @@
       document.getElementById('count').textContent = list.length + ' account' + (list.length === 1 ? '' : 's');
       var tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
+      document.getElementById('acct-reply-btn').style.display = 'none';
+      document.getElementById('acct-compose').style.display = 'none';
+      selectedAccount = null;
       if (!list.length) {
         tbody.innerHTML = '<tr><td colspan="4" style="color:#555;text-align:center;padding:24px;">No accounts found</td></tr>';
         return;
@@ -237,8 +259,44 @@
           '<td style="font-weight:600">' + esc(u.name || '—') + '</td>' +
           '<td style="color:#a0c4ff">' + esc(u.email) + '</td>' +
           '<td style="color:#888">' + date + '</td>';
+        tr.addEventListener('click', function() { selectAccount(u, tr); });
         tbody.appendChild(tr);
       });
+    }
+
+    function selectAccount(u, tr) {
+      var prev = document.querySelector('#tbody tr.acct-selected');
+      if (prev) prev.classList.remove('acct-selected');
+      tr.classList.add('acct-selected');
+      selectedAccount = u;
+      document.getElementById('acct-compose').style.display = 'none';
+      var btn = document.getElementById('acct-reply-btn');
+      btn.textContent = 'Reply to ' + (u.name || u.email || 'User');
+      btn.style.display = '';
+    }
+
+    function openCompose() {
+      document.getElementById('acct-reply-btn').style.display = 'none';
+      document.getElementById('acct-compose').style.display = 'block';
+      var inp = document.getElementById('acct-compose-input');
+      inp.value = '';
+      inp.focus();
+    }
+
+    function sendDirect() {
+      var inp = document.getElementById('acct-compose-input');
+      var text = inp.value.trim();
+      if (!text || !selectedAccount || !adminWs || adminWs.readyState !== 1) return;
+      adminWs.send(JSON.stringify({ type: 'elton_reply', text: text, target_name: selectedAccount.name }));
+      closeCompose();
+    }
+
+    function closeCompose() {
+      document.getElementById('acct-compose').style.display = 'none';
+      document.getElementById('acct-reply-btn').style.display = 'none';
+      var prev = document.querySelector('#tbody tr.acct-selected');
+      if (prev) prev.classList.remove('acct-selected');
+      selectedAccount = null;
     }
 
     function esc(s) {
@@ -250,6 +308,7 @@
         var a = document.activeElement;
         if (a === document.getElementById('reply-input')) { sendReply(); }
         else if (a === document.getElementById('search')) { filterAccounts(a.value); }
+        else if (a === document.getElementById('acct-compose-input')) { sendDirect(); }
         else if (!adminWs) { load(); }
       }
     });
