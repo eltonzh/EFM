@@ -136,6 +136,13 @@
     #send-btn:hover { background: #348a34; }
     #send-btn svg { display: block; }
     .system-msg { text-align: center; color: rgba(255,255,255,0.3); font-size: 0.75rem; padding: 4px 0; }
+    .msg-actions { display: flex; gap: 4px; margin-top: 4px; justify-content: flex-end; }
+    .msg-action { width: auto; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; border-radius: 5px; cursor: pointer; font-family: system-ui,sans-serif; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.45); transition: all 0.1s; line-height: 1.6; }
+    .msg-action:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .msg-action.del:hover { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.3); }
+    .bubble.editing { outline: 2px solid #2a7a2a; border-radius: 16px; cursor: text; }
+    #clear-all-btn { margin-left: auto; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; background: transparent; color: #555; border: 1px solid #333; border-radius: 7px; cursor: pointer; font-family: system-ui,sans-serif; }
+    #clear-all-btn:hover { color: #f87171; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06); }
   </style>
 </head>
 <body>
@@ -174,7 +181,7 @@
       <img src="elton.jpg" class="avatar" alt="Elton">
       <div class="online"></div>
       <span class="title">Elton</span>
-      <img src="logo-white.png" style="height:22px;opacity:0.8;margin-left:auto;">
+      <button id="clear-all-btn" onclick="clearMine()">Clear All</button>
     </div>
 
     <div id="msgs">
@@ -253,8 +260,26 @@
       col.appendChild(nameEl);
       col.appendChild(bubble);
 
-      if (mine) { row.appendChild(col); row.appendChild(av); }
-      else       { row.appendChild(av); row.appendChild(col); }
+      if (mine) {
+        var actions = document.createElement('div');
+        actions.className = 'msg-actions';
+        var editBtn = document.createElement('button');
+        editBtn.className = 'msg-action';
+        editBtn.textContent = 'Edit';
+        var delBtn = document.createElement('button');
+        delBtn.className = 'msg-action del';
+        delBtn.textContent = 'Delete';
+        (function(b, d) {
+          editBtn.onclick = function() { startEdit(b, d); };
+          delBtn.onclick  = function() { deleteMsg(row, d); };
+        })(bubble, text);
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+        col.appendChild(actions);
+        row.appendChild(col); row.appendChild(av);
+      } else {
+        row.appendChild(av); row.appendChild(col);
+      }
 
       msgs.appendChild(row);
       msgs.scrollTop = msgs.scrollHeight;
@@ -268,6 +293,53 @@
       addMsg(myName, text, true);
       input.value = '';
       input.style.height = '';
+    }
+
+    function deleteMsg(row, text) {
+      row.remove();
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({type: 'elton_chat_delete', name: myName, text: text}));
+      }
+    }
+
+    function startEdit(bubble, oldText) {
+      if (bubble.classList.contains('editing')) return;
+      bubble.classList.add('editing');
+      bubble.contentEditable = 'true';
+      bubble.focus();
+      var range = document.createRange();
+      range.selectNodeContents(bubble);
+      range.collapse(false);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      function commit() {
+        bubble.contentEditable = 'false';
+        bubble.classList.remove('editing');
+        var newText = bubble.textContent.trim();
+        if (newText && newText !== oldText && ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({type: 'elton_chat_edit', name: myName, old_text: oldText, new_text: newText}));
+          oldText = newText;
+        } else if (!newText) {
+          bubble.textContent = oldText;
+        }
+        bubble.removeEventListener('blur', commit);
+        bubble.removeEventListener('keydown', onKey);
+      }
+      function onKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { bubble.textContent = oldText; bubble.contentEditable = 'false'; bubble.classList.remove('editing'); }
+      }
+      bubble.addEventListener('blur', commit);
+      bubble.addEventListener('keydown', onKey);
+    }
+
+    function clearMine() {
+      msgs.querySelectorAll('.msg-row').forEach(function(r) { r.remove(); });
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({type: 'elton_chat_clear_mine', name: myName}));
+      }
     }
 
     document.getElementById('send-btn').addEventListener('click', send);

@@ -408,6 +408,38 @@ async def handler(websocket):
                     elton_chat_messages.clear()
                     save_elton_chat()
 
+            elif kind == 'elton_chat_delete':
+                name     = str(data.get('name', '')).strip()
+                old_text = str(data.get('text', '')).strip()
+                if not name or not old_text: continue
+                for i in range(len(elton_chat_messages) - 1, -1, -1):
+                    m = elton_chat_messages[i]
+                    if m.get('name') == name and m.get('text') == old_text:
+                        elton_chat_messages.pop(i)
+                        save_elton_chat()
+                        break
+
+            elif kind == 'elton_chat_edit':
+                name     = str(data.get('name', '')).strip()
+                old_text = str(data.get('old_text', '')).strip()
+                new_text = str(data.get('new_text', ''))[:2000].strip()
+                if not name or not old_text or not new_text: continue
+                for i in range(len(elton_chat_messages) - 1, -1, -1):
+                    m = elton_chat_messages[i]
+                    if m.get('name') == name and m.get('text') == old_text:
+                        elton_chat_messages[i] = {**m, 'text': new_text}
+                        save_elton_chat()
+                        break
+
+            elif kind == 'elton_chat_clear_mine':
+                name = str(data.get('name', '')).strip()
+                if name:
+                    elton_chat_messages[:] = [
+                        m for m in elton_chat_messages
+                        if not (m.get('name') == name or m.get('target') == name)
+                    ]
+                    save_elton_chat()
+
             elif kind == 'ask_claude':
                 await handle_ai_chat(websocket, data, 'claude_reply')
 
