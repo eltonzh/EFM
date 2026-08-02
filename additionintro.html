@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Addition – Elton's Fun Math</title>
 <style>
@@ -65,7 +67,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #050e1f; min-heig
 <script>
 const particlesEl = document.getElementById('particles');
 const blues = ['#00e5ff','#00b4ff','#4488ff','#7ef5f5','#0099ff'];
-for (let i = 0; i < 35; i++) {
+for (let i = 0; i < 55; i++) {
   const p = document.createElement('div');
   p.className = 'particle';
   const size = 2 + Math.random() * 3;
@@ -130,18 +132,27 @@ function popOut(cb) {
   subWord.style.opacity = '0'; subWord.style.transform = 'scale(0) translateY(20px)';
   setTimeout(cb, 350);
 }
-function runLoop() {
-  const spans = buildWord();
+// Entrance (letters build in, shimmer, button pops in) plays automatically.
+let spans = [];
+function playEntrance() {
+  spans = buildWord();
   animateIn(spans, () => {
     shimmer(spans, 1200, () => {
       popIn();
-      setTimeout(() => {
-        popOut(() => { animateOut(spans, () => setTimeout(runLoop, 400)); });
-      }, 3000);
     });
   });
 }
-setTimeout(runLoop, 300);
+setTimeout(playEntrance, 300);
+
+// Exit (button pops out, letters burst apart) only plays once the viewer
+// clicks the button, then moves on to Master the Basics.
+subWord.addEventListener('click', () => {
+  popOut(() => {
+    animateOut(spans, () => {
+      window.location.href = 'page-master-basics.html';
+    });
+  });
+}, { once: true });
 </script>
 </body>
 </html>
