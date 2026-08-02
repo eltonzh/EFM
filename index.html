@@ -276,7 +276,16 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      removeLockedState();
+      if (!localStorage.getItem('efm_cursor_name')) {
+        var ctaLink = document.getElementById('cta-link');
+        var ctaBtn  = document.getElementById('cta-btn');
+        if (ctaLink) ctaLink.removeAttribute('href');
+        if (ctaBtn) {
+          ctaBtn.textContent = 'Go!';
+          ctaBtn.style.background = '#2a7a2a';
+          ctaBtn.onclick = function(e) { e.preventDefault(); location.href = 'signup.html'; };
+        }
+      }
     });
     window.addEventListener('efm_setup_complete', removeLockedState);
 
