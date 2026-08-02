@@ -276,7 +276,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      if (!localStorage.getItem('efm_cursor_name')) applyLockedState();
+      removeLockedState();
     });
     window.addEventListener('efm_setup_complete', removeLockedState);
 
