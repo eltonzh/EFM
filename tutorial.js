@@ -68,6 +68,18 @@
     }, 60);
   }
 
+  function bubbleOnlyEl(id, text, nextStep) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    setTimeout(function () {
+      var r = el.getBoundingClientRect();
+      showBubble(r, text);
+      el.addEventListener('click', function () {
+        localStorage.setItem('efm_tutorial_step', String(nextStep));
+      }, { once: true });
+    }, 60);
+  }
+
   function init() {
     clearOverlay();
     var step = localStorage.getItem('efm_tutorial_step');
@@ -101,7 +113,7 @@
         'Click on the About button to view info about this website and its creator!', '3');
 
     } else if (step === '3' && page === 'about.html') {
-      spotlightEl('back-btn',
+      bubbleOnlyEl('back-btn',
         'Click on "Back" buttons to go back to the page you were at before!', '4');
 
     } else if (step === '4' && isIndex) {
@@ -109,7 +121,7 @@
         'Use the Notebook for taking notes and jotting down your ideas.', '5');
 
     } else if (step === '5' && page === 'notebook.html') {
-      spotlightEl('back-btn',
+      bubbleOnlyEl('back-btn',
         'Now try clicking the "Back" button on this page yourself!', 'done');
     }
   }
