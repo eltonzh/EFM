@@ -66,12 +66,11 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #050e1f; min-heig
 
 <script>
 const particlesEl = document.getElementById('particles');
-const blues = ['#00e5ff','#00b4ff','#4488ff','#7ef5f5','#0099ff'];
 for (let i = 0; i < 55; i++) {
   const p = document.createElement('div');
   p.className = 'particle';
   const size = 2 + Math.random() * 3;
-  p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;bottom:${Math.random()*30}%;background:${blues[Math.floor(Math.random()*blues.length)]};animation-duration:${5+Math.random()*9}s;animation-delay:${Math.random()*8}s;opacity:0`;
+  p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;bottom:${Math.random()*30}%;background:#00e5ff;animation-duration:${5+Math.random()*9}s;animation-delay:${Math.random()*8}s;opacity:0`;
   particlesEl.appendChild(p);
 }
 
