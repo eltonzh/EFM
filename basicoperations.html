@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Operations – Elton's Fun Math</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #030b18;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 48px; padding: 24px;
+}
+
+#aurora { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image:
+    linear-gradient(rgba(80,140,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80,140,255,0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sym-p {
+  position: absolute;
+  font-weight: 900; line-height: 1;
+  animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0); opacity: 0; }
+  8%   { opacity: 0.6; }
+  90%  { opacity: 0.04; }
+  100% { transform: translateY(-100vh); opacity: 0; }
+}
+
+#spotlight {
+  position: fixed; pointer-events: none; z-index: 2;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+  transform: translate(-50%,-50%);
+  left: 50%; top: 50%;
+  transition: left 0.1s ease, top 0.1s ease;
+}
+
+.title-block {
+  text-align: center;
+  position: relative; z-index: 5;
+}
+h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  font-weight: 900; letter-spacing: 0.1em;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(120,180,255,0.4), 0 0 60px rgba(80,140,255,0.2);
+}
+.divider {
+  width: min(380px, 70vw); height: 2px;
+  margin: 14px auto 0;
+  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.7), transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 210px));
+  grid-template-rows: repeat(2, minmax(110px, 130px));
+  gap: 18px;
+  position: relative; z-index: 5;
+}
+
+.op-btn {
+  border: none; border-radius: 18px;
+  font-family: inherit; cursor: pointer;
+  color: #fff; text-decoration: none;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px;
+  position: relative; overflow: hidden;
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+}
+.op-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.2s;
+}
+.op-btn:hover::before { opacity: 1; }
+.op-btn:hover { transform: translateY(-6px) scale(1.03); }
+.op-btn:active { transform: scale(0.97); }
+
+.op-symbol {
+  font-size: 2.2rem; font-weight: 900; line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
+}
+.op-name {
+  font-size: 0.85rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Sweep shimmer on hover */
+.op-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.45s ease;
+}
+.op-btn:hover::after { left: 160%; }
+
+.op-addition      { background: linear-gradient(135deg,#1fae4a,#0e7a34); box-shadow: 0 8px 32px rgba(31,174,74,0.45), 0 0 0 1px rgba(31,174,74,0.2); }
+.op-addition:hover      { box-shadow: 0 16px 48px rgba(31,174,74,0.7), 0 0 60px rgba(31,174,74,0.3); }
+
+.op-subtraction   { background: linear-gradient(135deg,#ff8c00,#c96800); box-shadow: 0 8px 32px rgba(255,140,0,0.45), 0 0 0 1px rgba(255,140,0,0.2); }
+.op-subtraction:hover   { box-shadow: 0 16px 48px rgba(255,140,0,0.7), 0 0 60px rgba(255,140,0,0.3); }
+
+.op-multiplication{ background: linear-gradient(135deg,#e6342f,#a81f1b); box-shadow: 0 8px 32px rgba(230,52,47,0.45), 0 0 0 1px rgba(230,52,47,0.2); }
+.op-multiplication:hover{ box-shadow: 0 16px 48px rgba(230,52,47,0.7), 0 0 60px rgba(230,52,47,0.3); }
+
+.op-division      { background: linear-gradient(135deg,#2f7dd6,#1a55a0); box-shadow: 0 8px 32px rgba(47,125,214,0.45), 0 0 0 1px rgba(47,125,214,0.2); }
+.op-division:hover      { box-shadow: 0 16px 48px rgba(47,125,214,0.7), 0 0 60px rgba(47,125,214,0.3); }
+</style>
+</head>
+<body>
+
+<canvas id="aurora"></canvas>
+<div class="grid-bg"></div>
+<div id="spotlight"></div>
+<div class="particles" id="particles"></div>
+
+<div class="title-block">
+  <h1>Basic Operations</h1>
+  <div class="divider"></div>
+</div>
+
+<div class="grid">
+  <a class="op-btn op-addition" href="additionintro.html">
+    <span class="op-symbol">+</span>
+    <span class="op-name">Addition</span>
+  </a>
+  <button class="op-btn op-subtraction">
+    <span class="op-symbol">−</span>
+    <span class="op-name">Subtraction</span>
+  </button>
+  <button class="op-btn op-multiplication">
+    <span class="op-symbol">×</span>
+    <span class="op-name">Multiplication</span>
+  </button>
+  <button class="op-btn op-division">
+    <span class="op-symbol">÷</span>
+    <span class="op-name">Division</span>
+  </button>
+</div>
+
+<script>
+// ── AURORA ──
+const canvas = document.getElementById('aurora');
+canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:0;';
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const orbs = [
+  { x:0.15, y:0.25, r:0.45, hue:200, s:0.00035, ph:0   },
+  { x:0.85, y:0.65, r:0.40, hue:240, s:0.00028, ph:1.8 },
+  { x:0.5,  y:0.85, r:0.35, hue:188, s:0.00042, ph:3.1 },
+  { x:0.1,  y:0.72, r:0.30, hue:265, s:0.00038, ph:4.6 },
+];
+let tt = 0;
+(function drawAurora() {
+  tt++;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for (const o of orbs) {
+    const cx = (o.x + Math.sin(tt*o.s + o.ph)*0.13) * canvas.width;
+    const cy = (o.y + Math.cos(tt*o.s*0.75 + o.ph)*0.1) * canvas.height;
+    const r  = o.r * Math.max(canvas.width, canvas.height);
+    const g  = ctx.createRadialGradient(cx,cy,0, cx,cy,r);
+    g.addColorStop(0,   `hsla(${o.hue},100%,60%,0.09)`);
+    g.addColorStop(0.45,`hsla(${o.hue},100%,50%,0.04)`);
+    g.addColorStop(1,   'transparent');
+    ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+  requestAnimationFrame(drawAurora);
+})();
+
+// ── PARTICLES ──
+const pel = document.getElementById('particles');
+const syms = [
+  { ch:'+', color:'rgba(31,174,74,0.75)'  },
+  { ch:'−', color:'rgba(255,140,0,0.75)'  },
+  { ch:'×', color:'rgba(230,52,47,0.75)'  },
+  { ch:'÷', color:'rgba(47,125,214,0.75)' },
+];
+for (let i = 0; i < 36; i++) {
+  const p = document.createElement('div');
+  p.className = 'sym-p';
+  const s = syms[i % syms.length];
+  p.textContent = s.ch;
+  const sz = 14 + Math.random()*18;
+  p.style.cssText = `font-size:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*70}%;color:${s.color};text-shadow:0 0 ${sz}px ${s.color};animation-duration:${10+Math.random()*12}s;animation-delay:${Math.random()*12}s;`;
+  pel.appendChild(p);
+}
+
+// ── SPOTLIGHT ──
+const spot = document.getElementById('spotlight');
+document.addEventListener('mousemove', e => {
+  spot.style.left = e.clientX + 'px';
+  spot.style.top  = e.clientY + 'px';
+});
+</script>
+</body>
+</html>
