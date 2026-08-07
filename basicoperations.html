@@ -10,7 +10,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: #030b18;
+  background: #ffffff;
   min-height: 100vh;
   overflow: hidden;
   display: flex; flex-direction: column;
@@ -23,8 +23,8 @@ body {
 .grid-bg {
   position: fixed; inset: 0; pointer-events: none; z-index: 1;
   background-image:
-    linear-gradient(rgba(80,140,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(80,140,255,0.06) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
@@ -44,7 +44,7 @@ body {
 #spotlight {
   position: fixed; pointer-events: none; z-index: 2;
   width: 500px; height: 500px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 70%);
   transform: translate(-50%,-50%);
   left: 50%; top: 50%;
   transition: left 0.1s ease, top 0.1s ease;
@@ -57,13 +57,13 @@ body {
 h1 {
   font-size: clamp(2rem, 6vw, 3.4rem);
   font-weight: 900; letter-spacing: 0.1em;
-  color: #fff;
-  text-shadow: 0 0 30px rgba(120,180,255,0.4), 0 0 60px rgba(80,140,255,0.2);
+  color: #000;
+  text-shadow: none;
 }
 .divider {
   width: min(380px, 70vw); height: 2px;
   margin: 14px auto 0;
-  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.7), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.7), transparent);
 }
 
 .grid {
@@ -181,8 +181,8 @@ let tt = 0;
     const cy = (o.y + Math.cos(tt*o.s*0.75 + o.ph)*0.1) * canvas.height;
     const r  = o.r * Math.max(canvas.width, canvas.height);
     const g  = ctx.createRadialGradient(cx,cy,0, cx,cy,r);
-    g.addColorStop(0,   `hsla(${o.hue},100%,60%,0.09)`);
-    g.addColorStop(0.45,`hsla(${o.hue},100%,50%,0.04)`);
+    g.addColorStop(0,   `hsla(${o.hue},80%,55%,0.12)`);
+    g.addColorStop(0.45,`hsla(${o.hue},80%,50%,0.05)`);
     g.addColorStop(1,   'transparent');
     ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
   }
@@ -191,19 +191,14 @@ let tt = 0;
 
 // ── PARTICLES ──
 const pel = document.getElementById('particles');
-const syms = [
-  { ch:'+', color:'rgba(31,174,74,0.75)'  },
-  { ch:'−', color:'rgba(255,140,0,0.75)'  },
-  { ch:'×', color:'rgba(230,52,47,0.75)'  },
-  { ch:'÷', color:'rgba(47,125,214,0.75)' },
-];
+const syms = ['+','−','×','÷'];
 for (let i = 0; i < 36; i++) {
   const p = document.createElement('div');
   p.className = 'sym-p';
-  const s = syms[i % syms.length];
-  p.textContent = s.ch;
+  p.textContent = syms[i % syms.length];
   const sz = 14 + Math.random()*18;
-  p.style.cssText = `font-size:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*70}%;color:${s.color};text-shadow:0 0 ${sz}px ${s.color};animation-duration:${10+Math.random()*12}s;animation-delay:${Math.random()*12}s;`;
+  const alpha = 0.12 + Math.random()*0.18;
+  p.style.cssText = `font-size:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*70}%;color:rgba(0,0,0,${alpha});animation-duration:${10+Math.random()*12}s;animation-delay:${Math.random()*12}s;`;
   pel.appendChild(p);
 }
 
