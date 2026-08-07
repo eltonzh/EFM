@@ -114,8 +114,24 @@ h1 {
 }
 .op-btn:hover::after { left: 160%; }
 
-.op-addition      { background: linear-gradient(135deg,#1fae4a,#0e7a34); box-shadow: 0 8px 32px rgba(31,174,74,0.45), 0 0 0 1px rgba(31,174,74,0.2); }
-.op-addition:hover      { box-shadow: 0 16px 48px rgba(31,174,74,0.7), 0 0 60px rgba(31,174,74,0.3); }
+@property --a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes spin { to { --a: 360deg; } }
+
+.op-addition      { background: transparent; overflow: visible; box-shadow: none; }
+.op-addition:hover      { box-shadow: 0 0 40px rgba(0,180,255,0.3), 0 0 80px rgba(0,80,255,0.15); }
+.op-addition::before {
+  inset: -2px; border-radius: 20px;
+  background: conic-gradient(from var(--a), #00e5ff 0%, #0055ff 30%, #7c3aed 55%, #00e5ff 100%);
+  animation: spin 2.5s linear infinite;
+  opacity: 1; z-index: -1; transition: none;
+}
+.op-addition::after {
+  top: 0; left: 0; width: 100%; height: 100%;
+  border-radius: 18px;
+  background: rgba(3,11,24,0.92);
+  transition: none; z-index: -1;
+}
+.op-addition:hover::after { left: 0; }
 
 .op-subtraction   { background: linear-gradient(135deg,#ff8c00,#c96800); box-shadow: 0 8px 32px rgba(255,140,0,0.45), 0 0 0 1px rgba(255,140,0,0.2); }
 .op-subtraction:hover   { box-shadow: 0 16px 48px rgba(255,140,0,0.7), 0 0 60px rgba(255,140,0,0.3); }
