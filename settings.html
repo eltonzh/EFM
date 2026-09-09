@@ -312,14 +312,25 @@
 
   <script src="cursors.js"></script>
   <script>
+  (function () {
     if (!localStorage.getItem('efm_cursor_name')) {
       document.querySelector('.content').innerHTML =
         '<a href="index.html" style="display:inline-flex;align-items:center;gap:7px;font-size:0.9rem;font-weight:700;color:#555;text-decoration:none;margin-bottom:48px;">← Back</a>' +
         '<div style="text-align:center;padding:60px 24px;">' +
           '<div style="font-size:2.5rem;margin-bottom:20px;">⚙️</div>' +
           '<div style="font-size:1.1rem;font-weight:700;color:#111;margin-bottom:10px;">No account settings yet.</div>' +
-          '<div style="font-size:0.95rem;color:#666;line-height:1.6;">Sign up or log in to see your EFM account!</div>' +
+          '<div style="font-size:0.95rem;color:#666;line-height:1.6;margin-bottom:24px;">Sign up or log in to see your EFM account!</div>' +
+          '<a href="signup.html" style="display:inline-block;padding:14px 32px;font-size:1rem;font-weight:700;background:#0f0f13;color:#fff;border-radius:10px;text-decoration:none;font-family:system-ui,sans-serif;">Sign up or log in</a>' +
         '</div>';
+
+      // cursors.js may still restore an identity from the server a moment later. Without
+      // this the placeholder would persist and the user could sign up a second account.
+      window.addEventListener('efm_color_ready', function () {
+        if (localStorage.getItem('efm_cursor_name')) location.reload();
+      }, { once: true });
+
+      // The account-only handlers below bind to nodes the innerHTML above just replaced.
+      return;
     }
 
     function showToast(msg) {
@@ -450,6 +461,7 @@
     });
 
     loadInfo();
+  })();
   </script>
 </body>
 </html>

@@ -245,21 +245,6 @@
 
     var LOCKABLE_IDS = ['nav-chars-l','nav-chars-r','nav-notebook','nav-games','nav-create','nav-settings','nav-reset','nav-chat','nav-inventory','nav-events'];
 
-    function applyLockedState() {
-      LOCKABLE_IDS.forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) el.classList.add('nav-lockable');
-      });
-      var ctaLink = document.getElementById('cta-link');
-      var ctaBtn  = document.getElementById('cta-btn');
-      if (ctaLink) ctaLink.removeAttribute('href');
-      if (ctaBtn) {
-        ctaBtn.textContent = 'Go!';
-        ctaBtn.style.background = '#2a7a2a';
-        ctaBtn.onclick = function(e) { e.preventDefault(); location.href = 'signup.html'; };
-      }
-    }
-
     function removeLockedState() {
       LOCKABLE_IDS.forEach(function(id) {
         var el = document.getElementById(id);
@@ -277,13 +262,12 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       if (!localStorage.getItem('efm_cursor_name')) {
-        var ctaLink = document.getElementById('cta-link');
-        var ctaBtn  = document.getElementById('cta-btn');
-        if (ctaLink) ctaLink.removeAttribute('href');
+        // Friendlier label for a first-time visitor, but the link still goes straight into
+        // the chapters. EFM is free to browse; only chat asks for an account.
+        var ctaBtn = document.getElementById('cta-btn');
         if (ctaBtn) {
           ctaBtn.textContent = 'Go!';
           ctaBtn.style.background = '#2a7a2a';
-          ctaBtn.onclick = function(e) { e.preventDefault(); location.href = 'signup.html'; };
         }
       }
     });

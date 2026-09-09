@@ -784,7 +784,11 @@ function efmGoBack() {
           identity.color = rec.fv || identity.color;
           continueWithIdentity();
         } else {
-          runFullSetup();
+          // Anonymous visitor: browse freely. No overlay, no colour prompts.
+          // EFM is free to read; only the chat pages ask for an account, and they
+          // gate themselves inline (see account-gate.js).
+          window.efmBeginSetup = runFullSetup;
+          window.dispatchEvent(new CustomEvent('efm_color_ready'));
         }
       });
     }
