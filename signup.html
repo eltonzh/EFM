@@ -56,7 +56,7 @@
     </div>
 
     <!-- Divider -->
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+    <div id="or-divider" style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
       <div style="flex:1; height:1px; background:#ddd;"></div>
       <span style="color:#aaa; font-size:0.9rem;">or</span>
       <div style="flex:1; height:1px; background:#ddd;"></div>
@@ -151,6 +151,16 @@
         overlay.appendChild(card);
         document.body.appendChild(overlay);
       });
+    }
+
+    // Show only the pending card. Never hide #form-container: #pending-section is a child
+    // of it, so hiding the parent makes the pending card unreachable (blank white page).
+    function showPendingOnly() {
+      ['signup-section', 'or-divider', 'login-section'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      document.getElementById('pending-section').style.display = '';
     }
 
     function startApprovalPolling() {
@@ -285,8 +295,7 @@
         } else if (d.type === 'register_ok') {
           approvalEmail = document.getElementById('signup-email').value.trim();
           localStorage.setItem('efm_pending_approval_email', approvalEmail);
-          document.getElementById('signup-section').style.display = 'none';
-          document.getElementById('pending-section').style.display = '';
+          showPendingOnly();
           startApprovalPolling();
         } else if (d.type === 'register_error') {
           document.getElementById('signup-err').textContent = d.message;
@@ -340,8 +349,7 @@
       var stored = localStorage.getItem('efm_pending_approval_email');
       if (!stored) return;
       approvalEmail = stored;
-      document.getElementById('form-container').style.display = 'none';
-      document.getElementById('pending-section').style.display = '';
+      showPendingOnly();
       startApprovalPolling();
     })();
 
